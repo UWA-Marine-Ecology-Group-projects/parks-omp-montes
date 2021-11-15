@@ -37,20 +37,24 @@ tidy.dir<- 'H:/GitHub/parks-omp-montes/Tidy data'
 setwd(tidy.dir)
 dir()
 
-maxn <- read.csv("montebello.synthesis.checked.maxn.csv")
-length <- read.csv("montebello.synthesis.checked.length.csv")
-habitat <- read.csv("montebello.synthesis.complete.habitat.csv")%>%
-  mutate(reef = broad.ascidians+broad.bryozoa+broad.hydroids+broad.invertebrate.complex+broad.macroalgae+broad.octocoral.black+broad.sponges)
+maxn <- read.csv("montebello.synthesis.checked.maxn.csv")%>%
+  mutate(scientific=paste(genus,species,sep=" "))%>%
+  dplyr::select(campaignid, sample, family, species, genus, scientific, maxn)
+
 names(maxn)
 
-metadata <- maxn %>%
-  distinct(sample,latitude,longitude,date,time,location,status,site,depth,observer,successful.count,successful.length)
 
+length <- read.csv("montebello.synthesis.checked.length.csv")
+
+habitat <- read.csv("montebello.synthesis.complete.habitat.csv")%>%
+  mutate(reef = biota.crinoids+biota.invertebrate.complex+biota.macroalgae+biota.octocoral.black+
+           biota.consolidated+biota.sponges+biota.hydroids+biota.stony.corals)
 names(habitat)
+
+metadata <- read.csv('montebello.synthesis.checked.metadata.csv')
 
 # look at top species ----
   maxn.sum<-maxn%>%
-    mutate(scientific=paste(genus,species,sep=" "))%>%
     group_by(scientific)%>%
     dplyr::summarise(maxn=sum(maxn))%>%
     ungroup()
@@ -72,10 +76,10 @@ ta.sr <- maxn %>%
   dplyr::group_by(scientific,sample) %>%
   dplyr::summarise(maxn = sum(maxn)) %>%
   tidyr::spread(scientific,maxn, fill = 0) %>%
-  dplyr::mutate(total.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
-  dplyr::mutate(species.richness=rowSums(.[,2:(ncol(.))] > 0)) %>% # double check these
-  dplyr::select(sample,total.abundance,species.richness) %>%
-  tidyr::gather(.,"scientific","maxn",2:3) %>%
+   dplyr::mutate(total.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
+   dplyr::mutate(species.richness=rowSums(.[,2:(ncol(.))] > 0)) %>% # double check these
+   dplyr::select(sample,total.abundance,species.richness) %>%
+   tidyr::gather(.,"response","number",2:3) %>%
   dplyr::glimpse()
 
 # Create abundance of all recreational fished species ----
@@ -92,9 +96,9 @@ unique(master$fishing.type)
 
 fished.species <- maxn %>%
   dplyr::left_join(master) %>%
-  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>%
-  dplyr::filter(!family%in%c("Monacanthidae", "Scorpididae", "Mullidae")) # Brooke removed leatherjackets, sea sweeps and goat fish
-
+  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>%  #should i maybe yeet Loxodon macrorhinus, Alectis ciliaris, Ulua mentalis  and Psammoperca datnioides
+  glimpse()
+  
 unique(fished.species$scientific)
 
 # Come back to maybe getting rid of some of these, but for now we continue on
@@ -105,40 +109,38 @@ fished.maxn <- fished.species %>%
   spread(scientific,maxn, fill = 0) %>%
   dplyr::mutate(targeted.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
   dplyr::select(sample,targeted.abundance) %>%
-  gather(.,"scientific","maxn",2:2) %>%
+  gather(.,"response","number",2:2) %>%
   dplyr::glimpse()
 
-# Pick top 3 species
+# Pick top 3 species                      second most abundant species is 'unknown spp'
 species.maxn <- maxn %>%
-  dplyr::filter(scientific %in% c("Pomacentridae Chromis westaustralis",
-                                  "Labridae Coris auricularis",
-                                  "Chaetodontidae Chaetodon assarius",
-                                  "Lethrinidae Lethrinus miniatus"
+  dplyr::filter(scientific %in% c("Pomacentrus coelestis",
+                                  "Chromis fumea",
+                                  "Lethrinus atkinsoni"
   ))%>%
   dplyr::select(sample,scientific,maxn) %>%
+  dplyr::rename('number' = maxn)%>%
+  dplyr::mutate(response = c('top.abundance'))%>%
   distinct()
-
-4 *75
 
 
 combined.maxn <- bind_rows(fished.maxn, species.maxn, 
                            ta.sr)%>%
   left_join(habitat) %>%
-  left_join(metadata) %>%
+   left_join(metadata) %>%                  
   distinct()
-
-glimpse(combined.maxn)
 
 # Set predictor variables---
 names(maxn)
 names(habitat)
 
-pred.vars=c("depth", "broad.ascidians","broad.bryozoa","broad.consolidated","broad.hydroids","broad.invertebrate.complex","broad.macroalgae","broad.octocoral.black","broad.sponges","broad.unconsolidated","mean.relief","sd.relief","reef") 
+pred.vars=c("depth","biota.unconsolidated", "biota.macroalgae", "biota.crinoids",
+            "reef", "biota.octocoral.black", "biota.consolidated", "biota.sponges", "biota.hydroids", "biota.stony.corals",
+            "mean.relief", "sd.relief") 
 
-# predictor variables Removed at first pass---
-# broad.Sponges and broad.Octocoral.Black and broad.Consolidated , "InPreds","BioTurb" are too rare
-
-dat <- combined.maxn
+dat <- combined.maxn %>%
+drop_na(campaignid)  #filter by campaign id removes entries with no habitat data 
+  
 
 # Check for correalation of predictor variables- remove anything highly correlated (>0.95)---
 round(cor(dat[,pred.vars]),2)
@@ -159,45 +161,34 @@ for (i in pred.vars) {
 
 # Review of individual predictors - we have to make sure they have an even distribution---
 #If the data are squewed to low numbers try sqrt>log or if squewed to high numbers try ^2 of ^3
-# sponges very low
-# octocoral, very very low
-# macroalgae, very very low
-# invert complex very very low
-# Hydroids very very low
-# consolidated ok
-# bryzoa very very low
-# ascidians very very low
+
+#log transform of relief and sd relief maybe look a bit better?
 
 
 # # Re-set the predictors for modeling----
-pred.vars=c("depth","broad.consolidated","broad.unconsolidated","mean.relief","sd.relief","reef") 
+pred.vars=c("depth","mean.relief","sd.relief","reef") 
 
 # Check to make sure Response vector has not more than 80% zeros----
-unique.vars=unique(as.character(dat$scientific))
+unique.vars=unique(as.character(dat$response))
 
 unique.vars.use=character()
 for(i in 1:length(unique.vars)){
-  temp.dat=dat[which(dat$scientific==unique.vars[i]),]
-  if(length(which(temp.dat$maxn==0))/nrow(temp.dat)<0.8){
+  temp.dat=dat[which(dat$response==unique.vars[i]),]
+  if(length(which(temp.dat$number==0))/nrow(temp.dat)<0.8){
     unique.vars.use=c(unique.vars.use,unique.vars[i])}
 }
 
 unique.vars.use   
 
-# butterfly fish and pomacentrid removed becuase of too many zeros
 
-
-#"BDS" bivalve Dosina subrosea
-#"BMS" bivalve Myadora striata
-#"CPN" crustacean Pagrus novaezelandiae
 
 # Run the full subset model selection----
-setwd("C:/GitHub/parks-abrolhos/output/fssgam - fish")
+setwd("H:/GitHub/parks-omp-montes/Output")
 resp.vars=unique.vars.use
 use.dat=as.data.frame(dat)
 str(use.dat)
 
-factor.vars=c("status","location")# Status as a Factor with two levels
+factor.vars=c("status","location", "campaignid")# Status as a Factor with two levels
 out.all=list()
 var.imp=list()
 
@@ -205,7 +196,7 @@ var.imp=list()
 for(i in 1:length(resp.vars)){
   use.dat=as.data.frame(dat[which(dat$scientific==resp.vars[i]),])
   
-  Model1=gam(maxn~s(depth,k=3,bs='cr')#+ s(location,Site,bs="re")
+  Model1=gam(number~s(relief,k=5,bs='cr')
              ,
              family=tw(),  data=use.dat)
   
