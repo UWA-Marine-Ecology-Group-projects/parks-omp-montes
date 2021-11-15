@@ -34,7 +34,7 @@ library(fst)
 study<-"montebello.synthesis"  ## change for your project
 
 ## Set your working directory ----
-working.dir<-dirname(rstudioapi::getActiveDocumentContext()$path) # to directory of current file - or type your own
+working.dir<- 'H:/GitHub/parks-omp-montes' # to directory of current file - or type your own
 
 ## Save these directory names to use later----
 staging.dir<-paste(working.dir,"Staging",sep="/") 
@@ -59,6 +59,7 @@ metadata<-read_csv(file="montebello.synthesis_metadata.csv")%>%
 setwd(working.dir)
 habitat<-ga.list.files("_Habitat.point.score.txt")%>% # list all files ending in "_Habitat.point.score.csv"
   purrr::map_df(~ga.read.files_txt(.))%>%
+  dplyr::select(project,campaignid,sample, everything())%>%
   glimpse()
 
 habitat[is.na(habitat)] = '0'
@@ -79,7 +80,7 @@ names(habitat)%>%sort()
 # colnames(habitat)<- gsr(colnames(habitat),updated.names$current.name,updated.names$new.name) # changes old names to new names
 # names(habitat)%>%sort()
 # habitat[is.na(habitat)] <- 0 # changes NAs to zeros
-cols = c(2:19) 
+cols = c(4:22) 
 # names(habitat)%>%sort()
 # habitat[,cols] = apply(habitat[,cols], 2, function(x) as.numeric(as.character(x))); # changes all columns to numeric
 # habitat<-habitat%>%replace_na(cols = 0)
@@ -96,6 +97,7 @@ habitat<-habitat%>%
   rename( relief.3 = relief.3.good.relief.structure.with.some.overhangs.45.substrate.slope.)%>%
   rename( relief.4 = relief.4.high.structural.complexity.fissures.and.caves.vertical.wall.90.substrate.slope.)%>%
   rename( relief.5 = relief.5.exceptional.structural.complexity.numerous.large.holes.and.caves.vertical.wall.90.substrate.slope.)%>%
+  
   glimpse()
 
 
@@ -126,11 +128,11 @@ relief.mean.and.sd<-habitat%>%
 # CREATE catami_broad------
 broad.percent.cover<-habitat%>%
   select(campaignid,sample,starts_with("biota."))%>%
-  # mutate(Total.Sum=rowSums(.[,3:(ncol(.))],na.rm = TRUE ))%>%
-  # group_by(campaignid,sample)%>%
-  # mutate_at(vars(starts_with("biota.")),funs(./Total.Sum*100))%>%
-  # select(-Total.Sum)%>%
-  # data.frame()%>%
+   mutate(Total.Sum=rowSums(.[,3:(ncol(.))],na.rm = TRUE ))%>%
+   group_by(campaignid,sample)%>%
+   mutate_at(vars(starts_with("biota.")),funs(./Total.Sum*100))%>%
+   select(-Total.Sum)%>%
+   data.frame()%>%
   glimpse()
 
 is.nan.data.frame <- function(x)

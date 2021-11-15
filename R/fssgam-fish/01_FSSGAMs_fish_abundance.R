@@ -16,28 +16,30 @@ library(doParallel) #this can removed?
 library(doSNOW)
 library(gamm4)
 library(RCurl) #needed to download data from GitHub
-library(FSSgam)
 library(GlobalArchive)
 library(ggplot2)
+library(devtools)
+#devtools::install_github("beckyfisher/FSSgam_package")
+library(FSSgam)
 
 ## set study name
-study <- "2021-05_Abrolhos_BOSS" 
+study <- "montebello.synthesis" 
 name <- study
 
 ## Set your working directory ----
-working.dir<-getwd()
+working.dir<-dirname(rstudioapi::getActiveDocumentContext()$path)
 
 ## Save these directory names to use later----
-tidy.dir<-paste(working.dir,"data/Tidy",sep="/")
+tidy.dir<- 'H:/GitHub/parks-omp-montes/Tidy data'
 
 
 ## Load the data sets -
 setwd(tidy.dir)
 dir()
 
-maxn <- read.csv("2021-05_Abrolhos_BOSS.complete.maxn.csv")
-length <- read.csv("2021-05_Abrolhos_BOSS.complete.length.csv")
-habitat <- read.csv("2021-05_Abrolhos_BOSS_random-points_percent-cover_broad.habitat.csv")%>%
+maxn <- read.csv("montebello.synthesis.checked.maxn.csv")
+length <- read.csv("montebello.synthesis.checked.length.csv")
+habitat <- read.csv("montebello.synthesis.complete.habitat.csv")%>%
   mutate(reef = broad.ascidians+broad.bryozoa+broad.hydroids+broad.invertebrate.complex+broad.macroalgae+broad.octocoral.black+broad.sponges)
 names(maxn)
 
