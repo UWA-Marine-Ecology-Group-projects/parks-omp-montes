@@ -1,14 +1,58 @@
 "","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","reef","status","cumsum.wi"
-"targeted.abundance","depth+mean.relief",1093.1743346431,1131.9034372788,0.22536,NA,9.84,1,0,2.102,0.71,0.172,1,1,0,0,0,0.71
+"targeted.abundance.depth+mean.relief","depth+mean.relief",1093.1743346431,1131.9034372788,0.22536,NA,9.84,1,0,2.102,0.71,0.172,1,1,0,0,0,0.71
+"targeted.abundance.depth+sd.relief","depth+sd.relief",1098.0964445101,1140.14639384317,0.22662,NA,10.61,1,4.922,10.345,0.061,0.003,1,0,1,0,0,0.771
+"targeted.abundance.reef+sd.relief","reef+sd.relief",1098.34297932078,1139.29137251741,0.24137,NA,9.51,0,5.169,9.49,0.054,0.004,0,0,1,1,0,0.825
+"targeted.abundance.depth","depth",1098.50484494897,1132.36836694744,0.19782,NA,8.12,1,5.331,2.567,0.049,0.136,1,0,0,0,0,0.874
+"targeted.abundance.reef+sd.relief+status","reef+sd.relief+status",1098.637364232,1142.2404873649,0.2518,NA,10.59,0,5.463,12.439,0.046,0.001,0,0,1,1,1,0.92
+"targeted.abundance.reef","reef",1099.18123980457,1133.85873532034,0.22228,NA,7.58,0,6.007,4.057,0.035,0.065,0,0,0,1,0,0.955
+"targeted.abundance.reef+status","reef+status",1099.29133647902,1137.13394124606,0.23678,NA,8.82,0,6.117,7.333,0.033,0.013,0,0,0,1,1,0.988
 "Lethrinus atkinsoni.mean.relief","mean.relief",411.910489566172,419.871283168432,0.03265,NA,4,2,0,1.399,0.295,0.303,0,1,0,0,0,0.295
 "Lethrinus atkinsoni.null","null",412.394576844296,418.4717923564,0.10547,NA,3,2,0.484,0,0.231,0.609,0,0,0,0,0,0.526
 "Lethrinus atkinsoni.reef","reef",412.753811382528,422.916605387692,0.04342,NA,4.92,2,0.843,4.445,0.193,0.066,0,0,0,1,0,0.719
+"Lethrinus atkinsoni.sd.relief","sd.relief",414.604873925078,428.187012821434,0.09793,NA,4.93,1,2.694,9.715,0.077,0.005,0,0,1,0,0,0.796
+"Lethrinus atkinsoni.status","status",415.38961795429,425.961298384056,0.04385,NA,4,1,3.479,7.49,0.052,0.014,0,0,0,0,1,0.848
+"Lethrinus atkinsoni.sd.relief+status","sd.relief+status",415.935831388954,432.664309385967,0.14947,NA,6.95,1,4.025,14.193,0.039,0.001,0,0,1,0,1,0.887
+"Lethrinus atkinsoni.mean.relief+status","mean.relief+status",417.042255305478,431.635992119369,0.09389,NA,5.74,1,5.132,13.164,0.023,0.001,0,1,0,0,1,0.91
+"Lethrinus atkinsoni.depth+sd.relief","depth+sd.relief",417.248314709005,433.982487721743,0.13526,NA,6.81,1,5.338,15.511,0.02,0,1,0,1,0,0,0.93
+"Lethrinus atkinsoni.reef+sd.relief","reef+sd.relief",417.433208459467,433.894640592974,0.11979,NA,6.59,1,5.523,15.423,0.019,0,0,0,1,1,0,0.949
+"Lethrinus atkinsoni.depth","depth",418.214447418337,432.549266415093,0.11214,NA,5.27,1,6.304,14.077,0.013,0.001,1,0,0,0,0,0.962
+"Lethrinus atkinsoni.depth+mean.relief","depth+mean.relief",418.488492117662,434.278321111492,0.11328,NA,6.27,1,6.578,15.807,0.011,0,1,1,0,0,0,0.973
+"Lethrinus atkinsoni.reef+status","reef+status",418.622200513782,436.176113934051,0.12872,NA,7.35,1,6.712,17.704,0.01,0,0,0,0,1,1,0.983
+"Lethrinus atkinsoni.reef+sd.relief+status","reef+sd.relief+status",419.134981252741,438.404309304239,0.1727,NA,8.71,1,7.224,19.933,0.008,0,0,0,1,1,1,0.991
+"Lethrinus atkinsoni.depth+reef","depth+reef",419.928849239304,437.857414499233,0.1219,NA,7.46,1,8.018,19.386,0.005,0,1,0,0,1,0,0.996
+"Lethrinus atkinsoni.depth+reef+sd.relief","depth+reef+sd.relief",420.569375538247,439.710880624819,0.15298,NA,8.44,1,8.659,21.239,0.004,0,1,0,1,1,0,1
 "Pomacentrus coelestis.status","status",407.026207801399,420.734418330012,0.15104,NA,8.15,1,0,0,0.218,0.287,0,0,0,0,1,0.218
 "Pomacentrus coelestis.null","null",407.237988331055,420.852100941759,0.15187,NA,7.81,1,0.212,0.118,0.196,0.271,0,0,0,0,0,0.414
 "Pomacentrus coelestis.depth","depth",408.591915681126,423.46934322753,0.17688,NA,8.99,0,1.566,2.735,0.1,0.073,1,0,0,0,0,0.514
 "Pomacentrus coelestis.depth+mean.relief","depth+mean.relief",408.808674480366,424.153222182247,0.20637,NA,10.36,0,1.782,3.419,0.089,0.052,1,1,0,0,0,0.603
+"Pomacentrus coelestis.mean.relief+status","mean.relief+status",409.338308999922,424.657884655354,0.21024,NA,11.03,1,2.312,3.923,0.069,0.04,0,1,0,0,1,0.672
+"Pomacentrus coelestis.sd.relief+status","sd.relief+status",409.502789987264,423.886206631187,0.15628,NA,9.09,1,2.477,3.152,0.063,0.059,0,0,1,0,1,0.735
+"Pomacentrus coelestis.sd.relief","sd.relief",409.607468945061,423.893095049399,0.15687,NA,8.73,1,2.581,3.159,0.06,0.059,0,0,1,0,0,0.795
+"Pomacentrus coelestis.mean.relief","mean.relief",409.626743376216,424.919997579467,0.20907,NA,10.72,1,2.601,4.186,0.059,0.035,0,1,0,0,0,0.854
+"Pomacentrus coelestis.reef+status","reef+status",410.202069539909,424.586970886364,0.15193,NA,9.1,1,3.176,3.853,0.044,0.042,0,0,0,1,1,0.898
+"Pomacentrus coelestis.reef","reef",410.44522254396,424.764127040742,0.15284,NA,8.76,1,3.419,4.03,0.039,0.038,0,0,0,1,0,0.937
+"Pomacentrus coelestis.depth+reef","depth+reef",411.946977076924,427.163462896746,0.17624,NA,9.95,0,4.921,6.429,0.019,0.012,1,0,0,1,0,0.956
+"Pomacentrus coelestis.depth+sd.relief","depth+sd.relief",412.063180988223,427.237914271528,0.17783,NA,9.79,0,5.037,6.503,0.018,0.011,1,0,1,0,0,0.974
+"Pomacentrus coelestis.reef+sd.relief+status","reef+sd.relief+status",412.854286808325,427.749689986235,0.15648,NA,10.05,1,5.828,7.015,0.012,0.009,0,0,1,1,1,0.986
+"Pomacentrus coelestis.reef+sd.relief","reef+sd.relief",412.874114781243,427.68924801477,0.15713,NA,9.69,1,5.848,6.955,0.012,0.009,0,0,1,1,0,0.998
+"Pomacentrus coelestis.depth+reef+sd.relief","depth+reef+sd.relief",415.434779711462,430.791041643531,0.17672,NA,10.72,0,8.409,10.057,0.003,0.002,1,0,1,1,0,1.001
 "Chromis fumea.depth+sd.relief","depth+sd.relief",282.295948436133,289.006823526682,0.17857,NA,6.46,2,0,0,0.216,0.179,1,0,1,0,0,0.216
 "Chromis fumea.reef+sd.relief","reef+sd.relief",282.605311419066,289.343813696179,0.19026,NA,6.55,2,0.309,0.337,0.185,0.151,0,0,1,1,0,0.401
 "Chromis fumea.reef","reef",283.793052083696,289.621177421028,0.08129,NA,4.8,2,1.497,0.614,0.102,0.131,0,0,0,1,0,0.503
+"Chromis fumea.depth","depth",284.314866451973,290.282647711625,0.07589,NA,4.97,2,2.019,1.276,0.079,0.094,1,0,0,0,0,0.582
+"Chromis fumea.sd.relief+status","sd.relief+status",284.326788426103,290.372414599914,0.35778,NA,8.3,1,2.031,1.366,0.078,0.09,0,0,1,0,1,0.66
+"Chromis fumea.depth+mean.relief+sd.relief","depth+mean.relief+sd.relief",284.667677803943,291.570344105007,0.2011,NA,7.51,2,2.372,2.564,0.066,0.05,1,1,1,0,0,0.726
+"Chromis fumea.depth+mean.relief","depth+mean.relief",285.502201262587,292.010765121479,0.10905,NA,5.96,2,3.206,3.004,0.044,0.04,1,1,0,0,0,0.77
+"Chromis fumea.sd.relief","sd.relief",285.668971766022,292.541860798042,0.22609,NA,6.35,1,3.373,3.535,0.04,0.03,0,0,1,0,0,0.81
+"Chromis fumea.mean.relief","mean.relief",285.833092948748,290.721225749186,0.03991,NA,4,2,3.537,1.714,0.037,0.076,0,1,0,0,0,0.847
+"Chromis fumea.reef+sd.relief+status","reef+sd.relief+status",286.028545431692,291.888517542549,0.34937,NA,8.51,1,3.733,2.882,0.033,0.042,0,0,1,1,1,0.88
+"Chromis fumea.reef+status","reef+status",286.09795797825,293.004292149668,0.19169,NA,6.07,1,3.802,3.997,0.032,0.024,0,0,0,1,1,0.912
+"Chromis fumea.status","status",286.273237013163,292.897216775774,0.1662,NA,4.83,1,3.977,3.89,0.03,0.026,0,0,0,0,1,0.942
+"Chromis fumea.mean.relief+sd.relief","mean.relief+sd.relief",287.049388279569,293.933059996302,0.20415,NA,6.63,1,4.753,4.926,0.02,0.015,0,1,1,0,0,0.962
+"Chromis fumea.null","null",287.175213341134,292.725253347276,0.12997,NA,3.09,1,4.879,3.718,0.019,0.028,0,0,0,0,0,0.981
+"Chromis fumea.mean.relief+sd.relief+status","mean.relief+sd.relief+status",287.776082181631,293.340688156736,0.35064,NA,8.84,1,5.48,4.334,0.014,0.02,0,1,1,0,1,0.995
+"Chromis fumea.mean.relief+status","mean.relief+status",290.011829520355,296.751806029749,0.20556,NA,6.93,1,7.716,7.745,0.005,0.004,0,1,0,0,1,1
 "total.abundance","depth+mean.relief",2016.72095986953,2063.61850288165,0.2048,NA,11.84,1,0,3.748,0.993,0.103,1,1,0,0,0,0.993
-"species.richness","depth+mean.relief",1389.33820720927,1437.27165933349,0.45982,NA,12.19,1,0,24.203,0.884,0,1,1,0,0,0,0.884
+"species.richness.depth+mean.relief","depth+mean.relief",1389.33820720927,1437.27165933349,0.45982,NA,12.19,1,0,24.203,0.884,0,1,1,0,0,0,0.884
+"species.richness.mean.relief","mean.relief",1393.79563751282,1413.0690131985,0.36883,NA,5.7,2,4.457,0,0.095,1,0,1,0,0,0,0.979
+"species.richness.mean.relief+status","mean.relief+status",1396.79134499647,1438.4423816104,0.41272,NA,9.41,0,7.453,25.373,0.021,0,0,1,0,0,1,1

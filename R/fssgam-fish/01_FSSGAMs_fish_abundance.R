@@ -225,7 +225,7 @@ for(i in 1:length(resp.vars)){
   mod.table=out.list$mod.data.out  # look at the model selection table
   mod.table=mod.table[order(mod.table$AICc),]
   mod.table$cumsum.wi=cumsum(mod.table$wi.AICc)
-  out.i=mod.table[which(mod.table$delta.AICc<=2),]
+  out.i=mod.table[which(mod.table$delta.AICc<=10),]
   out.all=c(out.all,list(out.i))
   # var.imp=c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw)) #Either raw importance score
   var.imp=c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw)) #Or importance score weighted by r2
@@ -264,7 +264,7 @@ heatmap.2(all.var.imp,notecex=0.4,  dendrogram ="none",
 
 # Load the importance score dataset produced above
 # dat.taxa <-read.csv(text=getURL("https://raw.githubusercontent.com/beckyfisher/FSSgam/master/case_study2_model_out/clams_all.var.imp.csv"))%>% #from github
-dat.taxa <-read.csv("clams_all.var.imp.csv")%>% #from local copy
+dat.taxa <-read.csv("montebello.synthesis_all.var.imp.csv")%>% #from local copy
   rename(resp.var=X)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   glimpse()
@@ -302,10 +302,10 @@ legend_title<-"Importance"
 
 # Annotations-
 dat.taxa.label<-dat.taxa%>%
-  mutate(label=NA)%>%
-  mutate(label=ifelse(predictor=="Distance"&resp.var=="BDS","X",ifelse(predictor=="Status"&resp.var=="BDS","X",ifelse(predictor=="sqrt.X500um"&resp.var=="BDS","X",label))))%>%
-  mutate(label=ifelse(predictor=="lobster"&resp.var=="BMS","X",label))%>%
-  mutate(label=ifelse(predictor=="sqrt.X4mm"&resp.var=="CPN","X",ifelse(predictor=="lobster"&resp.var=="CPN","X",label)))%>%
+  # mutate(label=NA)%>%
+  # mutate(label=ifelse(predictor=="Distance"&resp.var=="BDS","X",ifelse(predictor=="Status"&resp.var=="BDS","X",ifelse(predictor=="sqrt.X500um"&resp.var=="BDS","X",label))))%>%
+  # mutate(label=ifelse(predictor=="lobster"&resp.var=="BMS","X",label))%>%
+  # mutate(label=ifelse(predictor=="sqrt.X4mm"&resp.var=="CPN","X",ifelse(predictor=="lobster"&resp.var=="CPN","X",label)))%>%
   glimpse()
 
 # Plot gg.importance.scores ----
