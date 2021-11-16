@@ -21,30 +21,29 @@ library(GlobalArchive)
 library(ggplot2)
 
 ## set study name
-study <- "2021-05_Abrolhos_BOSS" 
+study <- "montebello.synthesis.lengths" 
 name <- study
 
 ## Set your working directory ----
-working.dir<-getwd()
+working.dir<-dirname(rstudioapi::getActiveDocumentContext()$path)
 
 ## Save these directory names to use later----
-tidy.dir<-paste(working.dir,"data/Tidy",sep="/")
+tidy.dir<- 'H:/GitHub/parks-omp-montes/Tidy data'
 
 ## Load the data sets -
 setwd(tidy.dir)
 dir()
 
-length <- read.csv("2021-05_Abrolhos_BOSS.complete.length.csv")%>%
+length <- read.csv("montebello.synthesis.checked.length.csv")%>%
   mutate(scientific=paste(family,genus,species))
 
-habitat <- read.csv("2021-05_Abrolhos_BOSS_random-points_percent-cover_broad.habitat.csv")%>%
-  mutate(reef = broad.ascidians+broad.bryozoa+broad.hydroids+broad.invertebrate.complex+broad.macroalgae+broad.octocoral.black+broad.sponges)
-names(maxn)
-
-metadata <- length %>%
-  distinct(sample,latitude,longitude,date,time,location,status,site,depth,observer,successful.count,successful.length)
-
+habitat <- read.csv("montebello.synthesis.complete.habitat.csv")%>%
+  mutate(reef = biota.crinoids+biota.invertebrate.complex+biota.macroalgae+biota.octocoral.black+
+           biota.consolidated+biota.sponges+biota.hydroids+biota.stony.corals)
 names(habitat)
+
+metadata <- read.csv('montebello.synthesis.checked.metadata.csv')
+
 
 # Create abundance of all recreational fished species ----
 url <- "https://docs.google.com/spreadsheets/d/1SMLvR9t8_F-gXapR2EemQMEPSw_bUbPLcXd3lJ5g5Bo/edit?ts=5e6f36e2#gid=825736197"
@@ -60,25 +59,19 @@ unique(master$fishing.type)
 
 fished.species <- length %>%
   dplyr::left_join(master) %>%
-  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>%
-  dplyr::filter(!family%in%c("Monacanthidae", "Scorpididae", "Mullidae")) # Brooke removed leatherjackets, sea sweeps and goat fish
+  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Serranidae Plectropomus spp"),"C/R",fishing.type))%>%
+  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Serranidae Plectropomus spp"), "450", minlegal.wa))%>%
+  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
+  dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus
+  glimpse()
 
 unique(fished.species$scientific)
 
 # Come back to maybe getting rid of some of these, but for now we continue on
-fished.maxn <- fished.species %>%
-  dplyr::ungroup() %>%
-  dplyr::group_by(scientific,sample) %>%
-  dplyr::summarise(maxn = sum(maxn)) %>%
-  spread(scientific,maxn, fill = 0) %>%
-  dplyr::mutate(targeted.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
-  dplyr::select(sample,targeted.abundance) %>%
-  gather(.,"scientific","maxn",2:2) %>%
-  dplyr::glimpse()
 
 without.min.length <- fished.species %>%
   filter(is.na(minlegal.wa))%>%
-  distinct(scientific) # only charlies don't have one
+  distinct(scientific)  #there are heaps here without min legal sizes
 
 legal <- fished.species %>%
   tidyr::replace_na(list(minlegal.wa=0)) %>%
@@ -95,24 +88,64 @@ sublegal <- fished.species %>%
   dplyr::mutate(scientific = "smaller than legal size") %>%
   dplyr::glimpse()
 
-miniatus.legal <- fished.species %>%
-  dplyr::filter(species%in%c("miniatus")) %>%
+
+#Atkinsoni
+
+atkinsoni.legal <- fished.species %>%
+  dplyr::filter(species%in%c("atkinsoni")) %>%
   dplyr::filter(length>minlegal.wa) %>%
   dplyr::group_by(sample) %>%
   dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size red throat") %>%
+  dplyr::mutate(scientific = "legal size atkinsoni") %>%
   dplyr::glimpse()
 
-miniatus.sublegal <- fished.species %>%
-  dplyr::filter(species%in%c("miniatus")) %>%
+atkinsoni.sublegal <- fished.species %>%
+  dplyr::filter(species%in%c("atkinsoni")) %>%
   dplyr::filter(length<minlegal.wa) %>%
   dplyr::group_by(sample) %>%
   dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size red throat") %>%
-  dplyr::glimpse() # only two of these
+  dplyr::mutate(scientific = "sublegal size atkinsoni") %>%
+  dplyr::glimpse() 
+
+#plectropomus
+
+plectropomus.legal <- fished.species %>%
+  dplyr::filter(genus%in%c("Plectropomus")) %>%
+  dplyr::filter(length>minlegal.wa) %>%
+  dplyr::group_by(sample) %>%
+  dplyr::summarise(number = sum(number)) %>%
+  dplyr::mutate(scientific = "legal size trout") %>%
+  dplyr::glimpse()
+
+plectropomus.sublegal <- fished.species %>%
+  dplyr::filter(genus%in%c("Plectropomus")) %>%
+  dplyr::filter(length<minlegal.wa) %>%
+  dplyr::group_by(sample) %>%
+  dplyr::summarise(number = sum(number)) %>%
+  dplyr::mutate(scientific = "sublegal size trout") %>%
+  dplyr::glimpse() 
+
+#nebulosus
+
+nebulosus.legal <- fished.species %>%
+  dplyr::filter(species%in%c("nebulosus")) %>%
+  dplyr::filter(length>minlegal.wa) %>%
+  dplyr::group_by(sample) %>%
+  dplyr::summarise(number = sum(number)) %>%
+  dplyr::mutate(scientific = "legal size spango") %>%
+  dplyr::glimpse()
+
+nebulosus.sublegal <- fished.species %>%
+  dplyr::filter(species%in%c("nebulosus")) %>%
+  dplyr::filter(length<minlegal.wa) %>%
+  dplyr::group_by(sample) %>%
+  dplyr::summarise(number = sum(number)) %>%
+  dplyr::mutate(scientific = "sublegal size spango") %>%
+  dplyr::glimpse() 
 
 
-combined.length <- bind_rows(legal, sublegal, miniatus.legal, miniatus.sublegal) # add pink snapper and other indicator species
+combined.length <- bind_rows(legal, sublegal, atkinsoni.legal, atkinsoni.sublegal, plectropomus.legal, plectropomus.sublegal,
+                             nebulosus.legal, nebulosus.sublegal)
 
 unique(combined.length$scientific)
 
@@ -120,12 +153,12 @@ complete.length <- combined.length %>%
   dplyr::right_join(metadata, by = c("sample")) %>% # add in all samples
   dplyr::select(sample,scientific,number) %>%
   tidyr::complete(nesting(sample), scientific) %>%
-  replace_na(list(number = 0)) %>% #we add in zeros - in case we want to calulate abundance of species based on a length rule (e.g. greater than legal size)
+  replace_na(list(number = 0)) %>% #we add in zeros - in case we want to calculate abundance of species based on a length rule (e.g. greater than legal size)
   dplyr::ungroup()%>%
   dplyr::filter(!is.na(scientific)) %>% # this should not do anything
   dplyr::left_join(.,metadata) %>%
   dplyr::left_join(.,habitat) %>%
-  dplyr::filter(successful.length%in%c("Y")) %>%
+  dplyr::filter(successful.length%in%c("Yes")) %>%
   dplyr::mutate(scientific=as.character(scientific)) %>%
   dplyr::glimpse()
 
@@ -133,12 +166,11 @@ complete.length <- combined.length %>%
 names(complete.length)
 names(habitat)
 
-pred.vars=c("depth", "broad.ascidians","broad.bryozoa","broad.consolidated","broad.hydroids","broad.invertebrate.complex","broad.macroalgae","broad.octocoral.black","broad.sponges","broad.unconsolidated","mean.relief","sd.relief","reef") 
+pred.vars=c("depth","biota.invertebrate.complex","biota.unconsolidated","biota.macroalgae", "biota.crinoids", "reef", "mean.relief", "biota.octocoral.black",
+            "sd.relief", "biota.consolidated", "biota.sponges", "biota.hydroids", "biota.stony.corals") 
 
-# predictor variables Removed at first pass---
-# broad.Sponges and broad.Octocoral.Black and broad.Consolidated , "InPreds","BioTurb" are too rare
-
-dat <- complete.length
+dat <- complete.length%>%
+  drop_na(reef)
 
 # Check for correalation of predictor variables- remove anything highly correlated (>0.95)---
 round(cor(dat[,pred.vars]),2)

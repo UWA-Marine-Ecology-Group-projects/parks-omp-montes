@@ -96,7 +96,10 @@ unique(master$fishing.type)
 
 fished.species <- maxn %>%
   dplyr::left_join(master) %>%
-  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>%  #should i maybe yeet Loxodon macrorhinus, Alectis ciliaris, Ulua mentalis  and Psammoperca datnioides
+  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Serranidae Plectropomus spp")
+                                      ,"R",fishing.type))%>%
+  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
+  dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus
   glimpse()
   
 unique(fished.species$scientific)
@@ -120,7 +123,7 @@ species.maxn <- maxn %>%
   ))%>%
   dplyr::select(sample,scientific,maxn) %>%
   dplyr::rename('number' = maxn)%>%
-  dplyr::mutate(response = c('top.abundance'))%>%
+  dplyr::mutate(response = scientific)%>%
   distinct()
 
 
@@ -144,7 +147,7 @@ drop_na(campaignid)  #filter by campaign id removes entries with no habitat data
 
 # Check for correalation of predictor variables- remove anything highly correlated (>0.95)---
 round(cor(dat[,pred.vars]),2)
-# nothing is highly correlated 
+# sand and reef highly correlated so include reef only 
 
 # Plot of likely transformations - thanks to Anna Cresswell for this loop!
 par(mfrow=c(3,2))
@@ -162,7 +165,7 @@ for (i in pred.vars) {
 # Review of individual predictors - we have to make sure they have an even distribution---
 #If the data are squewed to low numbers try sqrt>log or if squewed to high numbers try ^2 of ^3
 
-#log transform of relief and sd relief maybe look a bit better?
+#log transform of sd relief maybe look a bit better?
 
 
 # # Re-set the predictors for modeling----
@@ -188,25 +191,30 @@ resp.vars=unique.vars.use
 use.dat=as.data.frame(dat)
 str(use.dat)
 
-factor.vars=c("status","location", "campaignid")# Status as a Factor with two levels
+factor.vars=c("status")# Status as a Factor with two levels
+null.vars=c("campaignid", "location")
 out.all=list()
 var.imp=list()
 
 # Loop through the FSS function for each Taxa----
 for(i in 1:length(resp.vars)){
-  use.dat=as.data.frame(dat[which(dat$scientific==resp.vars[i]),])
-  
-  Model1=gam(number~s(relief,k=5,bs='cr')
-             ,
+  use.dat=as.data.frame(dat[which(dat$response==resp.vars[i]),])
+  use.dat$location <- as.factor(use.dat$location)
+  use.dat$campaignid <- as.factor(use.dat$campaignid)
+  Model1=gam(number~s(mean.relief,k=5,bs='cr') + 
+               s(campaignid,bs='re') +
+               s(location,bs='re'),
              family=tw(),  data=use.dat)
   
   model.set=generate.model.set(use.dat=use.dat,
                                test.fit=Model1,
+                                factor.smooth.interactions = TRUE,
+                               # smooth.smooth.interactions = TRUE,
                                pred.vars.cont=pred.vars,
                                pred.vars.fact=factor.vars,
-                               linear.vars="depth",
-                               k=5#,
-                               #null.terms="s(Location,Site,bs='re')"
+                               #linear.vars="depth",
+                               k=5,
+                               null.terms="s(campaignid ,bs='re')+s(location,bs='re')"
                                )
   out.list=fit.model.set(model.set,
                          max.models=600,
@@ -217,7 +225,7 @@ for(i in 1:length(resp.vars)){
   mod.table=out.list$mod.data.out  # look at the model selection table
   mod.table=mod.table[order(mod.table$AICc),]
   mod.table$cumsum.wi=cumsum(mod.table$wi.AICc)
-  out.i=mod.table[which(mod.table$delta.AICc<=3),]
+  out.i=mod.table[which(mod.table$delta.AICc<=2),]
   out.all=c(out.all,list(out.i))
   # var.imp=c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw)) #Either raw importance score
   var.imp=c(var.imp,list(out.list$variable.importance$aic$variable.weights.raw)) #Or importance score weighted by r2

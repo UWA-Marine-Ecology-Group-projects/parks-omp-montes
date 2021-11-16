@@ -91,13 +91,12 @@ str(habitat)
 names(habitat)
 
 habitat<-habitat%>%
-  rename( relief.0 = relief.0.flat.substrate.sandy.rubble.with.few.features.0.substrate.slope.)%>%
-  rename( relief.1 = relief.1.some.relief.features.amongst.mostly.flat.substrate.sand.rubble.45.degree.substrate.slope.)%>%
-  rename( relief.2 = relief.2.mostly.relief.features.amongst.some.flat.substrate.or.rubble.45.substrate.slope.)%>%
-  rename( relief.3 = relief.3.good.relief.structure.with.some.overhangs.45.substrate.slope.)%>%
-  rename( relief.4 = relief.4.high.structural.complexity.fissures.and.caves.vertical.wall.90.substrate.slope.)%>%
-  rename( relief.5 = relief.5.exceptional.structural.complexity.numerous.large.holes.and.caves.vertical.wall.90.substrate.slope.)%>%
-  
+  dplyr::rename( 'relief.0' = 'relief.0.flat.substrate.sandy.rubble.with.few.features.0.substrate.slope.')%>%
+  dplyr::rename( 'relief.1' = 'relief.1.some.relief.features.amongst.mostly.flat.substrate.sand.rubble.45.degree.substrate.slope.')%>%
+  dplyr::rename( 'relief.2' = 'relief.2.mostly.relief.features.amongst.some.flat.substrate.or.rubble.45.substrate.slope.')%>%
+  dplyr::rename( 'relief.3' = 'relief.3.good.relief.structure.with.some.overhangs.45.substrate.slope.')%>%
+  dplyr::rename( 'relief.4' = 'relief.4.high.structural.complexity.fissures.and.caves.vertical.wall.90.substrate.slope.')%>%
+  dplyr::rename( 'relief.5' = 'relief.5.exceptional.structural.complexity.numerous.large.holes.and.caves.vertical.wall.90.substrate.slope.')%>%
   glimpse()
 
 
@@ -150,6 +149,7 @@ habitat.relief.fov<-relief.mean.and.sd%>%
   mutate(id=paste(campaignid,sample,sep="."))%>%
   semi_join(metadata)%>%
   left_join(metadata)%>%
+  dplyr::filter(!sample%in%c('NCB634'))%>%   #remove this sample as it has only 1 point annotated - NA sd relief
   glimpse()
 
 
