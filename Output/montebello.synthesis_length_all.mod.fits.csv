@@ -1,0 +1,8 @@
+"","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","reef","status","cumsum.wi"
+"greater than legal size","depth+mean.relief",864.460668011252,911.881184405028,0.28016,NA,12.37,1,0,0,1,0.996,1,1,0,0,0,1
+"legal size atkinsoni.depth","depth",311.981544905931,339.44850776184,0.1158,NA,7.12,1,0,0,0.394,0.962,1,0,0,0,0,0.394
+"legal size atkinsoni.depth+mean.relief","depth+mean.relief",312.399755713799,352.131337255929,0.12162,NA,9.92,1,0.418,12.683,0.32,0.002,1,1,0,0,0,0.714
+"legal size spango","depth+mean.relief",223.068574729597,269.705446051054,0.16632,NA,11.57,0,0,2.152,0.81,0.142,1,1,0,0,0,0.81
+"smaller than legal size.reef","reef",704.544504663567,740.983171037499,0.3182,NA,8.18,0,0,0,0.497,0.702,0,0,0,1,0,0.497
+"smaller than legal size.reef+status","reef+status",704.610726667083,742.947746846819,0.32667,NA,9.08,0,0.066,1.965,0.481,0.263,0,0,0,1,1,0.978
+"sublegal size atkinsoni","depth+mean.relief",488.847434966493,532.876141788039,0.15849,NA,11.34,1,0,0,0.991,0.634,1,1,0,0,0,0.991

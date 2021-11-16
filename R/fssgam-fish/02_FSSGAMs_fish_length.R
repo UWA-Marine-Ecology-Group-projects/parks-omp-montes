@@ -21,7 +21,7 @@ library(GlobalArchive)
 library(ggplot2)
 
 ## set study name
-study <- "montebello.synthesis.lengths" 
+study <- "montebello.synthesis" 
 name <- study
 
 ## Set your working directory ----
@@ -191,20 +191,14 @@ for (i in pred.vars) {
 
 # Review of individual predictors - we have to make sure they have an even distribution---
 #If the data are squewed to low numbers try sqrt>log or if squewed to high numbers try ^2 of ^3
-# sponges very low
-# octocoral, very very low
-# macroalgae, very very low
-# invert complex very very low
-# Hydroids very very low
-# consolidated ok
-# bryzoa very very low
-# ascidians very very low
 
 
 # # Re-set the predictors for modeling----
-pred.vars=c("depth","broad.consolidated","broad.unconsolidated","mean.relief","sd.relief","reef") 
+pred.vars=c("depth","mean.relief","sd.relief","reef") 
 
 # Check to make sure Response vector has not more than 80% zeros----
+#some of the species have more than 80% 0s - sublegal spangos, trout legal and sublegal
+
 unique.vars=unique(as.character(dat$scientific))
 
 unique.vars.use=character()
@@ -216,42 +210,40 @@ for(i in 1:length(unique.vars)){
 
 unique.vars.use   
 
-# butterfly fish and pomacentrid removed becuase of too many zeros
-
-
-#"BDS" bivalve Dosina subrosea
-#"BMS" bivalve Myadora striata
-#"CPN" crustacean Pagrus novaezelandiae
 
 # Run the full subset model selection----
-setwd("C:/GitHub/parks-abrolhos/output/fssgam - fish")
+setwd("H:/GitHub/parks-omp-montes/Output")
 resp.vars=unique.vars.use
 use.dat=as.data.frame(dat)
 str(use.dat)
 
 name<- paste(study,"length",sep="_")
 
-factor.vars=c("status","location")# Status as a Factor with two levels
+factor.vars=c("status")# Status as a Factor with two levels
 out.all=list()
 var.imp=list()
 
 # Loop through the FSS function for each Taxa----
 for(i in 1:length(resp.vars)){
   use.dat=as.data.frame(dat[which(dat$scientific==resp.vars[i]),])
+  use.dat$location <- as.factor(use.dat$location)
+  use.dat$campaignid <- as.factor(use.dat$campaignid)
   
-  Model1=gam(number~s(depth,k=3,bs='cr')#+ s(location,Site,bs="re")
-             ,
+  Model1=gam(number~s(mean.relief,k=5,bs='cr') + 
+               s(campaignid,bs='re') +
+               s(location,bs='re'),
              family=tw(),  data=use.dat)
   
   model.set=generate.model.set(use.dat=use.dat,
                                test.fit=Model1,
+                               factor.smooth.interactions = TRUE,
+                               # smooth.smooth.interactions = TRUE,
                                pred.vars.cont=pred.vars,
                                pred.vars.fact=factor.vars,
-                               smooth.smooth.interactions = c("depth","mean.relief"),
-                               factor.smooth.interactions = NA,
-                               k=5#,
-                               #null.terms="s(Location,Site,bs='re')"
-                               )
+                               #linear.vars="depth",
+                               k=5,
+                               null.terms="s(campaignid ,bs='re')+s(location,bs='re')"
+  )
   out.list=fit.model.set(model.set,
                          max.models=600,
                          parallel=T)
@@ -293,7 +285,7 @@ heatmap.2(all.var.imp,notecex=0.4,  dendrogram ="none",
           col=colorRampPalette(c("white","yellow","red"))(10),
           trace="none",key.title = "",keysize=2,
           notecol="black",key=T,
-          sepcolor = "black",margins=c(12,8), lhei=c(4,15),Rowv=FALSE,Colv=FALSE)
+          sepcolor = "black",margins=c(12,12), lhei=c(4,15),Rowv=FALSE,Colv=FALSE)
 
 
 # Part 2 - custom plot of importance scores----

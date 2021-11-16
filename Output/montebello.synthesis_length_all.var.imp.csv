@@ -1,0 +1,6 @@
+"","depth","mean.relief","sd.relief","reef","status"
+"greater than legal size",1,1,0,0,0
+"legal size atkinsoni",0.714,0.33,0.058,0.204,0.089
+"legal size spango",0.945,0.822,0.041,0,0.013
+"smaller than legal size",0.018,0.02,0,0.978,0.483
+"sublegal size atkinsoni",0.993,0.992,0.001,0.004,0.003
