@@ -2,5 +2,7 @@
 "greater than legal size",1,1,0,0,0
 "legal size atkinsoni",0.714,0.33,0.058,0.204,0.089
 "legal size spango",0.945,0.822,0.041,0,0.013
+"legal size trout",0.2,0,0,0,0.196
 "smaller than legal size",0.018,0.02,0,0.978,0.483
 "sublegal size atkinsoni",0.993,0.992,0.001,0.004,0.003
+"sublegal size trout",0.114,0.071,0,0,0.389

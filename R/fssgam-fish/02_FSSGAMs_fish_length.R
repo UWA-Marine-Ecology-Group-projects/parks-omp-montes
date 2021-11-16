@@ -204,7 +204,7 @@ unique.vars=unique(as.character(dat$scientific))
 unique.vars.use=character()
 for(i in 1:length(unique.vars)){
   temp.dat=dat[which(dat$scientific==unique.vars[i]),]
-  if(length(which(temp.dat$number==0))/nrow(temp.dat)<0.8){
+  if(length(which(temp.dat$number==0))/nrow(temp.dat)<0.9){
     unique.vars.use=c(unique.vars.use,unique.vars[i])}
 }
 
