@@ -143,9 +143,26 @@ nebulosus.sublegal <- fished.species %>%
   dplyr::mutate(scientific = "sublegal size spango") %>%
   dplyr::glimpse() 
 
+#lethrinids
+
+lethrinid.legal <- fished.species %>%
+  dplyr::filter(genus%in%c("Lethrinus")) %>%
+  dplyr::filter(length>minlegal.wa) %>%
+  dplyr::group_by(sample) %>%
+  dplyr::summarise(number = sum(number)) %>%
+  dplyr::mutate(scientific = "legal size emperor") %>%
+  dplyr::glimpse()
+
+lethrinid.sublegal <- fished.species %>%
+  dplyr::filter(genus%in%c("Lethrinus")) %>%
+   dplyr::filter(length<minlegal.wa) %>%
+   dplyr::group_by(sample) %>%
+    dplyr::summarise(number = sum(number)) %>%
+    dplyr::mutate(scientific = "sublegal size emperor") %>%
+   dplyr::glimpse() 
 
 combined.length <- bind_rows(legal, sublegal, atkinsoni.legal, atkinsoni.sublegal, plectropomus.legal, plectropomus.sublegal,
-                             nebulosus.legal, nebulosus.sublegal)
+                             nebulosus.legal, nebulosus.sublegal, lethrinid.legal, lethrinid.sublegal)
 
 unique(combined.length$scientific)
 
@@ -204,7 +221,7 @@ unique.vars=unique(as.character(dat$scientific))
 unique.vars.use=character()
 for(i in 1:length(unique.vars)){
   temp.dat=dat[which(dat$scientific==unique.vars[i]),]
-  if(length(which(temp.dat$number==0))/nrow(temp.dat)<0.9){
+  if(length(which(temp.dat$number==0))/nrow(temp.dat)<0.99){       #forcing sublegal nebulosus in there, come back to check this
     unique.vars.use=c(unique.vars.use,unique.vars[i])}
 }
 
@@ -229,20 +246,20 @@ for(i in 1:length(resp.vars)){
   use.dat$location <- as.factor(use.dat$location)
   use.dat$campaignid <- as.factor(use.dat$campaignid)
   
-  Model1=gam(number~s(mean.relief,k=5,bs='cr') + 
-               s(campaignid,bs='re') +
-               s(location,bs='re'),
+  Model1=gam(number~s(mean.relief,k=5,bs='cr'), # + 
+               #s(campaignid,bs='re') +
+               #s(location,bs='re'),
              family=tw(),  data=use.dat)
   
   model.set=generate.model.set(use.dat=use.dat,
                                test.fit=Model1,
-                               factor.smooth.interactions = TRUE,
+                              # factor.smooth.interactions = TRUE,
                                # smooth.smooth.interactions = TRUE,
                                pred.vars.cont=pred.vars,
                                pred.vars.fact=factor.vars,
                                #linear.vars="depth",
-                               k=5,
-                               null.terms="s(campaignid ,bs='re')+s(location,bs='re')"
+                               k=5#,
+                              # null.terms="s(campaignid ,bs='re')+s(location,bs='re')"
   )
   out.list=fit.model.set(model.set,
                          max.models=600,

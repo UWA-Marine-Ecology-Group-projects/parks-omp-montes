@@ -1,8 +1,11 @@
 "","depth","mean.relief","sd.relief","reef","status"
 "greater than legal size",1,1,0,0,0
-"legal size atkinsoni",0.714,0.33,0.058,0.204,0.089
-"legal size spango",0.945,0.822,0.041,0,0.013
+"legal size atkinsoni",1.001,0.639,0.077,0,0
+"legal size emperor",1,0.957,0.021,0,0
+"legal size spango",0.107,0.171,0.232,0.17,0.673
 "legal size trout",0.2,0,0,0,0.196
-"smaller than legal size",0.018,0.02,0,0.978,0.483
-"sublegal size atkinsoni",0.993,0.992,0.001,0.004,0.003
-"sublegal size trout",0.114,0.071,0,0,0.389
+"smaller than legal size",0.993,0.981,0.005,0.006,0.006
+"sublegal size atkinsoni",0.999,0.996,0.001,0.001,0.001
+"sublegal size emperor",0.369,0.217,0.033,0.631,0.57
+"sublegal size spango",0.504,0.099,0.217,0.115,0.325
+"sublegal size trout",0.999,0.62,0.377,0.001,0

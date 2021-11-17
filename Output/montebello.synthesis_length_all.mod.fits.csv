@@ -1,28 +1,48 @@
 "","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","reef","status","cumsum.wi"
-"greater than legal size","depth+mean.relief",864.460668011252,911.881184405028,0.28016,NA,12.37,1,0,0,1,0.996,1,1,0,0,0,1
-"legal size atkinsoni.depth","depth",311.981544905931,339.44850776184,0.1158,NA,7.12,1,0,0,0.394,0.962,1,0,0,0,0,0.394
-"legal size atkinsoni.depth+mean.relief","depth+mean.relief",312.399755713799,352.131337255929,0.12162,NA,9.92,1,0.418,12.683,0.32,0.002,1,1,0,0,0,0.714
-"legal size atkinsoni.reef","reef",314.338503651703,348.145687525487,0.16028,NA,7.66,0,2.357,8.697,0.121,0.012,0,0,0,1,0,0.835
-"legal size atkinsoni.reef+status","reef+status",315.103725464239,350.595054331986,0.16466,NA,8.41,0,3.122,11.147,0.083,0.004,0,0,0,1,1,0.918
-"legal size atkinsoni.depth+sd.relief","depth+sd.relief",315.862950711714,352.018440655388,0.12243,NA,9.12,1,3.881,12.57,0.057,0.002,1,0,1,0,0,0.975
-"legal size atkinsoni.mean.relief","mean.relief",319.314388616882,357.252035890078,0.12415,NA,8.63,0,7.333,17.804,0.01,0,0,1,0,0,0,0.985
-"legal size atkinsoni.mean.relief+status","mean.relief+status",320.213876757453,359.65032968314,0.12597,NA,9.33,0,8.232,20.202,0.006,0,0,1,0,0,1,0.991
-"legal size atkinsoni.null","null",320.89086106612,347.948271320987,0.13994,NA,6,0,8.909,8.5,0.005,0.014,0,0,0,0,0,0.996
-"legal size atkinsoni.status","status",321.56180665043,350.246143080161,0.14392,NA,6.64,0,9.58,10.798,0.003,0.004,0,0,0,0,1,0.999
-"legal size spango.depth+mean.relief","depth+mean.relief",223.068574729597,269.705446051054,0.16632,NA,11.57,0,0,2.152,0.81,0.142,1,1,0,0,0,0.81
-"legal size spango.depth","depth",226.657906879551,267.553747904524,0.15812,NA,9.87,0,3.589,0,0.135,0.418,1,0,0,0,0,0.945
-"legal size spango.depth+sd.relief","depth+sd.relief",229.039688523508,272.725464128972,0.15807,NA,10.86,0,5.971,5.172,0.041,0.031,1,0,1,0,0,0.986
-"legal size spango.mean.relief+status","mean.relief+status",231.418595682275,270.891650387795,0.17802,NA,10.49,1,8.35,3.338,0.012,0.079,0,1,0,0,1,0.998
-"legal size trout.null","null",303.435370875903,312.825144650779,0.00486,NA,3,2,0,0,0.604,0.877,0,0,0,0,0,0.604
-"legal size trout.depth","depth",305.64930769576,318.121487849791,6e-05,NA,4,2,2.214,5.296,0.2,0.062,1,0,0,0,0,0.804
-"legal size trout.status","status",305.681014070431,318.153115758552,8e-05,NA,4,2,2.246,5.328,0.196,0.061,0,0,0,0,1,1
-"smaller than legal size.reef","reef",704.544504663567,740.983171037499,0.3182,NA,8.18,0,0,0,0.497,0.702,0,0,0,1,0,0.497
-"smaller than legal size.reef+status","reef+status",704.610726667083,742.947746846819,0.32667,NA,9.08,0,0.066,1.965,0.481,0.263,0,0,0,1,1,0.978
-"smaller than legal size.depth+mean.relief","depth+mean.relief",711.160053570285,751.476236961929,0.27025,NA,9.83,1,6.616,10.493,0.018,0.004,1,1,0,0,0,0.996
-"sublegal size atkinsoni","depth+mean.relief",488.847434966493,532.876141788039,0.15849,NA,11.34,1,0,0,0.991,0.634,1,1,0,0,0,0.991
-"sublegal size trout.null","null",278.765757124724,308.656825692235,0.30212,NA,7.27,0,0,0,0.476,0.666,0,0,0,0,0,0.476
-"sublegal size trout.status","status",279.448410591833,310.199097439945,0.30363,NA,7.53,0,0.683,1.542,0.338,0.308,0,0,0,0,1,0.814
-"sublegal size trout.depth","depth",281.711205872154,315.193171818437,0.29161,NA,8.27,0,2.945,6.536,0.109,0.025,1,0,0,0,0,0.923
-"sublegal size trout.mean.relief+status","mean.relief+status",283.215452078803,323.068970012985,0.25349,NA,10.54,0,4.45,14.412,0.051,0,0,1,0,0,1,0.974
-"sublegal size trout.mean.relief","mean.relief",285.097433732276,323.961991464285,0.25115,NA,10.17,0,6.332,15.305,0.02,0,0,1,0,0,0,0.994
-"sublegal size trout.depth+mean.relief","depth+mean.relief",288.045283877958,330.204140154037,0.24775,NA,11.17,0,9.28,21.547,0.005,0,1,1,0,0,0,0.999
+"greater than legal size","depth+mean.relief",869.439260288933,897.897327896871,0.21103,NA,6.33,0,0,0,1,0.992,1,1,0,0,0,1
+"legal size atkinsoni.depth+mean.relief","depth+mean.relief",310.910322388802,336.055387886702,0.10547,NA,5.22,0,0,11.054,0.639,0.004,1,1,0,0,0,0.639
+"legal size atkinsoni.depth","depth",312.527048492912,325.001060584614,0.09137,NA,2,0,1.617,0,0.285,0.973,1,0,0,0,0,0.924
+"legal size atkinsoni.depth+sd.relief","depth+sd.relief",315.151189531599,332.471661967984,0.09367,NA,3.34,0,4.241,7.471,0.077,0.023,1,0,1,0,0,1.001
+"legal size emperor.depth+mean.relief","depth+mean.relief",615.932852321006,638.768892436501,0.10047,NA,4.96,0,0,0,0.957,0.873,1,1,0,0,0,0.957
+"legal size emperor.depth","depth",623.437822408074,643.138142749178,0.08095,NA,3.91,0,7.505,4.369,0.022,0.098,1,0,0,0,0,0.979
+"legal size emperor.depth+sd.relief","depth+sd.relief",623.589003606831,646.219915510621,0.08608,NA,4.87,0,7.656,7.451,0.021,0.021,1,0,1,0,0,1
+"legal size spango.status","status",316.707165288522,329.179206079282,0.04852,NA,2,0,0,0,0.35,0.636,0,0,0,0,1,0.35
+"legal size spango.reef+status","reef+status",318.196151294968,333.727459250755,0.05132,NA,3,0,1.489,4.548,0.166,0.065,0,0,0,1,1,0.516
+"legal size spango.sd.relief+status","sd.relief+status",318.304986763038,333.835077402128,0.0513,NA,3,0,1.598,4.656,0.157,0.062,0,0,1,0,1,0.673
+"legal size spango.mean.relief+status","mean.relief+status",319.476449904177,337.127460320616,0.0531,NA,3.41,0,2.769,7.948,0.088,0.012,0,1,0,0,1,0.761
+"legal size spango.depth","depth",320.174681333773,332.648317096921,0.02725,NA,2,0,3.468,3.469,0.062,0.112,1,0,0,0,0,0.823
+"legal size spango.mean.relief.by.status+status","mean.relief.by.status+status",320.1841255317,343.870162445058,0.06112,NA,5.22,0,3.477,14.691,0.061,0,0,1,0,0,1,0.884
+"legal size spango.sd.relief.by.status+status","sd.relief.by.status+status",320.501742184007,339.068120938902,0.05289,NA,4,0,3.795,9.889,0.052,0.005,0,0,1,0,1,0.936
+"legal size spango.depth+sd.relief","depth+sd.relief",322.167598088396,337.698703029704,0.02842,NA,3,0,5.46,8.519,0.023,0.009,1,0,1,0,0,0.959
+"legal size spango.depth+mean.relief","depth+mean.relief",322.219416930713,337.760417778198,0.02809,NA,3,0,5.512,8.581,0.022,0.009,1,1,0,0,0,0.981
+"legal size spango.null","null",324.095746038716,333.485466912738,0,NA,1,0,7.389,4.306,0.009,0.074,0,0,0,0,0,0.99
+"legal size spango.reef","reef",325.618779275217,338.09177003855,0.00301,NA,2,0,8.912,8.913,0.004,0.007,0,0,0,1,0,0.994
+"legal size spango.sd.relief","sd.relief",325.994274128577,338.466805879076,0.00128,NA,2,0,9.287,9.288,0.003,0.006,0,0,1,0,0,0.997
+"legal size trout.null","null",303.435281475117,312.825002349139,0,NA,1,0,0,0,0.604,0.877,0,0,0,0,0,0.604
+"legal size trout.depth","depth",305.649220366304,318.12133343385,6e-05,NA,2,0,2.214,5.296,0.2,0.062,1,0,0,0,0,0.804
+"legal size trout.status","status",305.680923790681,318.152964581441,8e-05,NA,2,0,2.246,5.328,0.196,0.061,0,0,0,0,1,1
+"smaller than legal size.depth+mean.relief","depth+mean.relief",708.727909054964,734.749066776735,0.23415,NA,5.53,0,0,0,0.981,0.537,1,1,0,0,0,0.981
+"smaller than legal size.depth","depth",718.52929102975,735.223467832271,0.19303,NA,2.96,0,9.801,0.474,0.007,0.424,1,0,0,0,0,0.988
+"sublegal size atkinsoni","depth+mean.relief",487.995424343894,516.446497552567,0.12336,NA,6.27,0,0,0,0.996,0.631,1,1,0,0,0,0.996
+"sublegal size emperor.reef.by.status+status","reef.by.status+status",564.693853874036,594.982653753966,0.11686,NA,7.17,0,0,13.052,0.529,0.001,0,0,0,1,1,0.529
+"sublegal size emperor.depth+mean.relief","depth+mean.relief",566.479544004272,591.051474449346,0.12995,NA,5.14,0,1.786,9.121,0.217,0.008,1,1,0,0,0,0.746
+"sublegal size emperor.depth","depth",567.67688685371,581.930731839108,0.10221,NA,2.33,0,2.983,0,0.119,0.81,1,0,0,0,0,0.865
+"sublegal size emperor.reef","reef",569.01150070976,585.645802815666,0.11125,NA,2.98,0,4.318,3.715,0.061,0.126,0,0,0,1,0,0.926
+"sublegal size emperor.reef+status","reef+status",569.815412979117,589.070570807851,0.11962,NA,3.86,0,5.122,7.14,0.041,0.023,0,0,0,1,1,0.967
+"sublegal size emperor.depth+sd.relief","depth+sd.relief",570.247956619336,588.478386641117,0.10355,NA,3.5,0,5.554,6.548,0.033,0.031,1,0,1,0,0,1
+"sublegal size spango.depth","depth",221.839544156636,235.530589237857,0.04829,NA,2.22,0,0,0.932,0.294,0.226,1,0,0,0,0,0.294
+"sublegal size spango.status","status",222.550946155801,235.022986946562,0.05336,NA,2,0,0.711,0.425,0.206,0.291,0,0,0,0,1,0.5
+"sublegal size spango.depth+sd.relief","depth+sd.relief",223.255069620417,239.839078113558,0.05439,NA,3.19,0,1.416,5.241,0.145,0.026,1,0,1,0,0,0.645
+"sublegal size spango.reef+status","reef+status",224.646698585363,240.176973898525,0.05552,NA,3,0,2.807,5.579,0.072,0.022,0,0,0,1,1,0.717
+"sublegal size spango.depth+mean.relief","depth+mean.relief",224.872606536065,245.267807168073,0.06661,NA,4.13,0,3.033,10.67,0.065,0.002,1,1,0,0,0,0.782
+"sublegal size spango.null","null",225.208521779528,234.59824265355,0,NA,1,0,3.369,0,0.055,0.36,0,0,0,0,0,0.837
+"sublegal size spango.sd.relief+status","sd.relief+status",225.521306858082,242.663465437868,0.05808,NA,3.3,0,3.682,8.065,0.047,0.006,0,0,1,0,1,0.884
+"sublegal size spango.sd.relief","sd.relief",226.780524320679,239.253439742908,0.00659,NA,2,0,4.941,4.655,0.025,0.035,0,0,1,0,0,0.909
+"sublegal size spango.reef.by.status+status","reef.by.status+status",226.882084394887,245.445502216091,0.05337,NA,4,0,5.043,10.847,0.024,0.002,0,0,0,1,1,0.933
+"sublegal size spango.mean.relief+status","mean.relief+status",226.889155193098,247.291926182627,0.06492,NA,4.15,0,5.05,12.694,0.024,0.001,0,1,0,0,1,0.957
+"sublegal size spango.reef","reef",227.287038177665,239.759467690792,0.00233,NA,2,0,5.447,5.161,0.019,0.027,0,0,0,1,0,0.976
+"sublegal size spango.mean.relief","mean.relief",228.646478492069,247.129477105402,0.02685,NA,3.47,0,6.807,12.531,0.01,0.001,0,1,0,0,0,0.986
+"sublegal size spango.sd.relief.by.status+status","sd.relief.by.status+status",229.114297786501,253.695859185077,0.04694,NA,5.48,0,7.275,19.098,0.008,0,0,0,1,0,1,0.994
+"sublegal size spango.mean.relief.by.status+status","mean.relief.by.status+status",229.347271152068,261.964218288043,0.07109,NA,7.98,0,7.508,27.366,0.007,0,0,1,0,0,1,1.001
+"sublegal size trout.depth+mean.relief","depth+mean.relief",274.714220024953,299.147205404264,0.17586,NA,5.09,0,0,1.43,0.62,0.221,1,1,0,0,0,0.62
+"sublegal size trout.depth+sd.relief","depth+sd.relief",275.708139697113,297.717412953107,0.18522,NA,4.64,0,0.994,0,0.377,0.452,1,0,1,0,0,0.997

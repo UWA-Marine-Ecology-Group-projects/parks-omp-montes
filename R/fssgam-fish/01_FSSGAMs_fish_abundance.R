@@ -177,7 +177,7 @@ unique.vars=unique(as.character(dat$response))
 unique.vars.use=character()
 for(i in 1:length(unique.vars)){
   temp.dat=dat[which(dat$response==unique.vars[i]),]
-  if(length(which(temp.dat$number==0))/nrow(temp.dat)<0.8){
+  if(length(which(temp.dat$number==0))/nrow(temp.dat)<0.9){
     unique.vars.use=c(unique.vars.use,unique.vars[i])}
 }
 
@@ -192,7 +192,6 @@ use.dat=as.data.frame(dat)
 str(use.dat)
 
 factor.vars=c("status")# Status as a Factor with two levels
-null.vars=c("campaignid", "location")
 out.all=list()
 var.imp=list()
 
@@ -201,20 +200,19 @@ for(i in 1:length(resp.vars)){
   use.dat=as.data.frame(dat[which(dat$response==resp.vars[i]),])
   use.dat$location <- as.factor(use.dat$location)
   use.dat$campaignid <- as.factor(use.dat$campaignid)
-  Model1=gam(number~s(mean.relief,k=5,bs='cr') + 
-               s(campaignid,bs='re') +
-               s(location,bs='re'),
+  Model1=gam(number~s(mean.relief,k=5,bs='cr'),# + 
+               #s(campaignid,bs='re') +s(location,bs='re'),
              family=tw(),  data=use.dat)
   
   model.set=generate.model.set(use.dat=use.dat,
                                test.fit=Model1,
-                                factor.smooth.interactions = TRUE,
-                               # smooth.smooth.interactions = TRUE,
+                               # factor.smooth.interactions = TRUE,
+                               # smooth.smooth.interactions = c("depth"),
                                pred.vars.cont=pred.vars,
                                pred.vars.fact=factor.vars,
                                #linear.vars="depth",
-                               k=5,
-                               null.terms="s(campaignid ,bs='re')+s(location,bs='re')"
+                               k=5#,
+                              # null.terms="s(campaignid ,bs='re')+s(location,bs='re')"
                                )
   out.list=fit.model.set(model.set,
                          max.models=600,
@@ -257,7 +255,7 @@ heatmap.2(all.var.imp,notecex=0.4,  dendrogram ="none",
           col=colorRampPalette(c("white","yellow","red"))(10),
           trace="none",key.title = "",keysize=2,
           notecol="black",key=T,
-          sepcolor = "black",margins=c(12,8), lhei=c(4,15),Rowv=FALSE,Colv=FALSE)
+          sepcolor = "black",margins=c(12,14), lhei=c(4,15),Rowv=FALSE,Colv=FALSE)
 
 
 # Part 2 - custom plot of importance scores----
