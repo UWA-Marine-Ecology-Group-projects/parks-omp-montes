@@ -1,5 +1,5 @@
 ###
-# Project: Parks - Abrolhos
+# Project: Montes synthesis
 # Data:    BOSS fish, habitat
 # Task:    Plotting 10 most abundant species w/ cute pics
 # author:  Claude

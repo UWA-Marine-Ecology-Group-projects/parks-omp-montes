@@ -18,34 +18,15 @@ setwd(working.dir)
 #OR Set manually once
 
 #read in data - negative values manually added
+#manually add in Xs for terms included in most parsimonious models
 dat.taxa <-read.csv("output/fssgam - fish/2021-05_Abrolhos_BOSS_combined_imp.scores.csv")%>% #from local copy
   rename(resp.var=response)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   mutate(label=NA)%>%
-  mutate(label=ifelse(predictor=="biog"&resp.var=="targeted.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="targeted.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="macroalgae"&resp.var=="targeted.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="Labridae Coris auricularis","X",label))%>%
-  mutate(label=ifelse(predictor=="biog"&resp.var=="Lethrinidae Lethrinus miniatus","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="Lethrinidae Lethrinus miniatus","X",label))%>%
-  mutate(label=ifelse(predictor=="location"&resp.var=="Lethrinidae Lethrinus miniatus","X",label))%>%
-  mutate(label=ifelse(predictor=="relief"&resp.var=="Pomacentridae Chromis westaustralis","X",label))%>%
-  mutate(label=ifelse(predictor=="relief"&resp.var== "total.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="location"&resp.var== "species.richness","X",label))%>%
-  mutate(label=ifelse(predictor=="relief"&resp.var== "species.richness","X",label))%>%
-  mutate(label=ifelse(predictor=="tpi"&resp.var== "species.richness","X",label))%>%
-  mutate(label=ifelse(predictor=="biog"&resp.var== "greater than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var== "greater than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="location"&resp.var== "greater than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="biog"&resp.var== "legal size red throat","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var== "legal size red throat","X",label))%>%
-  mutate(label=ifelse(predictor=="location"&resp.var== "legal size red throat","X",label))%>%
-  mutate(label=ifelse(predictor=="biog"&resp.var== "smaller than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var== "smaller than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="macroalgae"&resp.var== "smaller than legal size","X",label))%>%
+  mutate(label=ifelse(predictor=="biog"&resp.var=="targeted.abundance","X",label))%>%              #template
   mutate(resp.var = factor(resp.var, levels = c("Pomacentridae Chromis westaustralis","Lethrinidae Lethrinus miniatus", "Labridae Coris auricularis",
                                                 "legal size red throat", "smaller than legal size", "greater than legal size","targeted.abundance",
-                                                "species.richness","total.abundance")))%>%
+                                                "species.richness","total.abundance")))%>%              #change order of response variables
   glimpse()
 
 # Theme-
@@ -81,8 +62,9 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
    scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
                          limits = c(-1, 1))+
      scale_y_discrete( labels=c("Chromis westaustralis abundance","Lethrinus miniatus abundance",
-                                "Coris auricularis abundance","Legal size Lethrinus miniatus","Smaller than legal size","Greater than legal size","Targeted abundance","Species richness","Total abundance"))+
-  scale_x_discrete(labels = c("Biogenic", "Depth", "Detrended", "Location", "Macroalgae", "Relief", "Sand", "Slope", 'TPI'))+
+                                "Coris auricularis abundance","Legal size Lethrinus miniatus","Smaller than legal size",
+                                "Greater than legal size","Targeted abundance","Species richness","Total abundance"))+         #Tidy Taxa names
+  scale_x_discrete(labels = c("Biogenic", "Depth", "Detrended", "Location", "Macroalgae", "Relief", "Sand", "Slope", 'TPI'))+   #Tidy predictor names
    xlab(NULL)+
    ylab(NULL)+
    theme_classic()+
@@ -91,4 +73,4 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
 gg.importance.scores
 
 #save output - changed dimensions for larger text in report
-save_plot("plots/abrolhos.fish.importance.png", gg.importance.scores,base_height = 6.75,base_width = 6.275)
+save_plot("plots/montes.synthesis.fish.importance.png", gg.importance.scores,base_height = 6.75,base_width = 6.275)
