@@ -41,7 +41,7 @@ setwd(working.dir)
 dat <- readRDS("data/Tidy/dat.maxn.rds")%>%
   glimpse()
 # Set predictor variables---
-names(maxn)
+names(dat)
 names(habitat)
   
 #Set the predictors for modeling----
