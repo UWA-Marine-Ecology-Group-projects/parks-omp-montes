@@ -180,7 +180,7 @@ bar<-ggplot(maxn.deep.10, aes(x=reorder(scientific,maxn), y=maxn)) +
   theme_collapse
 bar
 
-#plot shallow
+#plot shallow fish
 #load shallow fish
 #Pomacentrus coelestis
 p.c <- readPNG("data/images/Pomacentrus coelestis-3cmL.png")
