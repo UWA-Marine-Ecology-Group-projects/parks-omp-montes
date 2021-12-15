@@ -1,17 +1,18 @@
-"","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated","biota.consolidated","tpi","roughness","detrended","status","cumsum.wi"
-"targeted.abundance","biota.consolidated+depth+mesophotic.reef",1070.5368376152,1104.07142651078,0.31785,NA,8.4,0,0,0,0.974,0.904,1,0,0,1,0,0,1,0,0,0,0,0.974
-"Lethrinus atkinsoni.photic.reef+roughness+sd.relief","photic.reef+roughness+sd.relief",400.323189891803,412.213233365761,0.24024,NA,4.13,0,0,1.16,0.214,0.126,0,0,1,0,1,0,0,0,1,0,0,0.214
-"Lethrinus atkinsoni.roughness+sd.relief","roughness+sd.relief",401.29286211103,411.053018942225,0.21292,NA,3,0,0.97,0,0.132,0.225,0,0,1,0,0,0,0,0,1,0,0,0.346
-"Lethrinus atkinsoni.biota.consolidated+roughness+sd.relief","biota.consolidated+roughness+sd.relief",401.964575432695,413.587242812448,0.22822,NA,4.04,0,1.641,2.534,0.094,0.063,0,0,1,0,0,0,1,0,1,0,0,0.44
-"Lethrinus atkinsoni.detrended+roughness+sd.relief","detrended+roughness+sd.relief",402.134336340955,413.614282523066,0.24933,NA,4,0,1.811,2.561,0.087,0.063,0,0,1,0,0,0,0,0,1,1,0,0.527
-"Pomacentrus coelestis.biota.unconsolidated+detrended+roughness","biota.unconsolidated+detrended+roughness",397.701675854483,413.020720206923,0.40146,NA,10.24,0,0,0,0.27,0.167,0,0,0,0,0,1,0,0,1,1,0,0.27
-"Pomacentrus coelestis.detrended+mean.relief+roughness","detrended+mean.relief+roughness",398.160441436129,413.417133680427,0.51491,NA,9.73,0,0.459,0.396,0.215,0.137,0,1,0,0,0,0,0,0,1,1,0,0.485
-"Pomacentrus coelestis.detrended+roughness+sd.relief","detrended+roughness+sd.relief",399.288811269946,413.408952454793,0.46989,NA,7.68,0,1.587,0.388,0.122,0.138,0,0,1,0,0,0,0,0,1,1,0,0.607
-"Chromis fumea.biota.unconsolidated+detrended+sd.relief","biota.unconsolidated+detrended+sd.relief",269.830645120541,276.728334377026,0.35117,NA,5.44,0,0,0.797,0.147,0.118,0,0,1,0,0,1,0,0,0,1,0,0.147
-"Chromis fumea.depth+detrended+mean.relief","depth+detrended+mean.relief",270.109727525357,276.961328325946,0.29526,NA,5.07,0,0.279,1.03,0.128,0.105,1,1,0,0,0,0,0,0,0,1,0,0.275
-"Chromis fumea.detrended+mean.relief","detrended+mean.relief",270.222683720362,275.930954502478,0.23172,NA,3,0,0.392,0,0.121,0.176,0,1,0,0,0,0,0,0,0,1,0,0.396
-"Chromis fumea.detrended+mean.relief+sd.relief","detrended+mean.relief+sd.relief",270.690453296085,277.57946357951,0.34134,NA,5.77,0,0.86,1.649,0.096,0.077,0,1,1,0,0,0,0,0,0,1,0,0.492
-"Chromis fumea.biota.unconsolidated+detrended","biota.unconsolidated+detrended",271.528270445856,277.236082384128,0.23941,NA,3,0,1.698,1.305,0.063,0.091,0,0,0,0,0,1,0,0,0,1,0,0.555
-"Chromis fumea.detrended+sd.relief","detrended+sd.relief",271.67576679092,278.369465241796,0.29232,NA,4.42,0,1.845,2.439,0.059,0.052,0,0,1,0,0,0,0,0,0,1,0,0.614
-"total.abundance","depth+mean.relief+tpi",2015.14273652121,2055.73044371898,0.19509,NA,9.75,0,0,9.137,0.941,0.006,1,1,0,0,0,0,0,1,0,0,0,0.941
-"species.richness","biota.consolidated+detrended+mean.relief",1372.67052966247,1404.29116418212,0.47789,NA,7.11,0,0,0,0.852,0.623,0,1,0,0,0,0,1,0,0,1,0,0.852
+"","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated","tpi","roughness","detrended","status","cumsum.wi"
+"targeted.abundance.depth+detrended+mesophotic.reef","depth+detrended+mesophotic.reef",1088.76501181136,1113.61786123209,0.1939,NA,5.72,0,0,1.287,0.369,0.182,1,0,0,1,0,0,0,0,1,0,0.369
+"targeted.abundance.depth+mesophotic.reef","depth+mesophotic.reef",1089.98137256609,1112.33055086907,0.17974,NA,4.87,0,1.216,0,0.201,0.347,1,0,0,1,0,0,0,0,0,0,0.57
+"targeted.abundance.depth+detrended+mean.relief","depth+detrended+mean.relief",1090.49683354441,1115.34244253074,0.17935,NA,5.72,0,1.732,3.012,0.155,0.077,1,1,0,0,0,0,0,0,1,0,0.725
+"Lethrinus atkinsoni.photic.reef+roughness+sd.relief","photic.reef+roughness+sd.relief",400.323189891803,412.213233365761,0.24024,NA,4.13,0,0,1.16,0.264,0.148,0,0,1,0,1,0,0,1,0,0,0.264
+"Lethrinus atkinsoni.roughness+sd.relief","roughness+sd.relief",401.29286211103,411.053018942225,0.21292,NA,3,0,0.97,0,0.163,0.264,0,0,1,0,0,0,0,1,0,0,0.427
+"Lethrinus atkinsoni.detrended+roughness+sd.relief","detrended+roughness+sd.relief",402.134336340955,413.614282523066,0.24933,NA,4,0,1.811,2.561,0.107,0.073,0,0,1,0,0,0,0,1,1,0,0.534
+"Pomacentrus coelestis.biota.unconsolidated+detrended+roughness","biota.unconsolidated+detrended+roughness",397.701675854483,413.020720206923,0.40146,NA,10.24,0,0,0,0.307,0.192,0,0,0,0,0,1,0,1,1,0,0.307
+"Pomacentrus coelestis.detrended+mean.relief+roughness","detrended+mean.relief+roughness",398.160441436129,413.417133680427,0.51491,NA,9.73,0,0.459,0.396,0.244,0.157,0,1,0,0,0,0,0,1,1,0,0.551
+"Pomacentrus coelestis.detrended+roughness+sd.relief","detrended+roughness+sd.relief",399.288811269946,413.408952454793,0.46989,NA,7.68,0,1.587,0.388,0.139,0.158,0,0,1,0,0,0,0,1,1,0,0.69
+"Chromis fumea.biota.unconsolidated+detrended+sd.relief","biota.unconsolidated+detrended+sd.relief",269.830645120541,276.728334377026,0.35117,NA,5.44,0,0,0.797,0.147,0.118,0,0,1,0,0,1,0,0,1,0,0.147
+"Chromis fumea.depth+detrended+mean.relief","depth+detrended+mean.relief",270.109727525357,276.961328325946,0.29526,NA,5.07,0,0.279,1.03,0.128,0.105,1,1,0,0,0,0,0,0,1,0,0.275
+"Chromis fumea.detrended+mean.relief","detrended+mean.relief",270.222683720362,275.930954502478,0.23172,NA,3,0,0.392,0,0.121,0.176,0,1,0,0,0,0,0,0,1,0,0.396
+"Chromis fumea.detrended+mean.relief+sd.relief","detrended+mean.relief+sd.relief",270.690453296085,277.57946357951,0.34134,NA,5.77,0,0.86,1.649,0.096,0.077,0,1,1,0,0,0,0,0,1,0,0.492
+"Chromis fumea.biota.unconsolidated+detrended","biota.unconsolidated+detrended",271.528270445856,277.236082384128,0.23941,NA,3,0,1.698,1.305,0.063,0.091,0,0,0,0,0,1,0,0,1,0,0.555
+"Chromis fumea.detrended+sd.relief","detrended+sd.relief",271.67576679092,278.369465241796,0.29232,NA,4.42,0,1.845,2.439,0.059,0.052,0,0,1,0,0,0,0,0,1,0,0.614
+"total.abundance","depth+mean.relief+tpi",2015.14273652121,2055.73044371898,0.19509,NA,9.75,0,0,9.137,0.948,0.006,1,1,0,0,0,0,1,0,0,0,0.948
+"species.richness","detrended+mean.relief+roughness",1382.07158890185,1408.15853187771,0.42764,NA,5.84,0,0,0,0.726,0.425,0,1,0,0,0,0,0,1,1,0,0.726

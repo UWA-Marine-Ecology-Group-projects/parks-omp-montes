@@ -44,7 +44,7 @@ dat <- readRDS("data/tidy/dat.maxn.rds")%>%
 # Set predictor variables---
 names(dat)
 
-pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated","biota.consolidated", "tpi", "roughness","detrended") 
+pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated", "tpi", "roughness","detrended") 
 
 # Check to make sure Response vector has not more than 90% zeros----
 unique.vars=unique(as.character(dat$response))
