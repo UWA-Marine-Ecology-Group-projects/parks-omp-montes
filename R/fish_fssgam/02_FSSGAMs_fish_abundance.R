@@ -44,7 +44,7 @@ dat <- readRDS("data/tidy/dat.maxn.rds")%>%
 # Set predictor variables---
 names(dat)
 
-pred.vars=c("depth","mean.relief","sd.relief","biogenic.reef","biota.macroalgae","biota.consolidated", "tpi", "roughness","detrended","latitude", "longitude")  
+pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated","biota.consolidated", "tpi", "roughness","detrended") 
 
 # Check to make sure Response vector has not more than 90% zeros----
 unique.vars=unique(as.character(dat$response))
@@ -79,7 +79,7 @@ for(i in 1:length(resp.vars)){
   
   model.set=generate.model.set(use.dat=use.dat,
                                test.fit=Model1,
-                               # factor.smooth.interactions = TRUE,
+                               factor.smooth.interactions = FALSE,
                                # smooth.smooth.interactions = c("depth"),
                                pred.vars.cont=pred.vars,
                                pred.vars.fact=factor.vars,

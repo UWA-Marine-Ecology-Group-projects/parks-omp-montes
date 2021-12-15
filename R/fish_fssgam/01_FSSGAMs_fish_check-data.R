@@ -230,25 +230,25 @@ nebulosus.sublegal <- fished.species %>%
   dplyr::mutate(scientific = "sublegal size spango") %>%
   dplyr::glimpse() 
 
-#lethrinids
-lethrinid.legal <- fished.species %>%
-  dplyr::filter(genus%in%c("Lethrinus")) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size emperor") %>%
-  dplyr::glimpse()
-
-lethrinid.sublegal <- fished.species %>%
-  dplyr::filter(genus%in%c("Lethrinus")) %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size emperor") %>%
-  dplyr::glimpse() 
+# #lethrinids
+# lethrinid.legal <- fished.species %>%
+#   dplyr::filter(genus%in%c("Lethrinus")) %>%
+#   dplyr::filter(length>minlegal.wa) %>%
+#   dplyr::group_by(sample) %>%
+#   dplyr::summarise(number = sum(number)) %>%
+#   dplyr::mutate(scientific = "legal size emperor") %>%
+#   dplyr::glimpse()
+# 
+# lethrinid.sublegal <- fished.species %>%
+#   dplyr::filter(genus%in%c("Lethrinus")) %>%
+#   dplyr::filter(length<minlegal.wa) %>%
+#   dplyr::group_by(sample) %>%
+#   dplyr::summarise(number = sum(number)) %>%
+#   dplyr::mutate(scientific = "sublegal size emperor") %>%
+#   dplyr::glimpse() 
 
 combined.length <- bind_rows(legal, sublegal, atkinsoni.legal, atkinsoni.sublegal, plectropomus.legal, plectropomus.sublegal,
-                             nebulosus.legal, nebulosus.sublegal, lethrinid.legal, lethrinid.sublegal)
+                             nebulosus.legal, nebulosus.sublegal) #lethrinid.legal, lethrinid.sublegal
 
 unique(combined.length$scientific)
 
@@ -274,14 +274,15 @@ names(dat.length)
 names(habitat)
 
 pred.vars=c("depth","biota.unconsolidated", "biota.macroalgae", "biota.crinoids",
-            "biogenic.reef", "biota.octocoral.black", "biota.consolidated", "biota.sponges", "biota.hydroids", "biota.stony.corals",
+            "photic.reef","mesophotic.reef", "biota.octocoral.black", "biota.consolidated", "biota.sponges", "biota.hydroids", "biota.stony.corals",
             "mean.relief", "sd.relief", "tpi", "roughness", "slope","detrended", "bathy_depth") 
 
 # Check for correalation of predictor variables- remove anything highly correlated (>0.95)---
-round(cor(dat.length[,pred.vars]),2)
+round(cor(dat.maxn[,pred.vars]),2)
 #reef and sand
 #roughness and slope
 #depth and bathy_depth
+#macroalgae and photic reef - photic reef is just coral + macroalgae so remove macroalgae
 
 # Plot of likely transformations - thanks to Anna Cresswell for this loop!
 par(mfrow=c(3,2))
@@ -303,6 +304,6 @@ for (i in pred.vars) {
 #also remove all 'non-reef' predictors
 
 # # Re-set the predictors for modeling----
-pred.vars=c("depth","mean.relief","sd.relief","biogenic.reef","biota.macroalgae","biota.consolidated", "tpi", "roughness","detrended") 
+pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated","biota.consolidated", "tpi", "roughness","detrended") 
 
 #Export this to use in the next script? Or could just remove columns - but then have to re run later...

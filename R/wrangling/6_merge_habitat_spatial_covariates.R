@@ -21,8 +21,10 @@ setwd(working.dir)
 
 #read in habitat
 habitat <- read.csv("data/tidy/montebello.synthesis.complete.habitat.csv")%>%
-  mutate(biogenic.reef = biota.crinoids+biota.invertebrate.complex+biota.octocoral.black+
-           biota.sponges+biota.hydroids+biota.stony.corals)      #i am not sure reef should be made at this point or later in scripts
+  dplyr::mutate(mesophotic.reef = biota.crinoids+biota.invertebrate.complex+biota.octocoral.black+
+           biota.sponges+biota.hydroids+biota.stony.corals)%>%
+  dplyr::mutate(photic.reef = biota.stony.corals + biota.macroalgae)%>%
+  glimpse()
 
 # get spatial covariates (made in 'R/wrangling/A1_spatial_layers.R')
 tifs  <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)

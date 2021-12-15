@@ -32,7 +32,7 @@ dat <- readRDS("data/tidy/dat.length.rds")%>%
   glimpse()
 
 # Set predictor variables---
-pred.vars=c("depth","mean.relief","sd.relief","biogenic.reef","biota.macroalgae","biota.consolidated", "tpi", "roughness","detrended","latitude", "longitude") 
+pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated","biota.consolidated", "tpi", "roughness","detrended") 
 
 # Check to make sure Response vector has not more than 90% zeros----
 unique.vars=unique(as.character(dat$response))
@@ -67,7 +67,7 @@ for(i in 1:length(resp.vars)){
   
   model.set=generate.model.set(use.dat=use.dat,
                                test.fit=Model1,
-                               # factor.smooth.interactions = TRUE,
+                               factor.smooth.interactions = FALSE,
                                # smooth.smooth.interactions = c("depth"),
                                pred.vars.cont=pred.vars,
                                pred.vars.fact=factor.vars,
@@ -110,6 +110,19 @@ all.mod.fits=do.call("rbind",out.all)
 all.var.imp=do.call("rbind",var.imp)
 write.csv(all.mod.fits[ , -2], file = paste(savedir, paste(name, "all.mod.fits.csv", sep = "_"), sep = "/"))
 write.csv(all.var.imp, file = paste(savedir, paste(name, "all.var.imp.csv", sep = "_"), sep = "/"))
+
+#why is trout null
+trout <- dat %>%
+  dplyr::filter(response %in% c('legal size trout'))%>%
+  glimpse()
+
+# visualise patterns
+trout <- melt(trout, measure.vars = pred.vars)
+ggplot(trout, aes(value, number)) +
+  geom_jitter(alpha = 1/10) +
+  geom_smooth() +
+  facet_wrap(~ variable, scales = "free")
+
 
 # Generic importance plots-
 heatmap.2(all.var.imp,notecex=0.4,  dendrogram ="none",
