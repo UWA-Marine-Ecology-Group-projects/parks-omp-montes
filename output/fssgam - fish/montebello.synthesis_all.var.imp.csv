@@ -1,7 +1,7 @@
-"","depth","mean.relief","sd.relief","reef","tpi","roughness","aspect","detrended","status"
-"targeted.abundance",0.994,0.785,0.092,0.002,0.185,0.038,0.16,0.164,0.002
-"Lethrinus atkinsoni",0.178,0.06,0.533,0.166,0.213,0.91,0.004,0.001,0.163
-"Pomacentrus coelestis",0.374,0.571,0.135,0.051,0.03,0.007,0.832,0.195,0.442
-"Chromis fumea",0.615,0.298,0.179,0.227,0.004,0,0.13,0.911,0.195
-"total.abundance",0.978,0.987,0.006,0.008,0.21,0.001,0.201,0.002,0.015
-"species.richness",0.261,0.998,0,0,0.358,0,0.248,0,0.341
+,depth,mean.relief,sd.relief,biogenic.reef,biota.macroalgae,biota.consolidated,tpi,roughness,detrended,latitude,longitude,status
+targeted.abundance,1,0.008,0.002,0.973,0,0.999,0.001,0,0.011,0,0.002,0
+Lethrinus atkinsoni,0.011,0.152,0.657,0.003,0.401,0.172,0.075,0.858,0.2,0.062,0.006,0.046
+Pomacentrus coelestis,0.002,0.083,0.159,0.681,0.026,0.292,0.124,0.011,0.149,0,0.27,0.703
+Chromis fumea,0.088,0.103,0.066,0.017,0.02,NA,0.042,0.014,0.103,0.103,0.025,0.076
+total.abundance,0.412,0.998,0.001,0,0.001,0.005,0.507,0.348,0.009,0.569,0.134,0.001
+species.richness,0.003,0.996,0,0,0.003,0.983,0.002,0.127,0.824,0.023,0.005,0.015

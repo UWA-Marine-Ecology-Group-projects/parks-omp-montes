@@ -19,14 +19,21 @@ setwd(working.dir)
 
 #read in data - negative values manually added
 #manually add in Xs for terms included in most parsimonious models
-dat.taxa <-read.csv("output/fssgam - fish/2021-05_Abrolhos_BOSS_combined_imp.scores.csv")%>% #from local copy
-  rename(resp.var=response)%>%
+dat.taxa <-read.csv("output/fssgam - fish/montebello.synthesis_combined_imp.scores.csv")%>% #from local copy
+ # rename(resp.var=response)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   mutate(label=NA)%>%
-  mutate(label=ifelse(predictor=="biog"&resp.var=="targeted.abundance","X",label))%>%              #template
-  mutate(resp.var = factor(resp.var, levels = c("Pomacentridae Chromis westaustralis","Lethrinidae Lethrinus miniatus", "Labridae Coris auricularis",
-                                                "legal size red throat", "smaller than legal size", "greater than legal size","targeted.abundance",
-                                                "species.richness","total.abundance")))%>%              #change order of response variables
+  #mutate(label=ifelse(predictor=="biog"&resp.var=="targeted.abundance","X",label))%>%              #template
+   mutate(resp.var = factor(resp.var, levels = c("Chromis fumea","Pomacentrus coelestis","Lethrinus atkinsoni",
+                                                 "sublegal size emperor","legal size emperor",
+                                                 "sublegal size atkinsoni","legal size atkinsoni",
+                                                 "sublegal size trout","legal size trout",
+                                                 "legal size spango",
+                                                 "smaller than legal size","greater than legal size",
+                                                 "targeted.abundance","species.richness","total.abundance")))%>%  #change order of response variables
+  mutate(predictor = factor(predictor, levels = c("biogenic.reef","biota.consolidated","biota.macroalgae","detrended",
+                                                  "roughness","tpi","depth","mean.relief","sd.relief","status",
+                                                  "latitude","longitude")))%>%
   glimpse()
 
 # Theme-
@@ -61,10 +68,13 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
    geom_tile(show.legend=T) +
    scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
                          limits = c(-1, 1))+
-     scale_y_discrete( labels=c("Chromis westaustralis abundance","Lethrinus miniatus abundance",
-                                "Coris auricularis abundance","Legal size Lethrinus miniatus","Smaller than legal size",
-                                "Greater than legal size","Targeted abundance","Species richness","Total abundance"))+         #Tidy Taxa names
-  scale_x_discrete(labels = c("Biogenic", "Depth", "Detrended", "Location", "Macroalgae", "Relief", "Sand", "Slope", 'TPI'))+   #Tidy predictor names
+      scale_y_discrete( labels=c("Chromis fumea abundance",'Pomacentrus coelestis abundance',"Lethrinus atkinsoni abundance",
+                                 'Sublegal Lethrinids',"Legal Lethrinids","Sublegal Lethrinus atkinsoni","Legal Lethrinus atkinsoni",
+                                 "Sublegal Plectropomus spp","Legal Plectropomus spp","Legal Lethrinus nebulosus","Sublegal Lethrinus nebulosus",
+                                 "Smaller than legal size","Greater than legal size",
+                                 "Targeted abundance","Species richness","Total abundance"))+         #Tidy Taxa names
+     scale_x_discrete(labels = c("Biogenic reef", "Rock", "Macroalgae", "Detrended bathymetry", "Roughness", "TPI", "Depth",
+                                'Mean relief', "SD relief","Status", "Latitude","Longitude"))+   #Tidy predictor names
    xlab(NULL)+
    ylab(NULL)+
    theme_classic()+

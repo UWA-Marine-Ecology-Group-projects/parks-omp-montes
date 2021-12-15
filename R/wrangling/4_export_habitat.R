@@ -1,3 +1,8 @@
+####if we copy this there are mistakes in this script and it will not run!!####
+####changed method of doing working directory and have not updated in this script####
+####BEWARE####
+
+
 # Clear memory ----
 rm(list=ls())
 
@@ -34,26 +39,22 @@ library(fst)
 study<-"montebello.synthesis"  ## change for your project
 
 ## Set your working directory ----
-working.dir<- 'H:/GitHub/parks-omp-montes' # to directory of current file - or type your own
+working.dir <- getwd()
+setwd(working.dir)
+#OR set manually once
 
 ## Save these directory names to use later----
-staging.dir<-paste(working.dir,"Staging",sep="/") 
-download.dir<-paste(working.dir,"Downloads",sep="/")
-tidy.dir<-paste(working.dir,"Tidy data",sep="/")
-plots.dir=paste(working.dir,"Plots",sep="/")
-error.dir=paste(working.dir,"Errors to check",sep="/")
-checking.dir <- paste(working.dir,"Data to be checked",sep="/")
-
-# Read in the data----
-setwd(checking.dir)
-dir()
+staging.dir<-paste(working.dir,"staging",sep="/") 
+download.dir<-paste(working.dir,"downloads",sep="/")
+tidy.dir<-paste(working.dir,"tidy data",sep="/")
+plots.dir=paste(working.dir,"plots",sep="/")
+error.dir=paste(working.dir,"errors to check",sep="/")
+checking.dir <- paste(working.dir,"data to be checked",sep="/")
 
 # Read in metadata----
-
 metadata<-read_csv(file="montebello.synthesis_metadata.csv")%>%
   dplyr::mutate(id=paste(campaignid,sample,sep="."))%>%
   glimpse()
-
 
 # Read in habitat----
 setwd(working.dir)

@@ -1,19 +1,19 @@
-"","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","reef","tpi","roughness","aspect","detrended","status","cumsum.wi"
-"greater than legal size","aspect+depth+mean.relief",857.29871139845,896.310097642641,0.27666,NA,9.72,0,0,0,0.996,0.646,1,1,0,0,0,0,1,0,0,0.996
-"legal size atkinsoni.aspect+depth","aspect+depth",308.673253183997,331.608292924579,0.11662,NA,4.98,0,0,6.607,0.24,0.026,1,0,0,0,0,0,1,0,0,0.24
-"legal size atkinsoni.aspect+depth+mean.relief","aspect+depth+mean.relief",308.842091224231,341.823279285486,0.12119,NA,7.56,0,0.169,16.822,0.221,0,1,1,0,0,0,0,1,0,0,0.461
-"legal size atkinsoni.aspect+depth+detrended","aspect+depth+detrended",309.969498767679,335.513522023269,0.11922,NA,5.85,0,1.296,10.512,0.126,0.004,1,0,0,0,0,0,1,1,0,0.587
-"legal size emperor","aspect+depth+mean.relief",601.985280437284,635.648145396048,0.16481,NA,8.23,0,0,0,0.793,0.479,1,1,0,0,0,0,1,0,0,0.793
-"legal size spango.aspect+detrended.by.status+status","aspect+detrended.by.status+status",205.712859506023,237.908756043378,0.18207,NA,7.64,0,0,0,0.598,0.982,0,0,0,0,0,0,1,1,1,0.598
-"legal size spango.aspect.by.status+detrended.by.status+status","aspect.by.status+detrended.by.status+status",206.50774104474,245.947408621087,0.18368,NA,9.75,0,0.795,8.039,0.402,0.018,0,0,0,0,0,0,1,1,1,1
-"legal size trout","null",303.435281475117,312.825002349139,0,NA,1,0,0,0,0.499,0.839,0,0,0,0,0,0,0,0,0,0.499
-"smaller than legal size.depth+mean.relief","depth+mean.relief",708.727909054964,734.749066776735,0.23415,NA,5.53,0,0,0,0.471,0.428,1,1,0,0,0,0,0,0,0,0.471
-"smaller than legal size.aspect+depth+mean.relief","aspect+depth+mean.relief",709.852296789927,738.337580340496,0.23582,NA,6.39,0,1.124,3.589,0.269,0.071,1,1,0,0,0,0,1,0,0,0.74
-"smaller than legal size.depth+mean.relief+tpi","depth+mean.relief+tpi",710.637890694593,739.444190387945,0.23458,NA,6.5,0,1.91,4.695,0.181,0.041,1,1,0,0,1,0,0,0,0,0.921
-"sublegal size atkinsoni.aspect+depth+mean.relief","aspect+depth+mean.relief",487.908041381943,519.139916367728,0.13263,NA,7.2,0,0,2.693,0.428,0.123,1,1,0,0,0,0,1,0,0,0.428
-"sublegal size atkinsoni.depth+mean.relief","depth+mean.relief",487.995424343894,516.446497552567,0.12336,NA,6.27,0,0.087,0,0.41,0.473,1,1,0,0,0,0,0,0,0,0.838
-"sublegal size emperor.detrended.by.status+reef.by.status+status","detrended.by.status+reef.by.status+status",562.544218732833,605.078563626041,0.12547,NA,11.06,0,0,23.148,0.254,0,0,0,0,1,0,0,0,1,1,0.254
-"sublegal size emperor.detrended+reef.by.status+status","detrended+reef.by.status+status",564.12032413436,603.299421891721,0.1203,NA,9.78,0,1.576,21.369,0.116,0,0,0,0,1,0,0,0,1,1,0.37
-"sublegal size trout.aspect+depth","aspect+depth",274.384934157431,297.585393384264,0.22441,NA,5.1,0,0,0,0.273,0.288,1,0,0,0,0,0,1,0,0,0.273
-"sublegal size trout.depth+mean.relief","depth+mean.relief",274.714220024953,299.147205404264,0.17586,NA,5.09,0,0.329,1.562,0.232,0.132,1,1,0,0,0,0,0,0,0,0.505
-"sublegal size trout.depth+sd.relief","depth+sd.relief",275.708139697113,297.717412953107,0.18522,NA,4.64,0,1.323,0.132,0.141,0.27,1,0,1,0,0,0,0,0,0,0.646
+"","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","biogenic.reef","biota.macroalgae","biota.consolidated","tpi","roughness","detrended","latitude","longitude","status","cumsum.wi"
+"greater than legal size","biota.consolidated+depth+mean.relief",852.081214030366,892.253571063937,0.31731,NA,10.1,0,0,0,0.998,0.878,1,1,0,0,0,1,0,0,0,0,0,0,0.998
+"legal size atkinsoni.biota.consolidated+depth","biota.consolidated+depth",296.085676430446,317.912978289485,0.15629,NA,4.67,0,0,0,0.314,0.648,1,0,0,0,0,1,0,0,0,0,0,0,0.314
+"legal size atkinsoni.biogenic.reef+biota.consolidated+depth","biogenic.reef+biota.consolidated+depth",296.374390574844,320.580538113428,0.16221,NA,5.47,0,0.289,2.668,0.271,0.171,1,0,0,1,0,1,0,0,0,0,0,0,0.585
+"legal size atkinsoni.biota.consolidated+depth+sd.relief","biota.consolidated+depth+sd.relief",297.765391379474,325.423801149268,0.16154,NA,6.32,0,1.68,7.511,0.135,0.015,1,0,1,0,0,1,0,0,0,0,0,0,0.72
+"legal size emperor","biogenic.reef+biota.consolidated+depth",583.981805134721,620.597031640771,0.25309,NA,8.95,0,0,0,0.906,0.516,1,0,0,1,0,1,0,0,0,0,0,0,0.906
+"legal size spango.biogenic.reef+longitude","biogenic.reef+longitude",198.456428997104,230.111229980178,0.16678,NA,7.7,0,0,0,0.299,0.653,0,0,0,1,0,0,0,0,0,0,1,0,0.299
+"legal size spango.biogenic.reef+biota.macroalgae+longitude","biogenic.reef+biota.macroalgae+longitude",199.402808148051,233.995888715057,0.1721,NA,8.72,0,0.946,3.885,0.186,0.094,0,0,0,1,1,0,0,0,0,0,1,0,0.485
+"legal size spango.biogenic.reef+biota.consolidated+longitude","biogenic.reef+biota.consolidated+longitude",199.520702797138,234.088089011944,0.17222,NA,8.69,0,1.064,3.977,0.175,0.089,0,0,0,1,0,1,0,0,0,0,1,0,0.66
+"legal size spango.biogenic.reef+detrended+longitude","biogenic.reef+detrended+longitude",199.716785387261,234.548440395533,0.1694,NA,8.8,0,1.26,4.437,0.159,0.071,0,0,0,1,0,0,0,0,1,0,1,0,0.819
+"legal size trout","null",303.435281475117,312.825002349139,0,NA,1,0,0,0,0.326,0.737,0,0,0,0,0,0,0,0,0,0,0,0,0.326
+"smaller than legal size","biogenic.reef+biota.consolidated+depth",696.332270168877,721.041839006137,0.31113,NA,5.57,0,0,0,0.915,0.859,1,0,0,1,0,1,0,0,0,0,0,0,0.915
+"sublegal size atkinsoni.depth+detrended+mean.relief","depth+detrended+mean.relief",486.106078041356,515.77956523283,0.14263,NA,6.73,0,0,3.363,0.287,0.063,1,1,0,0,0,0,0,0,1,0,0,0,0.287
+"sublegal size atkinsoni.biogenic.reef+biota.consolidated+depth","biogenic.reef+biota.consolidated+depth",486.420598456022,512.416277427109,0.15301,NA,5.73,0,0.315,0,0.245,0.336,1,0,0,1,0,1,0,0,0,0,0,0,0.532
+"sublegal size atkinsoni.depth+mean.relief+tpi","depth+mean.relief+tpi",487.628218233439,518.966820344935,0.13093,NA,7.28,0,1.522,6.551,0.134,0.013,1,1,0,0,0,0,1,0,0,0,0,0,0.666
+"sublegal size atkinsoni.depth+mean.relief","depth+mean.relief",487.995424343894,516.446497552567,0.12336,NA,6.27,0,1.889,4.03,0.112,0.045,1,1,0,0,0,0,0,0,0,0,0,0,0.778
+"sublegal size emperor.biogenic.reef+biota.consolidated+depth","biogenic.reef+biota.consolidated+depth",558.391528100181,584.655293041715,0.18683,NA,5.87,0,0,3.255,0.331,0.031,1,0,0,1,0,1,0,0,0,0,0,0,0.331
+"sublegal size emperor.biogenic.reef+depth+detrended","biogenic.reef+depth+detrended",559.3838750809,582.360503287594,0.16511,NA,5.04,0,0.992,0.96,0.202,0.098,1,0,0,1,0,0,0,0,1,0,0,0,0.533
+"sublegal size trout","biota.consolidated+depth",272.180404842915,294.180162134719,0.25313,NA,4.67,0,0,0,0.452,0.734,1,0,0,0,0,1,0,0,0,0,0,0,0.452

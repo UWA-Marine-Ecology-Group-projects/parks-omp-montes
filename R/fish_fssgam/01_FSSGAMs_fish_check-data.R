@@ -37,16 +37,21 @@ name <- study
 working.dir <- getwd()
 setwd(working.dir)
 
-maxn <- read.csv("data/Tidy/montebello.synthesis.checked.maxn.csv")%>%
+maxn <- read.csv("data/tidy/montebello.synthesis.checked.maxn.csv")%>%
   mutate(scientific=paste(genus,species,sep=" "))%>%
   dplyr::select(campaignid, sample, family, species, genus, scientific, maxn)
 
 names(maxn)
 
-habitat <- readRDS("data/Tidy/merged_habitat.rds")%>%
+habitat <- readRDS("data/tidy/merged_habitat.rds")%>%
+  dplyr::rename('tpi'='layer_tpi',
+                'slope'='layer_slope',
+                'roughness'='layer_roughness',
+                'detrended'='layer_detrended',
+                'bathy_depth'='layer_depth',)%>%
   glimpse()
 
-metadata <- read.csv('data/Tidy/montebello.synthesis.checked.metadata.csv')%>%
+metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')%>%
   glimpse()
 
 # look at top species ----
@@ -132,14 +137,14 @@ dat.maxn <- bind_rows(fished.maxn, species.maxn,
   distinct()
 
 #Export the data to .rds for use in next script
-saveRDS(dat.maxn, "data/Tidy/dat.maxn.rds")
+saveRDS(dat.maxn, "data/tidy/dat.maxn.rds")
 
 #Import data for lengths
-length <- read.csv("data/Tidy/montebello.synthesis.checked.length.csv")%>%
+length <- read.csv("data/tidy/montebello.synthesis.checked.length.csv")%>%
   mutate(scientific=paste(family,genus,species))%>%
   glimpse()
 
-metadata <- read.csv('data/Tidy/montebello.synthesis.checked.metadata.csv')
+metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')
 
 
 # Create abundance of all recreational fished species ----
@@ -262,22 +267,21 @@ dat.length <- combined.length %>%
   drop_na(fieldofview.open)%>%
   dplyr::glimpse()
 
-saveRDS(dat.length, "data/Tidy/dat.length.rds")
+saveRDS(dat.length, "data/tidy/dat.length.rds")
 
 #Set and check predictor variables - these don't change so just doing for lengths
 names(dat.length)
 names(habitat)
 
 pred.vars=c("depth","biota.unconsolidated", "biota.macroalgae", "biota.crinoids",
-            "reef", "biota.octocoral.black", "biota.consolidated", "biota.sponges", "biota.hydroids", "biota.stony.corals",
-            "mean.relief", "sd.relief", "tpi", "roughness", "slope","aspect","detrended","lineartrend") 
+            "biogenic.reef", "biota.octocoral.black", "biota.consolidated", "biota.sponges", "biota.hydroids", "biota.stony.corals",
+            "mean.relief", "sd.relief", "tpi", "roughness", "slope","detrended", "bathy_depth") 
 
 # Check for correalation of predictor variables- remove anything highly correlated (>0.95)---
 round(cor(dat.length[,pred.vars]),2)
-#linear trend and depth
 #reef and sand
 #roughness and slope
-#linear trend and sand
+#depth and bathy_depth
 
 # Plot of likely transformations - thanks to Anna Cresswell for this loop!
 par(mfrow=c(3,2))
@@ -295,10 +299,10 @@ for (i in pred.vars) {
 # Review of individual predictors - we have to make sure they have an even distribution---
 #If the data are squewed to low numbers try sqrt>log or if squewed to high numbers try ^2 of ^3
 
-#remove linear trend, sand and slope
+#remove sand and slope
 #also remove all 'non-reef' predictors
 
 # # Re-set the predictors for modeling----
-pred.vars=c("depth","mean.relief","sd.relief","reef", "tpi", "roughness","aspect","detrended") 
+pred.vars=c("depth","mean.relief","sd.relief","biogenic.reef","biota.macroalgae","biota.consolidated", "tpi", "roughness","detrended") 
 
 #Export this to use in the next script? Or could just remove columns - but then have to re run later...

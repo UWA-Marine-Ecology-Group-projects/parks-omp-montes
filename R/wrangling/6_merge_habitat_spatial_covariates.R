@@ -20,14 +20,13 @@ working.dir <- getwd()
 setwd(working.dir)
 
 #read in habitat
-habitat <- read.csv("data/Tidy/montebello.synthesis.complete.habitat.csv")%>%
-  mutate(reef = biota.crinoids+biota.invertebrate.complex+biota.macroalgae+biota.octocoral.black+
-           biota.consolidated+biota.sponges+biota.hydroids+biota.stony.corals)      #i am not sure reef should be made at this point or later in scripts
+habitat <- read.csv("data/tidy/montebello.synthesis.complete.habitat.csv")%>%
+  mutate(biogenic.reef = biota.crinoids+biota.invertebrate.complex+biota.octocoral.black+
+           biota.sponges+biota.hydroids+biota.stony.corals)      #i am not sure reef should be made at this point or later in scripts
 
 # get spatial covariates (made in 'R/wrangling/A1_spatial_layers.R')
-tifs  <- list.files("Output/spatial_covariates/", "*.tif", full.names = TRUE)
+tifs  <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)
 preds <- stack(tifs)
-
 
 ## extract bathy derivatives for modelling
 # spatial setup
@@ -46,4 +45,4 @@ habi_df   <- cbind(habt_df, raster::extract(preds, allhab_t))
 names(habi_df)
 
 #save out the habitat with spatial covariates
-saveRDS(habi_df, "data/Tidy/merged_habitat.rds")
+saveRDS(habi_df, "data/tidy/merged_habitat.rds")

@@ -38,14 +38,13 @@ working.dir <- getwd()
 setwd(working.dir)
 
 #read in data
-dat <- readRDS("data/Tidy/dat.maxn.rds")%>%
+dat <- readRDS("data/tidy/dat.maxn.rds")%>%
   glimpse()
+
 # Set predictor variables---
 names(dat)
-names(habitat)
-  
-#Set the predictors for modeling----
-pred.vars=c("depth","mean.relief","sd.relief","reef", "tpi", "roughness","aspect","detrended") 
+
+pred.vars=c("depth","mean.relief","sd.relief","biogenic.reef","biota.macroalgae","biota.consolidated", "tpi", "roughness","detrended","latitude", "longitude")  
 
 # Check to make sure Response vector has not more than 90% zeros----
 unique.vars=unique(as.character(dat$response))
@@ -60,7 +59,7 @@ for(i in 1:length(unique.vars)){
 unique.vars.use   
 
 # Run the full subset model selection----
-savedir <- "Output/fssgam - fish"
+savedir <- "output/fssgam - fish"
 resp.vars=unique.vars.use
 use.dat=as.data.frame(dat)
 str(use.dat)
