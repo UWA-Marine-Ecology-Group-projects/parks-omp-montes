@@ -219,7 +219,7 @@ ggmod.species.detrended
 # mean relief ----
 ggmod.species.relief<- ggplot() +
   ylab("")+
-  xlab("Detrended bathymetry")+
+  xlab("Mean relief")+
   geom_point(data=dat.species,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
   geom_line(data=predicts.species.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
   geom_line(data=predicts.species.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
@@ -1001,22 +1001,26 @@ plot.grid.abundance <- plot_grid(ggmod.total.depth, ggmod.total.relief, ggmod.to
                                  ncol = 3, labels = c('a','b','c','d','e','f', 'g','h','i'),align = "vh")
 plot.grid.abundance
 
-plot.grid.lengths <- plot_grid(ggmod.legal.depth,ggmod.legal.relief,NULL,
+plot.grid.lengths1 <- plot_grid(ggmod.legal.depth,ggmod.legal.relief,NULL,
                                ggmod.sublegal.depth,ggmod.sublegal.detrended,ggmod.sublegal.mesophotic,
                                ggmod.spango.status,NULL,NULL,
-                              ggmod.sublegaltrout.depth,ggmod.sublegaltrout.relief,NULL,
-                              ggmod.legalatkinsoni.depth,ggmod.legalatkinsoni.mesophotic,NULL,
-                              ggmod.sublegalatkinsoni.depth,ggmod.sublegalatkinsoni.detrended,ggmod.sublegalatkinsoni.relief,
-                                ncol = 3, labels = c('g','h','','i','j','k','l','','', 'm','n','','o','p','','q','r','s'),align = "vh")
-plot.grid.lengths
+                                ncol = 3, labels = c('a','b','','c','d','e','f','','', 'g','h','','i','j','','k','l','m'),align = "vh")
+plot.grid.lengths1
+
+plot.grid.lengths2 <- plot_grid(ggmod.sublegaltrout.depth,ggmod.sublegaltrout.relief,NULL,
+                                ggmod.legalatkinsoni.depth,ggmod.legalatkinsoni.mesophotic,NULL,
+                                ggmod.sublegalatkinsoni.depth,ggmod.sublegalatkinsoni.detrended,ggmod.sublegalatkinsoni.relief,
+                                ncol = 3, labels = c('g','h','','i','j','','k','l','m'),align = "vh")
+plot.grid.lengths2
 
 plot.grid.species <- plot_grid(ggmod.atkinsoni.depth,ggmod.atkinsoni.detrended,ggmod.atkinsoni.relief,
                                ggmod.coelestis.depth,ggmod.coelestis.detrended,ggmod.coelestis.relief,
                                ggmod.fumea.depth,ggmod.fumea.detrended,ggmod.fumea.relief,
-                               ncol = 3, labels = c('t','u','v','w','x','y','z','too','many','plots'),align = "vh")
+                               ncol = 3, labels = c('a','b','c','d','e','f','g','h','i'),align = "vh")
 plot.grid.species
 
 #Save plots
 save_plot("plots/montes.synthesis.gam.abundance.png", plot.grid.abundance,base_height = 9,base_width = 8.5)
 save_plot("plots/montes.synthesis.gam.species.png", plot.grid.species,base_height = 9,base_width = 8.5)
-save_plot("plots/montes.synthesis.gam.lengths.png", plot.grid.lengths,base_height = 9,base_width = 8.5)
+save_plot("plots/montes.synthesis.gam.lengths1.png", plot.grid.lengths1,base_height = 9,base_width = 8.5)
+save_plot("plots/montes.synthesis.gam.lengths2.png", plot.grid.lengths2,base_height = 9,base_width = 8.5)
