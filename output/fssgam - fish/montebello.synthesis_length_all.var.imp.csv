@@ -1,8 +1,8 @@
-"","depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated","tpi","roughness","detrended","status"
-"greater than legal size",0.997,0.99,0,0.009,0.002,0,0.455,0,0.135,0
-"legal size atkinsoni",1,0.007,0,0.989,0,0,0.172,0,0.256,0
-"legal size spango",0.116,0.104,0.169,0.184,0.241,0.099,0.101,0.006,0.21,0.636
-"legal size trout",0.164,0,0,0,0.005,0,0.001,0.174,0,0.162
-"smaller than legal size",0.677,0.108,0.001,0.567,0,0.322,0.222,0.321,0.4,0.001
-"sublegal size atkinsoni",0.722,0.669,0.001,0.085,0.016,0.239,0.262,0.267,0.397,0.001
-"sublegal size trout",0.972,0.613,0.361,0,0.002,0.024,0.211,0.022,0.029,0.001
+"","depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","tpi","roughness","detrended","status"
+"greater than legal size",1,0.979,0,0.021,0,0.574,0,0.109,0
+"legal size atkinsoni",0.999,0.014,0,0.984,0,0.317,0,0.207,0
+"legal size spango",0.125,0.123,0.172,0.209,0.262,0.147,0.007,0.307,0.736
+"legal size trout",0.164,0,0,0,0.005,0.001,0.175,0,0.162
+"smaller than legal size",0.999,0.317,0.002,0.677,0,0.102,0,0.759,0
+"sublegal size atkinsoni",0.978,0.941,0.001,0.057,0.002,0.225,0.023,0.566,0
+"sublegal size trout",0.994,0.781,0.22,0,0.004,0.205,0.007,0.1,0

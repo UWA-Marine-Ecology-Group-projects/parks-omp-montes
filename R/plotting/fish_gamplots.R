@@ -51,203 +51,12 @@ name <- "montes.synthesis" # for the study
 working.dir <- getwd()
 setwd(working.dir)
 #OR Set manually once
-
-# Bring in and format the raw data----
-#MaxN
-maxn <- read.csv("data/Tidy/montebello.synthesis.checked.maxn.csv")%>%
-  mutate(scientific=paste(genus,species,sep=" "))%>%
-  dplyr::select(campaignid, sample, family, species, genus, scientific, maxn)
-
-names(maxn)
-
-length <- read.csv("data/Tidy/montebello.synthesis.checked.length.csv")%>%
-  mutate(scientific=paste(family,genus,species))%>%
+combined.maxn <- readRDS("data/tidy/dat.maxn.rds")%>%
+  dplyr::select(-scientific)%>%
   glimpse()
 
-habitat <- readRDS("data/Tidy/merged_habitat.rds")%>%
+combined.length <- readRDS("data/tidy/dat.length.rds")%>%
   glimpse()
-
-metadata <- read.csv('data/Tidy/montebello.synthesis.checked.metadata.csv')%>%
-  glimpse()
-
-# look at top species ----
-maxn.sum<-maxn%>%
-  group_by(scientific)%>%
-  dplyr::summarise(maxn=sum(maxn))%>%
-  ungroup()%>%
-  top_n(15)%>%                   #Claude added this - what is the point of plotting 6 billion species you cannot read the names of...
-  ungroup()
-
-# Create total abundance and species richness ----
-ta.sr <- maxn %>%
-  dplyr::ungroup() %>%
-  dplyr::group_by(scientific,sample) %>%
-  dplyr::summarise(maxn = sum(maxn)) %>%
-  tidyr::spread(scientific,maxn, fill = 0) %>%
-  dplyr::mutate(total.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
-  dplyr::mutate(species.richness=rowSums(.[,2:(ncol(.))] > 0)) %>% # double check these
-  dplyr::select(sample,total.abundance,species.richness) %>%
-  tidyr::gather(.,"response","number",2:3) %>%
-  dplyr::glimpse()
-
-# Create abundance of all recreational fished species ----
-url <- "https://docs.google.com/spreadsheets/d/1SMLvR9t8_F-gXapR2EemQMEPSw_bUbPLcXd3lJ5g5Bo/edit?ts=5e6f36e2#gid=825736197"
-
-master<-googlesheets4::read_sheet(url)%>%
-  ga.clean.names()%>%
-  filter(grepl('Australia', global.region))%>% # Change country here
-  dplyr::select(family,genus,species,fishing.type,australian.common.name,minlegal.wa)%>%
-  distinct()%>%
-  glimpse()
-
-unique(master$fishing.type)
-
-fished.species <- maxn %>%
-  dplyr::left_join(master) %>%
-  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Serranidae Plectropomus spp")
-                                      ,"R",fishing.type))%>%
-  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
-  dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus
-  glimpse()
-
-unique(fished.species$scientific)
-
-# Come back to maybe getting rid of some of these, but for now we continue on
-fished.maxn <- fished.species %>%
-  dplyr::ungroup() %>%
-  dplyr::group_by(scientific,sample) %>%
-  dplyr::summarise(maxn = sum(maxn)) %>%
-  spread(scientific,maxn, fill = 0) %>%
-  dplyr::mutate(targeted.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
-  dplyr::select(sample,targeted.abundance) %>%
-  gather(.,"response","number",2:2) %>%
-  dplyr::glimpse()
-
-# Pick top 3 species                      second most abundant species is 'unknown spp'
-species.maxn <- maxn %>%
-  dplyr::filter(scientific %in% c("Pomacentrus coelestis",
-                                  "Chromis fumea",
-                                  "Lethrinus atkinsoni"
-  ))%>%
-  dplyr::select(sample,scientific,maxn) %>%
-  dplyr::rename('number' = maxn)%>%
-  dplyr::mutate(response = scientific)%>%
-  distinct()
-
-combined.maxn <- bind_rows(fished.maxn, species.maxn, 
-                 ta.sr)%>%
-  left_join(habitat) %>%
-  left_join(metadata) %>%
-  drop_na(fieldofview.open)%>%
-  distinct()
-
-#move onto lengths
-fished.species <- length %>%
-  dplyr::left_join(master) %>%
-  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Serranidae Plectropomus spp"),"C/R",fishing.type))%>%
-  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Serranidae Plectropomus spp"), "450", minlegal.wa))%>%
-  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
-  dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus
-  glimpse()
-
-unique(fished.species$scientific)
-
-# Come back to maybe getting rid of some of these, but for now we continue on
-
-without.min.length <- fished.species %>%
-  filter(is.na(minlegal.wa))%>%
-  distinct(scientific)  #there are heaps here without min legal sizes
-
-legal <- fished.species %>%
-  tidyr::replace_na(list(minlegal.wa=0)) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "greater than legal size") %>%
-  dplyr::glimpse()
-
-sublegal <- fished.species %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "smaller than legal size") %>%
-  dplyr::glimpse()
-
-
-#Atkinsoni
-
-atkinsoni.legal <- fished.species %>%
-  dplyr::filter(species%in%c("atkinsoni")) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size atkinsoni") %>%
-  dplyr::glimpse()
-
-atkinsoni.sublegal <- fished.species %>%
-  dplyr::filter(species%in%c("atkinsoni")) %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size atkinsoni") %>%
-  dplyr::glimpse() 
-
-#plectropomus
-
-plectropomus.legal <- fished.species %>%
-  dplyr::filter(genus%in%c("Plectropomus")) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size trout") %>%
-  dplyr::glimpse()
-
-plectropomus.sublegal <- fished.species %>%
-  dplyr::filter(genus%in%c("Plectropomus")) %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size trout") %>%
-  dplyr::glimpse() 
-
-#nebulosus
-
-nebulosus.legal <- fished.species %>%
-  dplyr::filter(species%in%c("nebulosus")) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size spango") %>%
-  dplyr::glimpse()
-
-nebulosus.sublegal <- fished.species %>%
-  dplyr::filter(species%in%c("nebulosus")) %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size spango") %>%
-  dplyr::glimpse() 
-
-#lethrinids
-
-lethrinid.legal <- fished.species %>%
-  dplyr::filter(genus%in%c("Lethrinus")) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size emperor") %>%
-  dplyr::glimpse()
-
-lethrinid.sublegal <- fished.species %>%
-  dplyr::filter(genus%in%c("Lethrinus")) %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size emperor") %>%
-  dplyr::glimpse() 
-
-combined.length <- bind_rows(legal, sublegal, atkinsoni.legal, atkinsoni.sublegal, plectropomus.legal, plectropomus.sublegal,
-                             nebulosus.legal, nebulosus.sublegal, lethrinid.legal, lethrinid.sublegal)
 
 dat <- bind_rows(combined.maxn, combined.length)
 
@@ -259,39 +68,449 @@ dat <- bind_rows(combined.maxn, combined.length)
 #### montes MaxN ####
 unique(dat$scientific)
 
-# MODEL Total abundance (relief) ----
-dat.total <- dat %>% filter(scientific=="total.abundance")
+# MODEL Total abundance (depth + mean relief + tpi) ----
+dat.total <- dat %>% filter(response=="total.abundance")
 
-gamm=gam(maxn~s(relief,k=3,bs='cr'), family=tw,data=dat.total)
+gamm=gam(number~s(depth,k=3,bs='cr') + s(mean.relief,k=3,bs='cr')+ s(tpi,k=3,bs='cr'), family=tw,data=dat.total)
 
-# predict - relief ----
+# predict - depth ----
 mod<-gamm
-testdata <- expand.grid(relief=seq(min(dat$relief),max(dat$relief),length.out = 20)) %>%
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        mean.relief=mean(mod$model$mean.relief),
+                        tpi=mean(mod$model$tpi)) %>%
   distinct()%>%
   glimpse()
 
 fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
 
-predicts.total = testdata%>%data.frame(fits)%>%
-  group_by(relief)%>% #only change here
+predicts.total.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        tpi=mean(mod$model$tpi)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.total.mean.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - tpi ----
+mod<-gamm
+testdata <- expand.grid(tpi=seq(min(dat$tpi),max(dat$tpi),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.total.tpi = testdata%>%data.frame(fits)%>%
+  group_by(tpi)%>% #only change here
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
 # PLOTS for Total abundance ----
-# status ----
-ggmod.total<- ggplot() +
+# depth ----
+ggmod.total.depth<- ggplot() +
   ylab("")+
-  xlab("Mean relief")+
-  geom_point(data=dat.total,aes(x=relief,y=maxn),  alpha=0.2, size=1,show.legend=FALSE)+
-  geom_line(data=predicts.total,aes(x=relief,y=maxn),alpha=0.5)+
-  geom_line(data=predicts.total,aes(x=relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
-  geom_line(data=predicts.total,aes(x=relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  xlab("Depth")+
+  geom_point(data=dat.total,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.total.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.total.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.total.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
   Theme1+
   ggtitle("Total abundance") +
   theme(plot.title = element_text(hjust = 0))
-ggmod.total
+ggmod.total.depth
 
+# mean relief ----
+ggmod.total.relief<- ggplot() +
+  ylab("")+
+  xlab("Mean relief")+
+  geom_point(data=dat.total,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.total.mean.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.total.mean.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.total.mean.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.total.relief
+
+# tpi ----
+ggmod.total.tpi<- ggplot() +
+  ylab("")+
+  xlab("TPI")+
+  geom_point(data=dat.total,aes(x=tpi,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.total.tpi,aes(x=tpi,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.total.tpi,aes(x=tpi,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.total.tpi,aes(x=tpi,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.total.tpi
+
+# MODEL Species richness (detrended + mean relief + roughness) ----
+dat.species <- dat %>% filter(response=="species.richness")
+
+gamm=gam(number~s(detrended,k=3,bs='cr') + s(mean.relief,k=3,bs='cr')+ s(roughness,k=3,bs='cr'), family=tw,data=dat.species)
+
+# predict - detrended ----
+mod<-gamm
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
+                        mean.relief=mean(mod$model$mean.relief),
+                        roughness=mean(mod$model$roughness)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.species.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        detrended=mean(mod$model$detrended),
+                        roughness=mean(mod$model$roughness)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.species.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - roughness ----
+mod<-gamm
+testdata <- expand.grid(roughness=seq(min(dat$roughness),max(dat$roughness),length.out = 20),
+                        detrended=mean(mod$model$detrended),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.species.roughness = testdata%>%data.frame(fits)%>%
+  group_by(roughness)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Species richness ----
+# detrended ----
+ggmod.species.detrended<- ggplot() +
+  ylab("")+
+  xlab("Detrended bathymetry")+
+  geom_point(data=dat.species,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.species.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.species.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.species.detrended,aes(x=detrended,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Species richness") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.species.detrended
+
+# mean relief ----
+ggmod.species.relief<- ggplot() +
+  ylab("")+
+  xlab("Detrended bathymetry")+
+  geom_point(data=dat.species,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.species.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.species.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.species.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.species.relief
+
+# mean relief ----
+ggmod.species.roughness<- ggplot() +
+  ylab("")+
+  xlab("Roughness")+
+  geom_point(data=dat.species,aes(x=roughness,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.species.roughness,aes(x=roughness,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.species.roughness,aes(x=roughness,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.species.roughness,aes(x=roughness,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.species.roughness
+
+# MODEL Targeted abundance (depth + mesophotic reef) ----
+dat.targeted <- dat %>% filter(response=="targeted.abundance")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(mesophotic.reef,k=3,bs='cr'), family=tw,data=dat.targeted)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.targeted.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mesophotic reef ----
+mod<-gamm
+testdata <- expand.grid(mesophotic.reef=seq(min(dat$mesophotic.reef),max(dat$mesophotic.reef),length.out = 20),
+                        depth=mean(mod$model$depth)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.targeted.mesophotic = testdata%>%data.frame(fits)%>%
+  group_by(mesophotic.reef)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Targeted abundnace ----
+# depth ----
+ggmod.targeted.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.targeted,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.targeted.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.targeted.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.targeted.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Targeted abundance") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.targeted.depth
+
+# mesophotic reef ----
+ggmod.targeted.mesophotic<- ggplot() +
+  ylab("")+
+  xlab("Mesophotic reef")+
+  geom_point(data=dat.targeted,aes(x=mesophotic.reef,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.targeted.mesophotic,aes(x=mesophotic.reef,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.targeted.mesophotic,aes(x=mesophotic.reef,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.targeted.mesophotic,aes(x=mesophotic.reef,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.targeted.mesophotic
+
+# MODEL Legals (depth + mean relief) ----
+dat.legal <- dat %>% filter(response=="greater than legal size")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(mean.relief,k=3,bs='cr'), family=tw,data=dat.legal)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.legal.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        depth=mean(mod$model$depth)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.legal.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Legals ----
+# depth ----
+ggmod.legal.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.legal,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.legal.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.legal.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.legal.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Legal") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.legal.depth
+
+# mean relief ----
+ggmod.legal.relief<- ggplot() +
+  ylab("")+
+  xlab("Mean relief")+
+  geom_point(data=dat.legal,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.legal.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.legal.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.legal.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.legal.relief
+
+# MODEL Sublegals (depth + detrended + mesophotic) ----
+dat.sublegal <- dat %>% filter(response=="smaller than legal size")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mesophotic.reef,k=3,bs='cr'), family=tw,data=dat.sublegal)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        detrended=mean(mod$model$detrended),
+                        mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegal.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - detrended ----
+mod<-gamm
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegal.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mesophotic reef ----
+mod<-gamm
+testdata <- expand.grid(mesophotic.reef=seq(min(dat$mesophotic.reef),max(dat$mesophotic.reef),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegal.mesophotic = testdata%>%data.frame(fits)%>%
+  group_by(mesophotic.reef)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Sublegals ----
+# depth ----
+ggmod.sublegal.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.sublegal,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegal.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegal.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegal.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Sublegal") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.sublegal.depth
+
+# detrended ----
+ggmod.sublegal.detrended<- ggplot() +
+  ylab("")+
+  xlab("Detrended")+
+  geom_point(data=dat.sublegal,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegal.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegal.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegal.detrended,aes(x=detrended,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.sublegal.detrended
+
+# mesophotic reef ----
+ggmod.sublegal.mesophotic<- ggplot() +
+  ylab("")+
+  xlab("Mesophotic reef")+
+  geom_point(data=dat.sublegal,aes(x=mesophotic.reef,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegal.mesophotic,aes(x=mesophotic.reef,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegal.mesophotic,aes(x=mesophotic.reef,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegal.mesophotic,aes(x=mesophotic.reef,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.sublegal.mesophotic
+
+# MODEL Legal Spango (status) ----
+dat.spango <- dat %>% filter(response=="legal size spango")
+
+gamm=gam(number~status, family=tw,data=dat.spango)
+
+# predict - status ----
+mod<-gamm
+testdata <- expand.grid(status = c("Fished","No-take"))%>%
+  distinct()%>%
+  glimpse()
+
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.spango.status = testdata%>%data.frame(fits)%>%
+  group_by(status)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Legal spango ----
+# status ----
+ggmod.spango.status<- ggplot(aes(x=status,y=maxn,fill=status,colour=status), data=predicts.spango.status) +
+  ylab("")+
+  xlab('Status')+
+  scale_fill_manual(labels = c("Fished", "No-take"),values=c("grey", "#1470ad"))+
+  scale_colour_manual(labels = c("Fished", "No-take"),values=c("black", "black"))+
+  scale_x_discrete(limits = rev(levels(predicts.spango.status$status)))+
+  geom_bar(stat = "identity")+
+  geom_errorbar(aes(ymin = maxn-se.fit,ymax = maxn+se.fit),width = 0.5) +
+  theme_classic()+
+  Theme1+
+  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
+  theme(legend.position = "none")+
+  ggtitle("Legal Lethrinus nebulosus") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.spango.status
+
+# MODEL Sublegal trout (depth + mean relief) ----
+dat.sublegaltrout <- dat %>% filter(response=="smaller than legal size")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mesophotic.reef,k=3,bs='cr'), family=tw,data=dat.sublegal)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        detrended=mean(mod$model$detrended),
+                        mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegal.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
 
 # Combine with cowplot
 library(cowplot)

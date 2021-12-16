@@ -44,7 +44,7 @@ dat <- readRDS("data/tidy/dat.maxn.rds")%>%
 # Set predictor variables---
 names(dat)
 
-pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated", "tpi", "roughness","detrended") 
+pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef", "tpi", "roughness","detrended") 
 
 # Check to make sure Response vector has not more than 90% zeros----
 unique.vars=unique(as.character(dat$response))
@@ -73,7 +73,7 @@ for(i in 1:length(resp.vars)){
   use.dat=as.data.frame(dat[which(dat$response==resp.vars[i]),])
   use.dat$location <- as.factor(use.dat$location)
   use.dat$campaignid <- as.factor(use.dat$campaignid)
-  Model1=gam(number~s(depth,k=5,bs='cr'),# + 
+  Model1=gam(number~s(depth,k=3,bs='cr'),# + 
                #s(campaignid,bs='re') +s(location,bs='re'),
              family=tw(),  data=use.dat)
   
@@ -84,7 +84,7 @@ for(i in 1:length(resp.vars)){
                                pred.vars.cont=pred.vars,
                                pred.vars.fact=factor.vars,
                                #linear.vars="depth",
-                               k=5#,
+                               k=3#,
                               # null.terms="s(campaignid ,bs='re')+s(location,bs='re')"
                                )
   out.list=fit.model.set(model.set,
