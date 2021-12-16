@@ -52,7 +52,6 @@ working.dir <- getwd()
 setwd(working.dir)
 #OR Set manually once
 combined.maxn <- readRDS("data/tidy/dat.maxn.rds")%>%
-  dplyr::select(-scientific)%>%
   glimpse()
 
 combined.length <- readRDS("data/tidy/dat.length.rds")%>%
@@ -60,24 +59,19 @@ combined.length <- readRDS("data/tidy/dat.length.rds")%>%
 
 dat <- bind_rows(combined.maxn, combined.length)
 
-###   TEMPLATE   ###
-###              ###
-###              ###
-###              ###
 # Manually make the most parsimonious GAM models for each taxa ----
 #### montes MaxN ####
-unique(dat$scientific)
 
-# MODEL Total abundance (depth + mean relief + tpi) ----
+# MODEL Total abundance (depth + mean relief + detrended) ----
 dat.total <- dat %>% filter(response=="total.abundance")
 
-gamm=gam(number~s(depth,k=3,bs='cr') + s(mean.relief,k=3,bs='cr')+ s(tpi,k=3,bs='cr'), family=tw,data=dat.total)
+gamm=gam(number~s(depth,k=3,bs='cr') + s(mean.relief,k=3,bs='cr')+ s(detrended,k=3,bs='cr'), family=tw,data=dat.total)
 
 # predict - depth ----
 mod<-gamm
 testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
                         mean.relief=mean(mod$model$mean.relief),
-                        tpi=mean(mod$model$tpi)) %>%
+                        detrended=mean(mod$model$detrended)) %>%
   distinct()%>%
   glimpse()
 
@@ -92,7 +86,7 @@ predicts.total.depth = testdata%>%data.frame(fits)%>%
 mod<-gamm
 testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
                         depth=mean(mod$model$depth),
-                        tpi=mean(mod$model$tpi)) %>%
+                        detrended=mean(mod$model$detrended)) %>%
   distinct()%>%
   glimpse()
 
@@ -103,9 +97,9 @@ predicts.total.mean.relief = testdata%>%data.frame(fits)%>%
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
-# predict - tpi ----
+# predict - detrended ----
 mod<-gamm
-testdata <- expand.grid(tpi=seq(min(dat$tpi),max(dat$tpi),length.out = 20),
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
                         depth=mean(mod$model$depth),
                         mean.relief=mean(mod$model$mean.relief)) %>%
   distinct()%>%
@@ -113,8 +107,8 @@ testdata <- expand.grid(tpi=seq(min(dat$tpi),max(dat$tpi),length.out = 20),
 
 fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
 
-predicts.total.tpi = testdata%>%data.frame(fits)%>%
-  group_by(tpi)%>% #only change here
+predicts.total.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
@@ -145,17 +139,17 @@ ggmod.total.relief<- ggplot() +
   Theme1
 ggmod.total.relief
 
-# tpi ----
-ggmod.total.tpi<- ggplot() +
+# detrended ----
+ggmod.total.detrended<- ggplot() +
   ylab("")+
-  xlab("TPI")+
-  geom_point(data=dat.total,aes(x=tpi,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
-  geom_line(data=predicts.total.tpi,aes(x=tpi,y=maxn),alpha=0.5)+
-  geom_line(data=predicts.total.tpi,aes(x=tpi,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
-  geom_line(data=predicts.total.tpi,aes(x=tpi,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  xlab("Detrended bathymetry")+
+  geom_point(data=dat.total,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.total.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.total.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.total.detrended,aes(x=detrended,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
   Theme1
-ggmod.total.tpi
+ggmod.total.detrended
 
 # MODEL Species richness (detrended + mean relief + roughness) ----
 dat.species <- dat %>% filter(response=="species.richness")
@@ -234,7 +228,7 @@ ggmod.species.relief<- ggplot() +
   Theme1
 ggmod.species.relief
 
-# mean relief ----
+# roughness ----
 ggmod.species.roughness<- ggplot() +
   ylab("")+
   xlab("Roughness")+
@@ -246,15 +240,16 @@ ggmod.species.roughness<- ggplot() +
   Theme1
 ggmod.species.roughness
 
-# MODEL Targeted abundance (depth + mesophotic reef) ----
+# MODEL Targeted abundance (depth + detrended + mean relief) ----
 dat.targeted <- dat %>% filter(response=="targeted.abundance")
 
-gamm=gam(number~s(depth,k=3,bs='cr') + s(mesophotic.reef,k=3,bs='cr'), family=tw,data=dat.targeted)
+gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mean.relief,k=3,bs='cr'), family=tw,data=dat.targeted)
 
 # predict - depth ----
 mod<-gamm
 testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
-                        mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
+                        detrended=mean(mod$model$detrended),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
   distinct()%>%
   glimpse()
 
@@ -265,17 +260,33 @@ predicts.targeted.depth = testdata%>%data.frame(fits)%>%
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
-# predict - mesophotic reef ----
+# predict - detrended ----
 mod<-gamm
-testdata <- expand.grid(mesophotic.reef=seq(min(dat$mesophotic.reef),max(dat$mesophotic.reef),length.out = 20),
-                        depth=mean(mod$model$depth)) %>%
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
   distinct()%>%
   glimpse()
 
 fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
 
-predicts.targeted.mesophotic = testdata%>%data.frame(fits)%>%
-  group_by(mesophotic.reef)%>% #only change here
+predicts.targeted.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.targeted.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
@@ -294,17 +305,29 @@ ggmod.targeted.depth<- ggplot() +
   theme(plot.title = element_text(hjust = 0))
 ggmod.targeted.depth
 
-# mesophotic reef ----
-ggmod.targeted.mesophotic<- ggplot() +
+# detrended ----
+ggmod.targeted.detrended<- ggplot() +
   ylab("")+
-  xlab("Mesophotic reef")+
-  geom_point(data=dat.targeted,aes(x=mesophotic.reef,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
-  geom_line(data=predicts.targeted.mesophotic,aes(x=mesophotic.reef,y=maxn),alpha=0.5)+
-  geom_line(data=predicts.targeted.mesophotic,aes(x=mesophotic.reef,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
-  geom_line(data=predicts.targeted.mesophotic,aes(x=mesophotic.reef,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  xlab("Detrended bathymetry")+
+  geom_point(data=dat.targeted,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.targeted.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.targeted.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.targeted.detrended,aes(x=detrended,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
   Theme1
-ggmod.targeted.mesophotic
+ggmod.targeted.detrended
+
+# mean relief ----
+ggmod.targeted.relief<- ggplot() +
+  ylab("")+
+  xlab("Mean relief")+
+  geom_point(data=dat.targeted,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.targeted.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.targeted.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.targeted.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.targeted.relief
 
 # MODEL Legals (depth + mean relief) ----
 dat.legal <- dat %>% filter(response=="greater than legal size")
@@ -493,48 +516,507 @@ ggmod.spango.status<- ggplot(aes(x=status,y=maxn,fill=status,colour=status), dat
 ggmod.spango.status
 
 # MODEL Sublegal trout (depth + mean relief) ----
-dat.sublegaltrout <- dat %>% filter(response=="smaller than legal size")
+dat.sublegaltrout <- dat %>% filter(response=="sublegal size trout")
 
-gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mesophotic.reef,k=3,bs='cr'), family=tw,data=dat.sublegal)
+gamm=gam(number~s(depth,k=3,bs='cr') + s(mean.relief,k=3,bs='cr'), family=tw,data=dat.sublegaltrout)
 
 # predict - depth ----
 mod<-gamm
 testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
-                        detrended=mean(mod$model$detrended),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegaltrout.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        depth=mean(mod$model$depth)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegaltrout.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Sublegal trout ----
+# depth ----
+ggmod.sublegaltrout.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.sublegaltrout,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegaltrout.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegaltrout.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegaltrout.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Sublegal Plectropomus spp") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.sublegaltrout.depth
+
+# mean relief ----
+ggmod.sublegaltrout.relief<- ggplot() +
+  ylab("")+
+  xlab("Mean relief")+
+  geom_point(data=dat.sublegaltrout,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegaltrout.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegaltrout.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegaltrout.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.sublegaltrout.relief
+
+# MODEL Legal atkinsoni (depth + mesophotic reef) ----
+dat.legalatkinsoni <- dat %>% filter(response=="legal size atkinsoni")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(mesophotic.reef,k=3,bs='cr'), family=tw,data=dat.legalatkinsoni)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
                         mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
   distinct()%>%
   glimpse()
 
 fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
 
-predicts.sublegal.depth = testdata%>%data.frame(fits)%>%
+predicts.legalatkinsoni.depth = testdata%>%data.frame(fits)%>%
   group_by(depth)%>% #only change here
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
+
+# predict - mesophotic reef ----
+mod<-gamm
+testdata <- expand.grid(mesophotic.reef=seq(min(dat$mesophotic.reef),max(dat$mesophotic.reef),length.out = 20),
+                        depth=mean(mod$model$depth)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.legalatkinsoni.mesophotic = testdata%>%data.frame(fits)%>%
+  group_by(mesophotic.reef)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Legal atkinsoni ----
+# depth ----
+ggmod.legalatkinsoni.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.legalatkinsoni,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.legalatkinsoni.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.legalatkinsoni.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.legalatkinsoni.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Legal Lethrinus atkinsoni") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.legalatkinsoni.depth
+
+# mesophotic reef ----
+ggmod.legalatkinsoni.mesophotic<- ggplot() +
+  ylab("")+
+  xlab("Mesophotic reef")+
+  geom_point(data=dat.legalatkinsoni,aes(x=mesophotic.reef,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.legalatkinsoni.mesophotic,aes(x=mesophotic.reef,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.legalatkinsoni.mesophotic,aes(x=mesophotic.reef,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.legalatkinsoni.mesophotic,aes(x=mesophotic.reef,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.legalatkinsoni.mesophotic
+
+# MODEL Sublegal atkinsoni (depth + detrended + mean relief) ----
+dat.sublegalatkinsoni <- dat %>% filter(response=="sublegal size atkinsoni")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mean.relief,k=3,bs='cr'), family=tw,data=dat.sublegalatkinsoni)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        detrended=mean(mod$model$detrended),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegalatkinsoni.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - detrended ----
+mod<-gamm
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegalatkinsoni.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.sublegalatkinsoni.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Subegal atkinsoni ----
+# depth ----
+ggmod.sublegalatkinsoni.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.sublegalatkinsoni,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegalatkinsoni.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegalatkinsoni.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegalatkinsoni.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Sublegal Lethrinus atkinsoni") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.sublegalatkinsoni.depth
+
+# detrended ----
+ggmod.sublegalatkinsoni.detrended<- ggplot() +
+  ylab("")+
+  xlab("Detrended")+
+  geom_point(data=dat.sublegalatkinsoni,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegalatkinsoni.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegalatkinsoni.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegalatkinsoni.detrended,aes(x=detrended,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.sublegalatkinsoni.detrended
+
+# mean relief ----
+ggmod.sublegalatkinsoni.relief<- ggplot() +
+  ylab("")+
+  xlab("Mean relief")+
+  geom_point(data=dat.sublegalatkinsoni,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegalatkinsoni.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegalatkinsoni.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegalatkinsoni.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.sublegalatkinsoni.relief
+
+# MODEL Lethrinus atkinsoni (depth + detrended + mean relief) ----
+dat.atkinsoni <- dat %>% filter(response=="Lethrinus atkinsoni")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mean.relief,k=3,bs='cr'), family=tw,data=dat.atkinsoni)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        detrended=mean(mod$model$detrended),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.atkinsoni.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - detrended ----
+mod<-gamm
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.atkinsoni.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.atkinsoni.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for atkinsoni abundance ----
+# depth ----
+ggmod.atkinsoni.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.atkinsoni,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.atkinsoni.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.atkinsoni.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.atkinsoni.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Lethrinus atkinsoni") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.atkinsoni.depth
+
+# detrended ----
+ggmod.atkinsoni.detrended<- ggplot() +
+  ylab("")+
+  xlab("Detrended")+
+  geom_point(data=dat.atkinsoni,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.atkinsoni.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.atkinsoni.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.atkinsoni.detrended,aes(x=detrended,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.atkinsoni.detrended
+
+# mean relief ----
+ggmod.atkinsoni.relief<- ggplot() +
+  ylab("")+
+  xlab("Mean relief")+
+  geom_point(data=dat.atkinsoni,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.atkinsoni.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.atkinsoni.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.atkinsoni.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.atkinsoni.relief
+
+# MODEL Pomacentrus coelestis (depth + detrended + mean relief) ----
+dat.coelestis <- dat %>% filter(response=="Pomacentrus coelestis")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mean.relief,k=3,bs='cr'), family=tw,data=dat.coelestis)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        detrended=mean(mod$model$detrended),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.coelestis.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - detrended ----
+mod<-gamm
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.coelestis.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.coelestis.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Pomacentrus coelestis abundance ----
+# depth ----
+ggmod.coelestis.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.coelestis,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.coelestis.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.coelestis.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.coelestis.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Pomacentrus coelestis") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.coelestis.depth
+
+# detrended ----
+ggmod.coelestis.detrended<- ggplot() +
+  ylab("")+
+  xlab("Detrended")+
+  geom_point(data=dat.coelestis,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.coelestis.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.coelestis.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.coelestis.detrended,aes(x=detrended,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.coelestis.detrended
+
+# mean relief ----
+ggmod.coelestis.relief<- ggplot() +
+  ylab("")+
+  xlab("Mean relief")+
+  geom_point(data=dat.coelestis,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.coelestis.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.coelestis.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.coelestis.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.coelestis.relief
+
+# MODEL Chromis fumea (depth + detrended + mean relief) ----
+dat.fumea <- dat %>% filter(response=="Chromis fumea")
+
+gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mean.relief,k=3,bs='cr'), family=tw,data=dat.fumea)
+
+# predict - depth ----
+mod<-gamm
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
+                        detrended=mean(mod$model$detrended),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.fumea.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - detrended ----
+mod<-gamm
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        mean.relief=mean(mod$model$mean.relief)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.fumea.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - mean relief ----
+mod<-gamm
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.fumea.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
+  summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for Chromis fumea abundance ----
+# depth ----
+ggmod.fumea.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.fumea,aes(x=depth,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.fumea.depth,aes(x=depth,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.fumea.depth,aes(x=depth,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.fumea.depth,aes(x=depth,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Chromis fumea") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.fumea.depth
+
+# detrended ----
+ggmod.fumea.detrended<- ggplot() +
+  ylab("")+
+  xlab("Detrended")+
+  geom_point(data=dat.fumea,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.fumea.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.fumea.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.fumea.detrended,aes(x=detrended,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.fumea.detrended
+
+# mean relief ----
+ggmod.fumea.relief<- ggplot() +
+  ylab("")+
+  xlab("Mean relief")+
+  geom_point(data=dat.fumea,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.fumea.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.fumea.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.fumea.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.fumea.relief
 
 # Combine with cowplot
 library(cowplot)
 
 # view plots
-plot.grid.abundance <- plot_grid(ggmod.total, NULL,NULL,
-                       ggmod.species.relief, ggmod.species.tpi,NULL,
-                       ggmod.target.biog, ggmod.target.detrended, ggmod.target.macroalgae,
-                       ncol = 3, labels = c('a','','','b','c','','d','e','f'),align = "vh")
+plot.grid.abundance <- plot_grid(ggmod.total.depth, ggmod.total.relief, ggmod.total.detrended,
+                                 ggmod.species.detrended, ggmod.species.relief,ggmod.species.roughness,
+                                 ggmod.targeted.depth,ggmod.targeted.detrended,ggmod.targeted.relief,
+                                 ncol = 3, labels = c('a','b','c','d','e','f', 'g','h','i'),align = "vh")
 plot.grid.abundance
 
-plot.grid.lengths <- plot_grid( ggmod.greater.biog, ggmod.greater.detrended, ggmod.greater.macroalgae,
-                                 ggmod.legal.miniatus.biog, ggmod.legal.miniatus.depth,NULL,
-                                NULL,NULL,NULL,
-                                 ncol = 3, labels = c('g','h','i','j','k','','','',''),align = "vh")
+plot.grid.lengths <- plot_grid(ggmod.legal.depth,ggmod.legal.relief,NULL,
+                               ggmod.sublegal.depth,ggmod.sublegal.detrended,ggmod.sublegal.mesophotic,
+                               ggmod.spango.status,NULL,NULL,
+                              ggmod.sublegaltrout.depth,ggmod.sublegaltrout.relief,NULL,
+                              ggmod.legalatkinsoni.depth,ggmod.legalatkinsoni.mesophotic,NULL,
+                              ggmod.sublegalatkinsoni.depth,ggmod.sublegalatkinsoni.detrended,ggmod.sublegalatkinsoni.relief,
+                                ncol = 3, labels = c('g','h','','i','j','k','l','','', 'm','n','','o','p','','q','r','s'),align = "vh")
 plot.grid.lengths
 
-plot.grid.species <- plot_grid(ggmod.coris.depth,NULL, NULL,
-                                 ggmod.miniatus.biog, ggmod.miniatus.depth,NULL,
-                                 ggmod.chromis.relief,NULL,NULL,
-                                 ncol = 3, labels = c('l','','','m','n','','o','',''),align = "vh")
+plot.grid.species <- plot_grid(ggmod.atkinsoni.depth,ggmod.atkinsoni.detrended,ggmod.atkinsoni.relief,
+                               ggmod.coelestis.depth,ggmod.coelestis.detrended,ggmod.coelestis.relief,
+                               ggmod.fumea.depth,ggmod.fumea.detrended,ggmod.fumea.relief,
+                               ncol = 3, labels = c('t','u','v','w','x','y','z','too','many','plots'),align = "vh")
 plot.grid.species
 
 #Save plots
-save_plot("plots/abrolhos.boss.gam.abundance.png", plot.grid.abundance,base_height = 9,base_width = 8.5)
-save_plot("plots/abrolhos.boss.gam.species.png", plot.grid.species,base_height = 9,base_width = 8.5)
-save_plot("plots/abrolhos.boss.gam.lengths.png", plot.grid.lengths,base_height = 9,base_width = 8.5)
+save_plot("plots/montes.synthesis.gam.abundance.png", plot.grid.abundance,base_height = 9,base_width = 8.5)
+save_plot("plots/montes.synthesis.gam.species.png", plot.grid.species,base_height = 9,base_width = 8.5)
+save_plot("plots/montes.synthesis.gam.lengths.png", plot.grid.lengths,base_height = 9,base_width = 8.5)

@@ -79,10 +79,10 @@ ta.sr <- maxn %>%
   dplyr::group_by(scientific,sample) %>%
   dplyr::summarise(maxn = sum(maxn)) %>%
   tidyr::spread(scientific,maxn, fill = 0) %>%
-   dplyr::mutate(total.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
-   dplyr::mutate(species.richness=rowSums(.[,2:(ncol(.))] > 0)) %>% # double check these
-   dplyr::select(sample,total.abundance,species.richness) %>%
-   tidyr::gather(.,"response","number",2:3) %>%
+    dplyr::mutate(total.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
+    dplyr::mutate(species.richness=rowSums(.[,2:(ncol(.))] > 0)) %>% # double check these
+    dplyr::select(sample,total.abundance,species.richness) %>%
+    tidyr::gather(.,"response","number",2:3) %>%
   dplyr::glimpse()
 
 # Create abundance of all recreational fished species ----
@@ -129,12 +129,28 @@ species.maxn <- maxn %>%
   dplyr::mutate(response = scientific)%>%
   distinct()
 
-dat.maxn <- bind_rows(fished.maxn, species.maxn, 
-                           ta.sr)%>%
-  left_join(habitat) %>%
-   left_join(metadata) %>%
-  drop_na(fieldofview.open)%>%
-  distinct()
+combined.maxn <- bind_rows(fished.maxn, species.maxn, 
+                      ta.sr)%>%
+  dplyr::select(-scientific)%>%
+  glimpse()
+
+dat.maxn <- combined.maxn %>%
+  dplyr::right_join(metadata, by = c("sample")) %>% # add in all samples
+  dplyr::select(sample,response,number) %>%
+  tidyr::complete(nesting(sample), response) %>%
+  replace_na(list(number = 0)) %>%
+  dplyr::filter(!is.na(response)) %>%
+  dplyr::ungroup()%>%
+   dplyr::left_join(.,metadata) %>%
+   dplyr::left_join(.,habitat) %>%
+   dplyr::filter(successful.count%in%c("Yes")) %>%
+   dplyr::mutate(response=as.character(response)) %>%
+   drop_na(fieldofview.open)%>%
+  dplyr::glimpse()
+
+#205 samples, 6 responses
+205*6
+#1230 - it is before we filter by successful count
 
 #Export the data to .rds for use in next script
 saveRDS(dat.maxn, "data/tidy/dat.maxn.rds")
@@ -302,8 +318,3 @@ for (i in pred.vars) {
 
 #remove sand and slope
 #also remove all 'non-reef' predictors
-
-# # Re-set the predictors for modeling----
-pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","biota.unconsolidated","biota.consolidated", "tpi", "roughness","detrended") 
-
-#Export this to use in the next script? Or could just remove columns - but then have to re run later...

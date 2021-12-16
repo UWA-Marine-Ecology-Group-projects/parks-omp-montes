@@ -32,19 +32,22 @@ dat.taxa <-read.csv("output/fssgam - fish/montebello.synthesis_combined.imp.csv"
   mutate(predictor = factor(predictor, levels = c("photic.reef","mesophotic.reef","biota.unconsolidated","detrended",
                                                   "roughness","tpi","depth","mean.relief","sd.relief","status")))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="targeted.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="mesophotic.reef"&resp.var=="targeted.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="roughness"&resp.var=="Lethrinus atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="sd.relief"&resp.var=="Lethrinus atkinsoni","X",label))%>%
+  mutate(label=ifelse(predictor=="detrended"&resp.var=="targeted.abundance","X",label))%>%
+  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="targeted.abundance","X",label))%>%
+  mutate(label=ifelse(predictor=="depth"&resp.var=="Lethrinus atkinsoni","X",label))%>%
+  mutate(label=ifelse(predictor=="detrended"&resp.var=="Lethrinus atkinsoni","X",label))%>%
+  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="Lethrinus atkinsoni","X",label))%>%
+  mutate(label=ifelse(predictor=="depth"&resp.var=="Pomacentrus coelestis","X",label))%>%
   mutate(label=ifelse(predictor=="detrended"&resp.var=="Pomacentrus coelestis","X",label))%>%
-  mutate(label=ifelse(predictor=="roughness"&resp.var=="Pomacentrus coelestis","X",label))%>%
-  mutate(label=ifelse(predictor=="sd.relief"&resp.var=="Pomacentrus coelestis","X",label))%>%
+  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="Pomacentrus coelestis","X",label))%>%
+  mutate(label=ifelse(predictor=="depth"&resp.var=="Chromis fumea","X",label))%>%
   mutate(label=ifelse(predictor=="detrended"&resp.var=="Chromis fumea","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="Chromis fumea","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="total.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="tpi"&resp.var=="total.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="species.richness","X",label))%>%
+  mutate(label=ifelse(predictor=="detrended"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="detrended"&resp.var=="species.richness","X",label))%>%
+  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="species.richness","X",label))%>%
   mutate(label=ifelse(predictor=="roughness"&resp.var=="species.richness","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="greater than legal size","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="greater than legal size","X",label))%>%

@@ -1,8 +1,8 @@
 resp.var,depth,mean.relief,sd.relief,mesophotic.reef,photic.reef,tpi,roughness,detrended,status
-targeted.abundance,1,0.291,0.071,0.545,0,0.106,0,0.783,0
-Lethrinus atkinsoni,0.004,0.113,0.702,0.004,0.435,0.107,0.84,0.246,0.034
-Pomacentrus coelestis,0.002,0.039,0.5,0.002,0.013,0.025,0.956,0.924,0.349
-Chromis fumea,0.292,0.561,0.585,0.067,0.048,0.103,0.063,0.878,0.05
+targeted.abundance,1,0.999,0,0.001,0,0.02,0,0.921,0
+Lethrinus atkinsoni,0.999,0.996,0,0.003,0,0.087,0,0.714,0
+Pomacentrus coelestis,1,0.999,0,0,0,0.155,0,0.845,0
+Chromis fumea,0.884,0.776,0.217,0.002,0.009,0.028,0.013,0.997,0.03
 total.abundance,0.563,0.99,0.011,0,0,0.833,0.242,0.084,0.104
 species.richness,0.05,1,0,0,0,0.049,0.786,0.937,0.038
 greater than legal size,1,0.979,0,0.021,0,0.574,0,0.109,0
