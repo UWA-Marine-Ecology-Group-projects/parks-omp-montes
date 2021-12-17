@@ -45,12 +45,10 @@ study<-"montebello.synthesis"
 # **The only folder you will need to create is your working directory**
 
 ## Set your working directory ----
-working.dir<-dirname(rstudioapi::getActiveDocumentContext()$path) # to directory of current file - or type your own
+working.dir<-"H:/GitHub/parks-omp-montes/data"
 
 ## Save these directory names to use later----
-to.be.checked.dir<-paste(working.dir,"Data to be checked",sep="/") 
-download.dir<-paste(working.dir,"Downloads",sep="/")
-tidy.dir<-paste(working.dir,"Tidy data",sep="/")
+download.dir<-paste(working.dir,"downloads",sep="/")
 
 ## Delete Downloads folder ----
 # It will delete any data sitting within your 'Downloads' folder 
@@ -61,9 +59,7 @@ setwd(working.dir)
 unlink(download.dir, recursive=TRUE)
 
 ## Create Downloads, Data to be checked and Tidy data folders ----
-dir.create(file.path(working.dir, "Downloads"))
-dir.create(file.path(working.dir, "Data to be checked"))
-dir.create(file.path(working.dir, "Tidy data"))
+dir.create(file.path(working.dir, "downloads"))
 
 ## Query from GlobalArchive----
 # Load default values from GlobalArchive ----

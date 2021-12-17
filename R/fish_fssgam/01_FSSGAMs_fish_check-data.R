@@ -37,9 +37,11 @@ name <- study
 working.dir <- getwd()
 setwd(working.dir)
 
-maxn <- read.csv("data/tidy/montebello.synthesis.checked.maxn.csv")%>%
+maxn <- read.csv("data/tidy/montebello.synthesis.complete.maxn.csv")%>%
   mutate(scientific=paste(genus,species,sep=" "))%>%
   dplyr::select(campaignid, sample, family, species, genus, scientific, maxn)
+
+length(unique(maxn$sample))
 
 names(maxn)
 
@@ -51,7 +53,12 @@ habitat <- readRDS("data/tidy/merged_habitat.rds")%>%
                 'bathy_depth'='layer_depth',)%>%
   glimpse()
 
-metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')%>%
+metadata.maxn <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')%>%
+  dplyr::filter(successful.count %in% c("Yes"))%>%
+  glimpse()
+
+check <- metadata.maxn %>%
+  dplyr::anti_join(maxn)%>%
   glimpse()
 
 # look at top species ----
@@ -129,39 +136,29 @@ species.maxn <- maxn %>%
   dplyr::mutate(response = scientific)%>%
   distinct()
 
-combined.maxn <- bind_rows(fished.maxn, species.maxn, 
+dat.maxn <- bind_rows(fished.maxn, species.maxn, 
                       ta.sr)%>%
+  dplyr::left_join(metadata.maxn)%>%
+  dplyr::left_join(habitat)%>%
   dplyr::select(-scientific)%>%
+  drop_na(fieldofview.open)%>%
   glimpse()
-
-dat.maxn <- combined.maxn %>%
-  dplyr::right_join(metadata, by = c("sample")) %>% # add in all samples
-  dplyr::select(sample,response,number) %>%
-  tidyr::complete(nesting(sample), response) %>%
-  replace_na(list(number = 0)) %>%
-  dplyr::filter(!is.na(response)) %>%
-  dplyr::ungroup()%>%
-   dplyr::left_join(.,metadata) %>%
-   dplyr::left_join(.,habitat) %>%
-   dplyr::filter(successful.count%in%c("Yes")) %>%
-   dplyr::mutate(response=as.character(response)) %>%
-   drop_na(fieldofview.open)%>%
-  dplyr::glimpse()
-
-#205 samples, 6 responses
-205*6
-#1230 - it is before we filter by successful count
 
 #Export the data to .rds for use in next script
 saveRDS(dat.maxn, "data/tidy/dat.maxn.rds")
 
 #Import data for lengths
-length <- read.csv("data/tidy/montebello.synthesis.checked.length.csv")%>%
+length <- read.csv("data/tidy/montebello.synthesis.complete.length.csv")%>%
   mutate(scientific=paste(family,genus,species))%>%
   glimpse()
 
-metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')
+metadata.length <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')%>%
+  dplyr::filter(successful.length %in% c('Yes'))%>%
+  glimpse()
 
+check <- metadata.length %>%
+  dplyr::anti_join(length)%>%
+  glimpse()
 
 # Create abundance of all recreational fished species ----
 fished.species <- length %>%
@@ -269,13 +266,13 @@ combined.length <- bind_rows(legal, sublegal, atkinsoni.legal, atkinsoni.sublega
 unique(combined.length$scientific)
 
 dat.length <- combined.length %>%
-  dplyr::right_join(metadata, by = c("sample")) %>% # add in all samples
+  dplyr::right_join(metadata.length, by = c("sample")) %>% # add in all samples
   dplyr::select(sample,scientific,number) %>%
   tidyr::complete(nesting(sample), scientific) %>%
   replace_na(list(number = 0)) %>% #we add in zeros - in case we want to calculate abundance of species based on a length rule (e.g. greater than legal size)
   dplyr::ungroup()%>%
   dplyr::filter(!is.na(scientific)) %>% # this should not do anything
-  dplyr::left_join(.,metadata) %>%
+  dplyr::left_join(.,metadata.length) %>%
   dplyr::left_join(.,habitat) %>%
   dplyr::filter(successful.length%in%c("Yes")) %>%
   dplyr::mutate(scientific=as.character(scientific)) %>%
@@ -283,10 +280,15 @@ dat.length <- combined.length %>%
   drop_na(fieldofview.open)%>%
   dplyr::glimpse()
 
+check <- metadata.length %>%
+  dplyr::anti_join(dat.length)%>%
+  glimpse()
+#there are two samples that are yeeted but they have no habitat
+
 saveRDS(dat.length, "data/tidy/dat.length.rds")
 
 #Set and check predictor variables - these don't change so just doing for lengths
-names(dat.length)
+names(dat.maxn)
 names(habitat)
 
 pred.vars=c("depth","biota.unconsolidated", "biota.macroalgae", "biota.crinoids",

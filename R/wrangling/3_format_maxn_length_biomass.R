@@ -109,8 +109,8 @@ complete.length.number<-read_csv(file=paste(study,"checked.length.csv",sep = "."
   left_join(.,metadata)%>%
   glimpse()
 
-length(unique(metadata$id)) # 1121
-length(unique(complete.length.number$id)) # 1121
+length(unique(metadata$id)) # 205
+length(unique(complete.length.number$id)) # 205
 
 # Make the expanded length data----
 # For use in length analyses - i.e KDE or histograms

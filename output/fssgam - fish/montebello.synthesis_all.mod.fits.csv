@@ -1,7 +1,7 @@
 "","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","tpi","roughness","detrended","status","cumsum.wi"
-"Chromis fumea","depth+detrended+mean.relief",476.595894220793,502.865578466869,0.10782,NA,5.86,0,0,0.972,0.72,0.232,1,1,0,0,0,0,0,1,0,0.72
-"Lethrinus atkinsoni","depth+detrended+mean.relief",591.487187044127,616.527885345259,0.18236,NA,5.61,0,0,0.29,0.712,0.433,1,1,0,0,0,0,0,1,0,0.712
-"Pomacentrus coelestis","depth+detrended+mean.relief",583.7727134986,609.119905141295,0.06164,NA,5.89,0,0,0,0.844,0.839,1,1,0,0,0,0,0,1,0,0.844
-"species.richness","detrended+mean.relief+roughness",1379.92277423292,1402.1933311344,0.4247,NA,4.95,0,0,0,0.729,0.487,0,1,0,0,0,0,1,1,0,0.729
 "targeted.abundance","depth+detrended+mean.relief",1202.87805053402,1228.18634618745,0.21718,NA,5.83,0,0,0,0.92,0.754,1,1,0,0,0,0,0,1,0,0.92
+"Lethrinus atkinsoni","depth+detrended+mean.relief",591.487187044127,616.527885345259,0.18236,NA,5.61,0,0,0.29,0.712,0.433,1,1,0,0,0,0,0,1,0,0.712
+"Chromis fumea","depth+detrended+mean.relief",476.595894220793,502.865578466869,0.10782,NA,5.86,0,0,0.972,0.72,0.232,1,1,0,0,0,0,0,1,0,0.72
+"Pomacentrus coelestis","depth+detrended+mean.relief",583.7727134986,609.119905141295,0.06164,NA,5.89,0,0,0,0.844,0.839,1,1,0,0,0,0,0,1,0,0.844
 "total.abundance","depth+mean.relief+tpi",2023.43167711808,2051.27293757456,0.16123,NA,6.34,0,0,5.427,0.525,0.044,1,1,0,0,0,1,0,0,0,0.525
+"species.richness","detrended+mean.relief+roughness",1379.92277423292,1402.1933311344,0.4247,NA,4.95,0,0,0,0.729,0.487,0,1,0,0,0,0,1,1,0,0.729

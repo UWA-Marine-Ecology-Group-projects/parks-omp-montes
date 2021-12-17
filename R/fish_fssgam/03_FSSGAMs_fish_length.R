@@ -123,7 +123,6 @@ ggplot(trout, aes(value, number)) +
   geom_smooth() +
   facet_wrap(~ variable, scales = "free")
 
-
 # Generic importance plots-
 heatmap.2(all.var.imp,notecex=0.4,  dendrogram ="none",
           col=colorRampPalette(c("white","yellow","red"))(10),

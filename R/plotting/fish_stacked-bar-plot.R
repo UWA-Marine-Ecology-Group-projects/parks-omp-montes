@@ -50,18 +50,38 @@ theme.larger.text<-theme(
 maxn <- read.csv("data/tidy/montebello.synthesis.checked.maxn.csv")%>%
   glimpse()
 
+test <- maxn %>%
+  dplyr::mutate(scientific = paste(family,genus,species, sep = " "))%>%
+  glimpse()
+
+species <- as.data.frame(unique(test$scientific)) 
+
+#get stats to use for the little section in report
+sum(test$maxn) #16935 fish
+
+length(unique(test$sample)) #200
+
+length(unique(test$family)) #63
+length(unique(test$genus)) #161
+length(unique(test$scientific)) #385
+length(unique(test$species)) #325
+
+length <- read.csv(file = 'data/tidy/montebello.synthesis.expanded.length.csv')
+
+mass <- read.csv(file = 'data/tidy/montebello.synthesis.complete.mass.csv')
+
 metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')%>%
   glimpse()
 
-# # workout total maxn for each species ---
-# maxn.10<-maxn%>%
-#   mutate(scientific=paste(genus,species,sep=" "))%>%
-#   group_by(scientific)%>%
-#   dplyr::summarise(maxn=sum(maxn))%>%
-#   ungroup()%>%
-#   top_n(12)%>%
-#   dplyr::filter(!scientific%in%c('Unknown sp10', 'Unknown spp'))%>%
-#   glimpse()
+# workout total maxn for each species ---
+maxn.10<-maxn%>%
+  mutate(scientific=paste(genus,species,sep=" "))%>%
+  group_by(scientific)%>%
+  dplyr::summarise(maxn=sum(maxn))%>%
+  ungroup()%>%
+  top_n(12)%>%
+  dplyr::filter(!scientific%in%c('Unknown sp10', 'Unknown spp'))%>%
+  glimpse()
 # 
 # 
 # ## Total frequency of occurance 
