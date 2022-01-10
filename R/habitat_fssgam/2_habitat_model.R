@@ -13,16 +13,17 @@ library(viridis)
 library(raster)
 
 # read in
-habi   <- readRDS("data/tidy/merged_habitat.rds")                               # merged data from 'R/1_mergedata.R'
-preds  <- readRDS("data/spatial/spatial_covariates.rds")                        # spatial covs from 'R/1_mergedata.R'
+habi  <- readRDS("data/tidy/merged_habitat.rds")                               # merged data from 'R/1_mergedata.R'
+tifs  <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)
+preds <- stack(tifs)
 preddf <- as.data.frame(preds, xy = TRUE, na.rm = TRUE)
-preddf$Depth <- preddf$Z * -1
+# preddf$Depth <- preddf$Z * -1
 
 # reduce predictor space to fit survey area
 # preddf <- preddf[preddf$Depth > min(habi$Depth), ]
 # preddf <- preddf[preddf$Depth < 200, ]
-habisp <- SpatialPointsDataFrame(coords = cbind(habi$Longitude.1, 
-                                                habi$Latitude.1), data = habi)
+habisp <- SpatialPointsDataFrame(coords = cbind(habi$longitude.1, 
+                                                habi$latitude.1), data = habi)
 sbuff  <- buffer(habisp, 10000)
 
 # # visualise patterns
@@ -38,77 +39,91 @@ sbuff  <- buffer(habisp, 10000)
 #   facet_grid(habitat ~ covariate, scales = "free")
 
 # use formula from top model from '2_modelselect.R'
-m_kelps <- gam(cbind(kelps, totalpts - kelps) ~ 
-                 s(Depth,     k = 5, bs = "cr")  + 
-                 s(roughness, k = 5, bs = "cr") + 
-                 s(tpi, k = 5, bs = "cr"), 
-               data = habi, method = "REML", family = binomial("logit"))
-summary(m_kelps)
-gam.check(m_kelps)
-vis.gam(m_kelps)
+m_photic <- gam(cbind(photic.reef, Total.Sum - photic.reef) ~ 
+                  s(layer_depth,     k = 5, bs = "cr")  + 
+                  s(layer_detrended, k = 5, bs = "cr") + 
+                  s(layer_roughness, k = 5, bs = "cr") +
+                  s(layer_tpi, k = 5, bs = "cr"), 
+                data = habi, method = "REML", family = binomial("logit"))
+summary(m_photic)
+gam.check(m_photic)
+vis.gam(m_photic)
 
-m_macro <- gam(cbind(macroalgae, totalpts - macroalgae) ~ 
-                 s(Depth,     k = 5, bs = "cr")  + 
-                 s(detrended, k = 5, bs = "cr") + 
-                 s(roughness, k = 5, bs = "cr"), 
-               data = habi, method = "REML", family = binomial("logit"))
+m_meso <- gam(cbind(mesophotic.reef, Total.Sum - mesophotic.reef) ~ 
+                s(layer_depth,     k = 5, bs = "cr")  + 
+                s(layer_detrended, k = 5, bs = "cr") + 
+                s(layer_roughness, k = 5, bs = "cr") +
+                s(layer_tpi, k = 5, bs = "cr"), 
+              data = habi, method = "REML", family = binomial("logit"))
+summary(m_meso)
+gam.check(m_meso)
+vis.gam(m_meso)
+
+m_macro <- gam(cbind(biota.macroalgae, Total.Sum - biota.macroalgae) ~ 
+                 s(layer_depth,     k = 5, bs = "cr")  + 
+                 s(layer_detrended, k = 5, bs = "cr") + 
+                 s(layer_roughness, k = 5, bs = "cr") +
+                 s(layer_tpi, k = 5, bs = "cr"), 
+          data = habi, method = "REML", family = binomial("logit"))
 summary(m_macro)
 gam.check(m_macro)
 vis.gam(m_macro)
 
-m_biogenic <- gam(cbind(biog, totalpts - biog) ~ 
-            s(Depth,     k = 5, bs = "cr") + 
-            s(detrended, k = 5, bs = "cr") + 
-            s(roughness,       k = 5, bs = "cr"), 
-          data = habi, method = "REML", family = binomial("logit"))
-summary(m_biogenic)
-gam.check(m_biogenic)
-vis.gam(m_biogenic)
-
-m_sand <- gam(cbind(sand, totalpts - sand) ~ 
-                s(Depth,     k = 5, bs = "cr") + 
-                s(roughness, k = 5, bs = "cr") + 
-                s(tpi,       k = 5, bs = "cr"), 
+m_stony <- gam(cbind(biota.stony.corals, Total.Sum - biota.stony.corals) ~ 
+                s(layer_depth,     k = 5, bs = "cr")  + 
+                s(layer_detrended, k = 5, bs = "cr") + 
+                s(layer_roughness, k = 5, bs = "cr"), 
               data = habi, method = "REML", family = binomial("logit"))
-summary(m_sand)
-gam.check(m_sand)
-vis.gam(m_sand)
+summary(m_stony)
+gam.check(m_stony)
+vis.gam(m_stony)
 
-m_rock <- gam(cbind(rock, totalpts - rock) ~ 
-                s(Depth, k = 5, bs = "cr") + 
-                s(detrended,  k = 5, bs = "cr") + 
-                s(tpi,    k = 5, bs = "cr"), 
+m_rock <- gam(cbind(biota.consolidated, Total.Sum - biota.consolidated) ~ 
+                s(layer_depth,     k = 5, bs = "cr")  + 
+                s(layer_detrended, k = 5, bs = "cr") + 
+                s(layer_roughness, k = 5, bs = "cr") +
+                s(layer_tpi, k = 5, bs = "cr"), 
               data = habi, method = "REML", family = binomial("logit"))
 summary(m_rock)
 gam.check(m_rock)
 vis.gam(m_rock)
 
+m_sand <- gam(cbind(biota.unconsolidated, Total.Sum - biota.unconsolidated) ~ 
+                s(layer_depth,     k = 5, bs = "cr")  + 
+                s(layer_detrended, k = 5, bs = "cr") + 
+                s(layer_roughness, k = 5, bs = "cr") +
+                s(layer_tpi, k = 5, bs = "cr"), 
+              data = habi, method = "REML", family = binomial("logit"))
+summary(m_sand)
+gam.check(m_sand)
+vis.gam(m_sand)
 
 # predict, rasterise and plot
 preddf <- cbind(preddf, 
-                "pkelps" = predict(m_kelps, preddf, type = "response"),
-                "pmacroalg" = predict(m_macro, preddf, type = "response"),
+                "pcoral" = predict(m_stony, preddf, type = "response"),
+                "pmacro" = predict(m_macro, preddf, type = "response"),
                 "psand" = predict(m_sand, preddf, type = "response"),
                 "prock" = predict(m_rock, preddf, type = "response"),
-                "pbiogenic" = predict(m_biogenic, preddf, type = "response"))
+                "pphotic" = predict(m_photic, preddf, type = "response"),
+                "pmeso" = predict(m_meso, preddf, type = "response"))
 
-prasts <- rasterFromXYZ(preddf, res = c(247, 277))
-prasts$dom_tag <- which.max(prasts[[10:14]])
-plot(prasts)
+prasts <- rasterFromXYZ(preddf, res = c(30, 30))
+prasts$dom_tag <- which.max(prasts[[6:11]])
+plot(prasts[[6:12]])
 
 # categorise by dominant tag
-preddf$dom_tag <- apply(preddf[12:16], 1,
+preddf$dom_tag <- apply(preddf[8:13], 1,
                         FUN = function(x){names(which.max(x))})
 preddf$dom_tag <- sub('.', '', preddf$dom_tag)
 head(preddf)
 
 # subset to 10km from sites only
 sprast <- mask(prasts, sbuff)
-plot(sprast)
+plot(sprast[[6:12]])
 
 # tidy and output data
 spreddf         <- as.data.frame(sprast, xy = TRUE, na.rm = TRUE)
-spreddf$dom_tag <- (names(spreddf)[12:16])[spreddf$dom_tag]
+spreddf$dom_tag <- (names(spreddf)[8:13])[spreddf$dom_tag]
 
-saveRDS(preddf, "output/broad_habitat_predictions.rds")
+# saveRDS(preddf, "output/broad_habitat_predictions.rds")  # not keeping these, too big for git
 saveRDS(spreddf, "output/site_habitat_predictions.rds")

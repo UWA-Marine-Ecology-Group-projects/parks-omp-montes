@@ -36,7 +36,7 @@ wgscrs <- CRS("+proj=longlat +datum=WGS84 +south")
 utmcrs <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")
 
 # align crs and check samples over bathy and extract terrain data
-allhab_sp <- SpatialPointsDataFrame(coords = habitat[21:20], data = habitat, 
+allhab_sp <- SpatialPointsDataFrame(coords = habitat[22:21], data = habitat, 
                                     proj4string = wgscrs)
 allhab_t  <- spTransform(allhab_sp, CRS = utmcrs)
 plot(preds[[1]])

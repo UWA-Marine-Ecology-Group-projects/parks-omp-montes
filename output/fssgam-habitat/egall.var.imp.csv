@@ -1,0 +1,7 @@
+"","layer_depth","layer_detrended","layer_roughness","layer_tpi"
+"biota.consolidated",1,1,0.999,0.99
+"biota.macroalgae",1,1,1,0.997
+"biota.stony.corals",1.001,0.948,0.998,0.007
+"biota.unconsolidated",1,1,0.998,1
+"mesophotic.reef",1,1,1,1
+"photic.reef",1,1,1,0.559

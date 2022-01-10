@@ -68,18 +68,16 @@ library(FSSgam)
 
 # Bring in and format the data----
 habi <- readRDS("data/tidy/merged_habitat.rds")                                 # merged data from 'R/1_mergedata.R'
-
-habi <- habi[ , -c(9:49)]
-
 colnames(habi)
-habi <- melt(habi, measure.vars = c(21:26))                               # collect all taxa tags for univariate stats
-head(habi)
+habi <- melt(habi, measure.vars = c(9, 12, 15, 16, 33, 34))                               # collect all taxa tags for univariate stats
+
 # Set predictor variables---
-pred.vars <- c("Depth","tri", "tpi", "roughness", "slope", "aspect", "detrended") 
+pred.vars <- c("layer_depth","layer_detrended", 
+               "layer_roughness", "layer_tpi") 
 
 # Check for correlation of predictor variables- remove anything highly correlated (>0.95)---
 round(cor(habi[ , pred.vars]), 2)
-# several highly correlated terrain variables here but I think we need to keep them?
+# dropping slope but should try trading slope and roughness
 
 # # Review of individual predictors for even distribution---
 # # Plot of likely transformations - Anna Cresswell loop
@@ -97,15 +95,15 @@ round(cor(habi[ , pred.vars]), 2)
 # 
 # review and create cols for best transforms
 habi <- habi %>%
-  mutate(logdepth = log(Depth)) %>%
-  # mutate(sqrttri = sqrt(tri)) %>%
-  mutate(sqrtrough = sqrt(roughness)) %>%
+  # mutate(logdepth = log(Depth)) %>%
+  # # mutate(sqrttri = sqrt(tri)) %>%
+  # mutate(sqrtrough = sqrt(roughness)) %>%
   # mutate(sqrtslope = sqrt(slope)) %>%
   rename(Taxa = variable) %>%
   rename(response = value)
 
 # # Re-set the predictors for modeling----
-pred.vars <- c("Depth","roughness", "tpi", "detrended") 
+# pred.vars <- c("Depth","roughness", "tpi", "detrended") # slope and roughness had high cov
 
 # Check to make sure Response vector has not more than 80% zeros----
 unique.vars     <- unique(as.character(habi$Taxa))
@@ -115,13 +113,12 @@ unique.vars     <- unique(as.character(habi$Taxa))
 #   if(length(which(temp.dat$response == 0)) / nrow(temp.dat) < 0.8){
 #     unique.vars.use <- c(unique.vars.use, unique.vars[i])}
 # }
-# unique.vars.use
-unique.vars.use <- unique.vars[unique.vars != "turf"]
+unique.vars.use <- unique.vars
 # unique.vars.use <- unique.vars.use[11:12] # only macroalgae and sponge of interest. remove unknown, open water
 # unique.vars.use     
 
 # Run the full subset model selection----
-outdir    <- ("output/fssgam/") #Set wd for example outputs - will differ on your computer
+outdir    <- ("output/fssgam-habitat/") #Set wd for example outputs - will differ on your computer
 resp.vars <- unique.vars.use
 use.dat   <- habi[habi$Taxa %in% c(unique.vars.use), ]
 # factor.vars <- c("Status")# Status as a Factor with two levels
@@ -132,22 +129,21 @@ name <- "eg"
 # Loop through the FSS function for each Taxa----
 for(i in 1:length(resp.vars)){
   use.dat <- habi[habi$Taxa == resp.vars[i],]
-  use.dat <- use.dat[!(use.dat$totalpts - use.dat$response < 0), ] # added to fix weird point
   # use.dat$Site <- as.factor(use.dat$Site)
-  Model1  <- gam(cbind(response, (totalpts - response)) ~ 
-                   s(Depth, bs = 'cr'),
-                 family = binomial("logit"),  data = use.dat)
+  Model1  <- gam(cbind(response, (Total.Sum - response)) ~ s(layer_depth, bs = 'cr'),
+                 family = binomial(link = "logit"),  data = use.dat)
   
   model.set <- generate.model.set(use.dat = use.dat,
-                               test.fit = Model1,
-                               pred.vars.cont = pred.vars,
-                               # pred.vars.fact=factor.vars,
-                               # linear.vars="Distance",
-                               cyclic.vars = c("aspect"),
-                               k = 5,
-                               cov.cutoff = 0.7
-                               # null.terms = "s(Site, bs='re')"
-                               )
+                                  test.fit = Model1,
+                                  pred.vars.cont = pred.vars,
+                                  # pred.vars.fact=factor.vars,
+                                  # linear.vars="Distance",
+                                  # cyclic.vars = c("aspect"),
+                                  max.predictors = 4,
+                                  k = 5,
+                                  cov.cutoff = 0.7
+                                  # null.terms = "s(Site, bs='re')"
+  )
   out.list <- fit.model.set(model.set,
                             max.models = 600,
                             parallel = T)

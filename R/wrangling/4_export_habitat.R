@@ -39,26 +39,26 @@ library(fst)
 study<-"montebello.synthesis"  ## change for your project
 
 ## Set your working directory ----
-working.dir <- getwd()
-setwd(working.dir)
+# working.dir <- getwd()
+# setwd(working.dir)
 #OR set manually once
 
 ## Save these directory names to use later----
-staging.dir<-paste(working.dir,"staging",sep="/") 
-download.dir<-paste(working.dir,"downloads",sep="/")
-tidy.dir<-paste(working.dir,"tidy data",sep="/")
-plots.dir=paste(working.dir,"plots",sep="/")
-error.dir=paste(working.dir,"errors to check",sep="/")
-checking.dir <- paste(working.dir,"data to be checked",sep="/")
+staging.dir  <- "data/staging"
+download.dir <- "data/downloads"
+tidy.dir     <- "data/tidy"
+plots.dir    <- "plots"
+error.dir    <- "data/errors to check"
+checking.dir <- "data/data to be checked"
 
 # Read in metadata----
-metadata<-read_csv(file="montebello.synthesis_metadata.csv")%>%
+metadata<-read_csv(file=paste(checking.dir, "montebello.synthesis_metadata.csv", sep = "/"))%>%
   dplyr::mutate(id=paste(campaignid,sample,sep="."))%>%
   glimpse()
 
 # Read in habitat----
 setwd(working.dir)
-habitat<-ga.list.files("_Habitat.point.score.txt")%>% # list all files ending in "_Habitat.point.score.csv"
+habitat <- ga.list.files("_Habitat.point.score.txt") %>% # list all files ending in "_Habitat.point.score.csv"
   purrr::map_df(~ga.read.files_txt(.))%>%
   dplyr::select(project,campaignid,sample, everything())%>%
   glimpse()
@@ -103,10 +103,14 @@ habitat<-habitat%>%
 
  # select(sample,campaignid,project,relief.0,relief.1,relief.2,relief.3,relief.4,relief.5,fieldofview.facing.down,fieldofview.facing.up,fieldofview.limited,fieldofview.open,biota.ascidians,biota.bryozoa,biota.consolidated,biota.crinoids,biota.hydrocoral,biota.hydroids,biota.invertebrate.complex,biota.macroalgae,biota.mangrove,biota.octocoral.black,biota.seagrasses,biota.sponges,biota.stony.corals,biota.true.anemones,biota.unconsolidated,biota.zoanthids)
 
+# fix character to numeric columns
+habitat[, 10:22] <- sapply(habitat[, 10:22], as.numeric)
+
+
 # Create %fov----
 fov.percent.cover<-habitat%>%
   select(campaignid,sample,starts_with("fieldofview"))%>%
-  mutate_all(funs(replace(.,is.na(.),0)))%>%
+  mutate_all(funs(replace(.,is.na(.),0))) %>%
   mutate(Total.Sum=rowSums(.[,3:(ncol(.))],na.rm = TRUE ))%>%
   group_by(campaignid,sample)%>%
   mutate_at(vars(starts_with("fieldofview.")),funs(./Total.Sum*100))%>%
@@ -130,19 +134,17 @@ broad.percent.cover<-habitat%>%
   select(campaignid,sample,starts_with("biota."))%>%
    mutate(Total.Sum=rowSums(.[,3:(ncol(.))],na.rm = TRUE ))%>%
    group_by(campaignid,sample)%>%
-   mutate_at(vars(starts_with("biota.")),funs(./Total.Sum*100))%>%
-   select(-Total.Sum)%>%
+   # mutate_at(vars(starts_with("biota.")),funs(./Total.Sum*100))%>%
+   # select(-Total.Sum)%>% # KG hashed out - better to have as binomial for habitat modelling
    data.frame()%>%
   glimpse()
 
-is.nan.data.frame <- function(x)
-  do.call(cbind, lapply(x, is.nan))
-broad.percent.cover[is.nan(broad.percent.cover)] <- 0 
-broad.percent.cover%>%glimpse()
+# is.nan.data.frame <- function(x)
+#   do.call(cbind, lapply(x, is.nan))
+# broad.percent.cover[is.nan(broad.percent.cover)] <- 0 
+# broad.percent.cover%>%glimpse()
 
 # Write final habitat data----
-setwd(tidy.dir)
-dir()
 
 habitat.relief.fov<-relief.mean.and.sd%>%
   full_join(fov.percent.cover,by=c("campaignid","sample"))%>%
@@ -154,6 +156,7 @@ habitat.relief.fov<-relief.mean.and.sd%>%
   glimpse()
 
 
-write.csv(habitat.relief.fov, file=paste(study,"complete.habitat.csv",sep = "."), row.names=FALSE)
-write.fst(habitat.relief.fov,"complete.habitat.fst")
+write.csv(habitat.relief.fov, 
+          file=paste(tidy.dir, paste(study, "complete.habitat.csv", sep = "."), sep = "/"), row.names=FALSE)
+write.fst(habitat.relief.fov, "data/tidy/complete.habitat.fst")
 
