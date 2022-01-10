@@ -457,7 +457,7 @@ ggmod.sublegal.depth
 # detrended ----
 ggmod.sublegal.detrended<- ggplot() +
   ylab("")+
-  xlab("Detrended")+
+  xlab("Detrended bathymetry")+
   geom_point(data=dat.sublegal,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
   geom_line(data=predicts.sublegal.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
   geom_line(data=predicts.sublegal.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
@@ -499,6 +499,10 @@ predicts.spango.status = testdata%>%data.frame(fits)%>%
 
 # PLOTS for Legal spango ----
 # status ----
+#load fish picture
+l.n <- readPNG("data/images/lethrinus nebulosus 3cm.png")
+l.n <- as.raster(l.n)
+
 ggmod.spango.status<- ggplot(aes(x=status,y=maxn,fill=status,colour=status), data=predicts.spango.status) +
   ylab("")+
   xlab('Status')+
@@ -512,7 +516,8 @@ ggmod.spango.status<- ggplot(aes(x=status,y=maxn,fill=status,colour=status), dat
   scale_y_continuous(expand = expansion(mult = c(0, .1)))+
   theme(legend.position = "none")+
   ggtitle("Legal Lethrinus nebulosus") +
-  theme(plot.title = element_text(hjust = 0))
+  theme(plot.title = element_text(hjust = 0))+
+  annotation_raster(l.n, xmin=1.7, xmax=2.5, ymin=0.8, ymax=1)
 ggmod.spango.status
 
 # MODEL Sublegal trout (depth + mean relief) ----
@@ -550,6 +555,10 @@ predicts.sublegaltrout.relief = testdata%>%data.frame(fits)%>%
 
 # PLOTS for Sublegal trout ----
 # depth ----
+#load fish pic
+p.spp <- readPNG("data/images/Plectropomus leopardus 3cm.png")
+p.spp <- as.raster(p.spp)
+
 ggmod.sublegaltrout.depth<- ggplot() +
   ylab("")+
   xlab("Depth")+
@@ -560,7 +569,8 @@ ggmod.sublegaltrout.depth<- ggplot() +
   theme_classic()+
   Theme1+
   ggtitle("Sublegal Plectropomus spp") +
-  theme(plot.title = element_text(hjust = 0))
+  theme(plot.title = element_text(hjust = 0))+
+  annotation_raster(p.spp, xmin=37.5, xmax=62.5, ymin=5.25, ymax=6.75)
 ggmod.sublegaltrout.depth
 
 # mean relief ----
@@ -610,6 +620,10 @@ predicts.legalatkinsoni.mesophotic = testdata%>%data.frame(fits)%>%
 
 # PLOTS for Legal atkinsoni ----
 # depth ----
+#load fish pic
+l.a <- readPNG("data/images/Lethrinus atkinsoni 5cmL.png")
+l.a <- as.raster(l.a)
+
 ggmod.legalatkinsoni.depth<- ggplot() +
   ylab("")+
   xlab("Depth")+
@@ -620,7 +634,8 @@ ggmod.legalatkinsoni.depth<- ggplot() +
   theme_classic()+
   Theme1+
   ggtitle("Legal Lethrinus atkinsoni") +
-  theme(plot.title = element_text(hjust = 0))
+  theme(plot.title = element_text(hjust = 0))+
+  annotation_raster(l.a, xmin=45, xmax=65, ymin=17.5, ymax=22.5)
 ggmod.legalatkinsoni.depth
 
 # mesophotic reef ----
@@ -697,13 +712,14 @@ ggmod.sublegalatkinsoni.depth<- ggplot() +
   theme_classic()+
   Theme1+
   ggtitle("Sublegal Lethrinus atkinsoni") +
-  theme(plot.title = element_text(hjust = 0))
+  theme(plot.title = element_text(hjust = 0))+
+  annotation_raster(l.a, xmin=45, xmax=65, ymin=20, ymax=25)
 ggmod.sublegalatkinsoni.depth
 
 # detrended ----
 ggmod.sublegalatkinsoni.detrended<- ggplot() +
   ylab("")+
-  xlab("Detrended")+
+  xlab("Detrended bathymetry")+
   geom_point(data=dat.sublegalatkinsoni,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
   geom_line(data=predicts.sublegalatkinsoni.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
   geom_line(data=predicts.sublegalatkinsoni.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
@@ -786,13 +802,14 @@ ggmod.atkinsoni.depth<- ggplot() +
   theme_classic()+
   Theme1+
   ggtitle("Lethrinus atkinsoni") +
-  theme(plot.title = element_text(hjust = 0))
+  theme(plot.title = element_text(hjust = 0))+
+  annotation_raster(l.a, xmin=45, xmax=65, ymin=30, ymax=37.5)
 ggmod.atkinsoni.depth
 
 # detrended ----
 ggmod.atkinsoni.detrended<- ggplot() +
   ylab("")+
-  xlab("Detrended")+
+  xlab("Detrended bathymetry")+
   geom_point(data=dat.atkinsoni,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
   geom_line(data=predicts.atkinsoni.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
   geom_line(data=predicts.atkinsoni.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
@@ -865,6 +882,10 @@ predicts.coelestis.relief = testdata%>%data.frame(fits)%>%
 
 # PLOTS for Pomacentrus coelestis abundance ----
 # depth ----
+#load fish pic
+p.c <- readPNG("data/images/Pomacentrus coelestis-3cmL.png")
+p.c <- as.raster(p.c)
+
 ggmod.coelestis.depth<- ggplot() +
   ylab("")+
   xlab("Depth")+
@@ -875,13 +896,14 @@ ggmod.coelestis.depth<- ggplot() +
   theme_classic()+
   Theme1+
   ggtitle("Pomacentrus coelestis") +
-  theme(plot.title = element_text(hjust = 0))
+  theme(plot.title = element_text(hjust = 0))+
+  annotation_raster(p.c, xmin=47.5, xmax=62.5, ymin=200, ymax=240)
 ggmod.coelestis.depth
 
 # detrended ----
 ggmod.coelestis.detrended<- ggplot() +
   ylab("")+
-  xlab("Detrended")+
+  xlab("Detrended bathymetry")+
   geom_point(data=dat.coelestis,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
   geom_line(data=predicts.coelestis.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
   geom_line(data=predicts.coelestis.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
@@ -954,6 +976,10 @@ predicts.fumea.relief = testdata%>%data.frame(fits)%>%
 
 # PLOTS for Chromis fumea abundance ----
 # depth ----
+#load fish pic
+c.f <- readPNG("data/images/Pomacentridae-Dark.png")
+c.f <- as.raster(c.f)
+
 ggmod.fumea.depth<- ggplot() +
   ylab("")+
   xlab("Depth")+
@@ -964,13 +990,14 @@ ggmod.fumea.depth<- ggplot() +
   theme_classic()+
   Theme1+
   ggtitle("Chromis fumea") +
-  theme(plot.title = element_text(hjust = 0))
+  theme(plot.title = element_text(hjust = 0))+
+  annotation_raster(c.f, xmin=47.5, xmax=62.5, ymin=95, ymax=115)
 ggmod.fumea.depth
 
 # detrended ----
 ggmod.fumea.detrended<- ggplot() +
   ylab("")+
-  xlab("Detrended")+
+  xlab("Detrended bathymetry")+
   geom_point(data=dat.fumea,aes(x=detrended,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
   geom_line(data=predicts.fumea.detrended,aes(x=detrended,y=maxn),alpha=0.5)+
   geom_line(data=predicts.fumea.detrended,aes(x=detrended,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
