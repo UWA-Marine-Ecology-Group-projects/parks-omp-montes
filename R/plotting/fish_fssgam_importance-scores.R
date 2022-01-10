@@ -1,9 +1,9 @@
 ###
-# Project: Parks - Abrolhos
-# Data:    BOSS fish, habitat
+# Project: Parks - Montes synthesis
+# Data:    BRUV fish, habitat
 # Task:    Plotting fish importance scores
 # author:  Claude
-# date:    Nov-Dec 2021
+# date:    Dec 2021-Feb 2022
 ##
 
 rm(list=ls())
@@ -11,6 +11,7 @@ rm(list=ls())
 # Plotting defaults----
 library(ggplot2)
 library(dplyr)
+library(ggtext)
 
 ## Set working directory----
 working.dir <- getwd()
@@ -80,7 +81,7 @@ Theme1 <-
     axis.title.x=element_text(vjust=0.3, size=10),
     axis.title.y=element_text(vjust=0.6, angle=90, size=10),
     axis.text.x=element_text(size=10,angle = 90, hjust=1,vjust=0.5),
-    axis.text.y=element_text(size=10,face="italic"),
+    axis.text.y=element_text(size=10),#,face="italic"),
     axis.line.x=element_line(colour="black", size=0.5,linetype='solid'),
     axis.line.y=element_line(colour="black", size=0.5,linetype='solid'),
     strip.background = element_blank())
@@ -96,9 +97,9 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
    geom_tile(show.legend=T) +
    scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
                          limits = c(-1, 1))+
-      scale_y_discrete( labels=c("Chromis fumea abundance",'Pomacentrus coelestis abundance',"Lethrinus atkinsoni abundance",
-                                 "Sublegal Lethrinus atkinsoni","Legal Lethrinus atkinsoni",
-                                 "Sublegal Plectropomus spp","Legal Plectropomus spp","Legal Lethrinus nebulosus",
+      scale_y_discrete(labels=c("*Chromis fumea* abundance",'*Pomacentrus coelestis* abundance',"*Lethrinus atkinsoni* abundance",
+                                 "Sublegal *Lethrinus atkinsoni*","Legal *Lethrinus atkinsoni*",
+                                 "Sublegal *Plectropomus* spp","Legal *Plectropomus* spp","Legal *Lethrinus nebulosus*",
                                  "Sublegal","Legal",
                                  "Targeted abundance","Species richness","Total abundance"))+         #Tidy Taxa names
       scale_x_discrete(labels = c("Photic reef", "Mesophotic reef",  "Detrended bathymetry", "Roughness", "TPI", "Depth",
@@ -107,7 +108,8 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
    ylab(NULL)+
    theme_classic()+
    Theme1+
-   geom_text(aes(label=label))
+   geom_text(aes(label=label))+
+  theme(axis.text.y = ggtext::element_markdown())
 gg.importance.scores
 
 #save output - changed dimensions for larger text in report

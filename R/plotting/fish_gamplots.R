@@ -1,9 +1,9 @@
 ###
-# Project: Parks - Abrolhos
-# Data:    BOSS fish, habitat
+# Project: Parks - Montes synthesis
+# Data:    BRUV fish, habitat
 # Task:    Plotting fish importance GAM relationships
 # author:  Claude
-# date:    Nov-Dec 2021
+# date:    Dec 2021-Feb 2022
 ##
 
 rm(list=ls())

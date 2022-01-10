@@ -46,7 +46,7 @@ master <- googlesheets4::read_sheet(url)%>%
 
 names(master)
 
-unique(metadata$sample)
+length(unique(metadata$sample))
 
 total.number.fish <- sum(maxn$maxn) # 13901
 # total.number.measured <- length%>%
@@ -85,19 +85,12 @@ species.table <- maxn%>%
 
 unique(species.table$fishing.type)
 
-# ubiquity <- maxn%>%
-#   filter(maxn>0) %>%
-#   group_by(family,genus,species,scientific)%>%
-#   summarise(no.of.deployments=n())%>%
-#   ungroup() %>%
-#   mutate(ubiquity=(no.of.deployments/295)*100)
-
-
-# arch <-read.csv("archytype.list.csv") %>%
-#   mutate(genus.species=sp.names) %>%
-#   dplyr::select(genus.species,archetype)
-
-
+ubiquity <- maxn%>%
+  filter(maxn>0) %>%
+  group_by(family,genus,species,scientific)%>%
+  summarise(no.of.deployments=n())%>%
+  ungroup() %>%
+  mutate(ubiquity=(no.of.deployments/200)*100)
 
 cleaned<-species.table%>%
   dplyr::select(family,genus.species,australian.common.name,fishing.type,iucn.ranking)%>%

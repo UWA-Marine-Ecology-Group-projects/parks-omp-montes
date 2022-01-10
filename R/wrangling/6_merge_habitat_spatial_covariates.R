@@ -22,7 +22,7 @@ setwd(working.dir)
 #read in habitat
 habitat <- read.csv("data/tidy/montebello.synthesis.complete.habitat.csv")%>%
   dplyr::mutate(mesophotic.reef = biota.crinoids+biota.invertebrate.complex+biota.octocoral.black+
-           biota.sponges+biota.hydroids+biota.stony.corals)%>%
+           biota.sponges+biota.hydroids)%>%
   dplyr::mutate(photic.reef = biota.stony.corals + biota.macroalgae)%>%
   glimpse()
 
