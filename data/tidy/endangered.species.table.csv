@@ -1,25 +1,29 @@
-"","family","genus.species","australian.common.name","fishing.type","iucn.ranking"
-"1","Carcharhinidae","Carcharhinus albimarginatus","Silvertip shark","Commercial","Vulnerable"
-"2","Carcharhinidae","Carcharhinus amblyrhynchos","Grey Reef shark","","Near Threatened"
-"3","Carcharhinidae","Carcharhinus brevipinna","Spinner shark","","Near Threatened"
-"4","Carcharhinidae","Carcharhinus limbatus","Common blacktip shark","Commercial","Near Threatened"
-"5","Carcharhinidae","Carcharhinus melanopterus","Blacktip Reef shark","Commercial","Near Threatened"
-"6","Carcharhinidae","Carcharhinus plumbeus","Sandbar shark","Commercial","Vulnerable"
-"7","Carcharhinidae","Galeocerdo cuvier","Tiger shark","","Near Threatened"
-"8","Carcharhinidae","Negaprion acutidens","Lemon shark","","Vulnerable"
-"9","Carcharhinidae","Triaenodon obesus","Whitetip reef shark","","Near Threatened"
-"10","Chaetodontidae","Chaetodon trifascialis","Chevron butterflyfish","","Near Threatened"
-"11","Dasyatidae","Taeniurops meyeni","Blotched fantail ray","","Vulnerable"
-"12","Ginglymostomatidae","Nebrius ferrugineus","Tawny shark","","Vulnerable"
-"13","Glaucostegidae","Glaucostegus typus","Giant shovelnose ray","","Vulnerable"
-"14","Hemigaleidae","Hemipristis elongata","Fossil shark","","Vulnerable"
-"15","Labridae","Choerodon schoenleinii","Blackspot tuskfish","","Near Threatened"
-"16","Mobulidae","Mobula tarapacana","Chilean devil ray","","Vulnerable"
-"17","Monacanthidae","Oxymonacanthus longirostris","Harlequin filefish","","Vulnerable"
-"18","Rhinidae","Rhynchobatus australiae","Whitespotted guitarfish","","Critically Endangered"
-"19","Serranidae","Epinephelus coioides","Goldspotted rockcod","Commercial","Near Threatened"
-"20","Serranidae","Epinephelus fuscoguttatus","Flowery rockcod","Commercial","Near Threatened"
-"21","Serranidae","Epinephelus malabaricus","Blackspotted rockcod","Commercial","Near Threatened"
-"22","Serranidae","Epinephelus polyphekadion","Camouflage grouper","","Near Threatened"
-"23","Sphyrnidae","Sphyrna mokarran","Great hammerhead","Commercial","Endangered"
-"24","Stegostomatidae","Stegostoma fasciatum","Zebra shark","","Endangered"
+Scientific name,Common name,IUCN Ranking
+Rhynchobatus australiae,Whitespotted guitarfish,Critically Endangered
+Sphyrna mokarran,Great hammerhead,Critically Endangered
+Stegostoma fasciatum,Zebra shark,Endangered
+Negaprion acutidens,Lemon shark,Endangered
+Mobula tarapacana,Chilean devil ray,Endangered
+Carcharhinus amblyrhynchos,Grey Reef shark,Endangered
+Carcharhinus albimarginatus,Silvertip shark,Vulnerable
+Carcharhinus plumbeus,Sandbar shark,Vulnerable
+Taeniurops meyeni,Blotched fantail ray,Vulnerable
+Nebrius ferrugineus,Tawny shark,Vulnerable
+Glaucostegus typus,Giant shovelnose ray,Vulnerable
+Hemipristis elongata,Snaggletooth shark,Vulnerable
+Oxymonacanthus longirostris,Harlequin filefish,Vulnerable
+Pateobatis fai,Pink whipray,Vulnerable
+Carcharhinus amboinensis,Pigeye Shark,Vulnerable
+Carcharhinus melanopterus,Blacktip Reef shark,Vulnerable
+Triaenodon obesus,Whitetip reef shark,Vulnerable
+Pateobatis jenkinsii,Jenkin's Whipray,Vulnerable
+Carcharhinus brevipinna,Spinner shark,Near Threatened
+Carcharhinus limbatus,Common blacktip shark,Near Threatened
+Galeocerdo cuvier,Tiger shark,Near Threatened
+Chaetodon trifascialis,Chevron butterflyfish,Near Threatened
+Choerodon schoenleinii,Blackspot tuskfish,Near Threatened
+Epinephelus coioides,Goldspotted rockcod,Near Threatened
+Epinephelus fuscoguttatus,Flowery rockcod,Near Threatened
+Epinephelus malabaricus,Blackspotted rockcod,Near Threatened
+Epinephelus polyphekadion,Camouflage grouper,Near Threatened
+Neotrygon australiae,Bluespotted Maskray,Near Threatened
