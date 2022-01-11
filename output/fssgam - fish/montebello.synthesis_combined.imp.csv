@@ -1,14 +1,14 @@
 resp.var,depth,mean.relief,sd.relief,mesophotic.reef,photic.reef,tpi,roughness,detrended,status
-targeted.abundance,1,0.999,0,0.001,0,0.02,0,0.921,0
-Lethrinus atkinsoni,-0.999,0.996,0,0.003,0,0.087,0,0.714,0
+targeted.abundance,1,1,0,0,0,0.02,0,0.921,0
+Lethrinus atkinsoni,-1,0.997,0,0.003,0,0.087,0,0.715,0
 Pomacentrus coelestis,-1,0.999,0,0,0,0.155,0,0.845,0
-Chromis fumea,-0.884,0.776,0.217,0.002,0.009,-0.028,-0.013,-0.997,-0.03
+Chromis fumea,-0.885,0.774,0.216,0.006,0.01,-0.027,-0.013,-0.997,-0.03
 total.abundance,-0.563,0.99,0.011,0,0,0.833,0.242,0.084,-0.104
 species.richness,0.05,1,0,0,0,0.049,0.786,0.937,-0.038
-greater than legal size,1,0.979,0,0.021,0,-0.574,0,0.109,0
-legal size atkinsoni,-0.999,0.014,0,0.984,0,-0.317,0,0.207,0
-legal size spango,-0.125,0.123,0.172,-0.209,-0.262,0.147,0.007,-0.307,0.736
+greater than legal size,1,0.999,0,0.001,0,-0.573,0,0.109,0
+legal size atkinsoni,-0.998,0.033,0,0.963,0,-0.487,0,0.174,0
+legal size spango,-0.121,0.097,0.138,-0.37,-0.264,0.147,0.009,-0.287,0.75
 legal size trout,-0.164,0,0,0,0.005,0.001,0.175,0,0.162
-smaller than legal size,-0.999,0.317,0.002,0.677,0,0.102,0,0.759,0
-sublegal size atkinsoni,-0.978,0.941,0.001,0.057,0.002,0.225,0.023,0.566,0
-sublegal size trout,-0.994,0.781,0.22,0,-0.004,-0.205,0.007,0.1,0
+smaller than legal size,-0.999,0.436,0.002,0.557,0,0.091,0,0.764,0
+sublegal size atkinsoni,-0.979,0.9,0.001,0.097,0.002,0.221,0.021,0.565,0
+sublegal size trout,-0.996,0.422,0.118,0.459,-0.002,-0.191,0.003,0.169,0

@@ -12,6 +12,8 @@ rm(list=ls())
 library(ggplot2)
 library(dplyr)
 library(ggtext)
+library(tidyr)
+library(cowplot)
 
 ## Set working directory----
 working.dir <- getwd()
@@ -46,7 +48,7 @@ dat.taxa <-read.csv("output/fssgam - fish/montebello.synthesis_combined.imp.csv"
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="Chromis fumea","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="total.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="total.abundance","X",label))%>%
+  mutate(label=ifelse(predictor=="tpi"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="detrended"&resp.var=="species.richness","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="species.richness","X",label))%>%
   mutate(label=ifelse(predictor=="roughness"&resp.var=="species.richness","X",label))%>%
@@ -57,12 +59,12 @@ dat.taxa <-read.csv("output/fssgam - fish/montebello.synthesis_combined.imp.csv"
   mutate(label=ifelse(predictor=="status"&resp.var=="legal size spango","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="smaller than legal size","X",label))%>%
   mutate(label=ifelse(predictor=="detrended"&resp.var=="smaller than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="mesophotic.reef"&resp.var=="smaller than legal size","X",label))%>%
+  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="smaller than legal size","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="sublegal size atkinsoni","X",label))%>%
   mutate(label=ifelse(predictor=="detrended"&resp.var=="sublegal size atkinsoni","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="sublegal size atkinsoni","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="sublegal size trout","X",label))%>%
-  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="sublegal size trout","X",label))%>%
+  mutate(label=ifelse(predictor=="mesophotic.reef"&resp.var=="sublegal size trout","X",label))%>%
   glimpse()
 
 # Theme-
