@@ -119,11 +119,16 @@ head(preddf)
 
 # subset to 10km from sites only
 sprast <- mask(prasts, sbuff)
-plot(sprast[[6:12]])
+sprast <- sprast[[6:12]]
+plot(sprast)
 
-# tidy and output data
-spreddf         <- as.data.frame(sprast, xy = TRUE, na.rm = TRUE)
-spreddf$dom_tag <- (names(spreddf)[8:13])[spreddf$dom_tag]
+# write to tifs to reduce file sizes
+writeRaster(sprast, "output/spatial_predictions/layer.tif", 
+            bylayer = TRUE, suffix = names(sprast), overwrite = TRUE)
 
-# saveRDS(preddf, "output/broad_habitat_predictions.rds")  # not keeping these, too big for git
-saveRDS(spreddf, "output/site_habitat_predictions.rds")
+# # tidy and output data - not keeping this, too big for git
+# spreddf         <- as.data.frame(sprast, xy = TRUE, na.rm = TRUE)
+# spreddf$dom_tag <- (names(spreddf)[8:13])[spreddf$dom_tag]
+# 
+# # saveRDS(preddf, "output/broad_habitat_predictions.rds")  
+# saveRDS(spreddf, "output/site_habitat_predictions.rds")

@@ -51,7 +51,7 @@ plot(habsp, add = T)
 habuff   <- buffer(habsp, 10000)
 fbath    <- crop(bath_r, extent(habuff))
 fbath_df <- as.data.frame(fbath, xy = TRUE)
-saveRDS(fbath_df, 'output/ga_bathy_fine.rds')
+saveRDS(fbath_df, 'output/spatial_covariates/ga_bathy_fine.rds')
 
 # get fine bathy from the merged data in: https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/144600
 mbathy <- raster('data/spatial/raster/North_West_Shelf_DEM_v2_Bathymetry_2020_30m_MSL_cog.tif')
