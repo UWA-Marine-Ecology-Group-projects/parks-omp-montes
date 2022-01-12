@@ -27,7 +27,8 @@ maxn <- read_csv("data/tidy/montebello.synthesis.checked.maxn.csv")%>%
   mutate(scientific=paste(family,genus,species,sep=" "))%>%
   glimpse()
 
-# length <-read.csv("2020_south-west_stereo-BRUVs.complete.length.csv")
+mass <- read.csv("data/tidy/montebello.synthesis.complete.mass.csv")%>%
+  glimpse()
 
 # Read in metadata ----
 metadata<-read_csv("data/tidy/montebello.synthesis.checked.metadata.csv")%>%

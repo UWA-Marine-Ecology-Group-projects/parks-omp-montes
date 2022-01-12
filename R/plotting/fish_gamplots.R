@@ -389,16 +389,16 @@ ggmod.legal.relief<- ggplot() +
   Theme1
 ggmod.legal.relief
 
-# MODEL Sublegals (depth + detrended + mesophotic) ----
+# MODEL Sublegals (depth + detrended + mean relief) ----
 dat.sublegal <- dat %>% filter(response=="smaller than legal size")
 
-gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mesophotic.reef,k=3,bs='cr'), family=tw,data=dat.sublegal)
+gamm=gam(number~s(depth,k=3,bs='cr') + s(detrended,k=3,bs='cr')+ s(mean.relief,k=3,bs='cr'), family=tw,data=dat.sublegal)
 
 # predict - depth ----
 mod<-gamm
 testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
                         detrended=mean(mod$model$detrended),
-                        mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
+                        mean.relief=mean(mod$model$mean.relief)) %>%
   distinct()%>%
   glimpse()
 
@@ -413,7 +413,7 @@ predicts.sublegal.depth = testdata%>%data.frame(fits)%>%
 mod<-gamm
 testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 20),
                         depth=mean(mod$model$depth),
-                        mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
+                        mean.relief=mean(mod$model$mean.relief)) %>%
   distinct()%>%
   glimpse()
 
@@ -424,9 +424,9 @@ predicts.sublegal.detrended = testdata%>%data.frame(fits)%>%
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
-# predict - mesophotic reef ----
+# predict - mean relief ----
 mod<-gamm
-testdata <- expand.grid(mesophotic.reef=seq(min(dat$mesophotic.reef),max(dat$mesophotic.reef),length.out = 20),
+testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
                         depth=mean(mod$model$depth),
                         detrended=mean(mod$model$detrended)) %>%
   distinct()%>%
@@ -434,8 +434,8 @@ testdata <- expand.grid(mesophotic.reef=seq(min(dat$mesophotic.reef),max(dat$mes
 
 fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
 
-predicts.sublegal.mesophotic = testdata%>%data.frame(fits)%>%
-  group_by(mesophotic.reef)%>% #only change here
+predicts.sublegal.relief = testdata%>%data.frame(fits)%>%
+  group_by(mean.relief)%>% #only change here
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
@@ -466,17 +466,17 @@ ggmod.sublegal.detrended<- ggplot() +
   Theme1
 ggmod.sublegal.detrended
 
-# mesophotic reef ----
-ggmod.sublegal.mesophotic<- ggplot() +
+# mean relief ----
+ggmod.sublegal.relief<- ggplot() +
   ylab("")+
-  xlab("Mesophotic reef")+
-  geom_point(data=dat.sublegal,aes(x=mesophotic.reef,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
-  geom_line(data=predicts.sublegal.mesophotic,aes(x=mesophotic.reef,y=maxn),alpha=0.5)+
-  geom_line(data=predicts.sublegal.mesophotic,aes(x=mesophotic.reef,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
-  geom_line(data=predicts.sublegal.mesophotic,aes(x=mesophotic.reef,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  xlab("Mean relief")+
+  geom_point(data=dat.sublegal,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegal.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegal.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegal.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
   Theme1
-ggmod.sublegal.mesophotic
+ggmod.sublegal.relief
 
 # MODEL Legal Spango (status) ----
 dat.spango <- dat %>% filter(response=="legal size spango")
@@ -520,15 +520,15 @@ ggmod.spango.status<- ggplot(aes(x=status,y=maxn,fill=status,colour=status), dat
   annotation_raster(l.n, xmin=1.7, xmax=2.5, ymin=0.8, ymax=1)
 ggmod.spango.status
 
-# MODEL Sublegal trout (depth + mean relief) ----
+# MODEL Sublegal trout (depth + mesophotic reef) ----
 dat.sublegaltrout <- dat %>% filter(response=="sublegal size trout")
 
-gamm=gam(number~s(depth,k=3,bs='cr') + s(mean.relief,k=3,bs='cr'), family=tw,data=dat.sublegaltrout)
+gamm=gam(number~s(depth,k=3,bs='cr') + s(mesophotic.reef,k=3,bs='cr'), family=tw,data=dat.sublegaltrout)
 
 # predict - depth ----
 mod<-gamm
 testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 20),
-                        mean.relief=mean(mod$model$mean.relief)) %>%
+                        mesophotic.reef=mean(mod$model$mesophotic.reef)) %>%
   distinct()%>%
   glimpse()
 
@@ -539,17 +539,17 @@ predicts.sublegaltrout.depth = testdata%>%data.frame(fits)%>%
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
-# predict - mean relief ----
+# predict - mesophotic reef ----
 mod<-gamm
-testdata <- expand.grid(mean.relief=seq(min(dat$mean.relief),max(dat$mean.relief),length.out = 20),
+testdata <- expand.grid(mesophotic.reef=seq(min(dat$mesophotic.reef),max(dat$mesophotic.reef),length.out = 20),
                         depth=mean(mod$model$depth)) %>%
   distinct()%>%
   glimpse()
 
 fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
 
-predicts.sublegaltrout.relief = testdata%>%data.frame(fits)%>%
-  group_by(mean.relief)%>% #only change here
+predicts.sublegaltrout.mesophotic = testdata%>%data.frame(fits)%>%
+  group_by(mesophotic.reef)%>% #only change here
   summarise(maxn=mean(fit),se.fit=mean(se.fit))%>%
   ungroup()
 
@@ -573,17 +573,17 @@ ggmod.sublegaltrout.depth<- ggplot() +
   annotation_raster(p.spp, xmin=37.5, xmax=62.5, ymin=5.25, ymax=6.75)
 ggmod.sublegaltrout.depth
 
-# mean relief ----
-ggmod.sublegaltrout.relief<- ggplot() +
+# mesophotic reef ----
+ggmod.sublegaltrout.mesophotic<- ggplot() +
   ylab("")+
-  xlab("Mean relief")+
-  geom_point(data=dat.sublegaltrout,aes(x=mean.relief,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
-  geom_line(data=predicts.sublegaltrout.relief,aes(x=mean.relief,y=maxn),alpha=0.5)+
-  geom_line(data=predicts.sublegaltrout.relief,aes(x=mean.relief,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
-  geom_line(data=predicts.sublegaltrout.relief,aes(x=mean.relief,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
+  xlab("Mesophotic reef")+
+  geom_point(data=dat.sublegaltrout,aes(x=mesophotic.reef,y=number),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.sublegaltrout.mesophotic,aes(x=mesophotic.reef,y=maxn),alpha=0.5)+
+  geom_line(data=predicts.sublegaltrout.mesophotic,aes(x=mesophotic.reef,y=maxn - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.sublegaltrout.mesophotic,aes(x=mesophotic.reef,y=maxn + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
   Theme1
-ggmod.sublegaltrout.relief
+ggmod.sublegaltrout.mesophotic
 
 # MODEL Legal atkinsoni (depth + mesophotic reef) ----
 dat.legalatkinsoni <- dat %>% filter(response=="legal size atkinsoni")
@@ -1029,12 +1029,12 @@ plot.grid.abundance <- plot_grid(ggmod.total.depth, ggmod.total.relief, ggmod.to
 plot.grid.abundance
 
 plot.grid.lengths1 <- plot_grid(ggmod.legal.depth,ggmod.legal.relief,NULL,
-                               ggmod.sublegal.depth,ggmod.sublegal.detrended,ggmod.sublegal.mesophotic,
+                               ggmod.sublegal.depth,ggmod.sublegal.detrended,ggmod.sublegal.relief,
                                ggmod.spango.status,NULL,NULL,
                                 ncol = 3, labels = c('a','b','','c','d','e','f','','', 'g','h','','i','j','','k','l','m'),align = "vh")
 plot.grid.lengths1
 
-plot.grid.lengths2 <- plot_grid(ggmod.sublegaltrout.depth,ggmod.sublegaltrout.relief,NULL,
+plot.grid.lengths2 <- plot_grid(ggmod.sublegaltrout.depth,ggmod.sublegaltrout.mesophotic,NULL,
                                 ggmod.legalatkinsoni.depth,ggmod.legalatkinsoni.mesophotic,NULL,
                                 ggmod.sublegalatkinsoni.depth,ggmod.sublegalatkinsoni.detrended,ggmod.sublegalatkinsoni.relief,
                                 ncol = 3, labels = c('g','h','','i','j','','k','l','m'),align = "vh")
