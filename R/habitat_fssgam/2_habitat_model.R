@@ -1,9 +1,9 @@
 ###
-# Project: Parks - Abrolhos Post-Survey
+# Project: Parks - Montes Post-Survey
 # Data:    BRUVS, BOSS Habitat data
 # Task:    Habitat modelling
 # author:  Kingsley Griffin
-# date:    Sept-Nov 2021
+# date:    Jan 22
 ##
 
 library(reshape2)
@@ -102,10 +102,10 @@ vis.gam(m_sand)
 preddf <- cbind(preddf, 
                 "pcoral" = predict(m_stony, preddf, type = "response"),
                 "pmacro" = predict(m_macro, preddf, type = "response"),
-                "psand" = predict(m_sand, preddf, type = "response"),
-                "prock" = predict(m_rock, preddf, type = "response"),
+                "pmeso" = predict(m_meso, preddf, type = "response"),
                 "pphotic" = predict(m_photic, preddf, type = "response"),
-                "pmeso" = predict(m_meso, preddf, type = "response"))
+                "prock" = predict(m_rock, preddf, type = "response"),
+                "psand" = predict(m_sand, preddf, type = "response"))
 
 prasts <- rasterFromXYZ(preddf, res = c(30, 30))
 prasts$dom_tag <- which.max(prasts[[6:11]])
@@ -122,7 +122,7 @@ sprast <- mask(prasts, sbuff)
 sprast <- sprast[[6:12]]
 plot(sprast)
 
-# write to tifs to reduce file sizes
+# write to tifs to reduce file sizes for git
 writeRaster(sprast, "output/spatial_predictions/layer.tif", 
             bylayer = TRUE, suffix = names(sprast), overwrite = TRUE)
 

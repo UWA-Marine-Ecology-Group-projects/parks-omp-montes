@@ -1,9 +1,9 @@
 ###
-# Project: Parks - Abrolhos Post-Survey
+# Project: Parks - Montes Post-Survey
 # Data:    BRUVS, BOSS Habitat data
 # Task:    Habitat figures
 # author:  Kingsley Griffin
-# date:    Nov-Dec 2021
+# date:    Jan 22
 ##
 
 library(reshape2)
@@ -13,108 +13,101 @@ library(raster)
 library(patchwork)
 library(sf)
 
-# bring in spatial layers
-aumpa  <- st_read("data/spatial/shp/AustraliaNetworkMarineParks.shp")           # all aus mpas
-sw_mpa <- aumpa[aumpa$ResName %in% c("Abrolhos"), ]                             # just Abrolhos Aus MP
-ab_npz <- sw_mpa[sw_mpa$ZoneName == "National Park Zone", ]
-ab_npz$parkid <- c(1:3)                                                         # for easy subsetting later 
+# spatial setup and bring in layers
 wgscrs <- CRS("+proj=longlat +datum=WGS84")
 sppcrs <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")       # crs for sp objects
-abnpza <- ab_npz
-ab_npz <- st_transform(ab_npz, sppcrs)
-jacmap <- raster("data/spatial/raster/ecosystem-types-19class-naland.tif")      # jac's aus habitat map
-cropex <- extent(112, 116, -30, -27)
-jacmap <- crop(jacmap, cropex)
-jacmap <- projectRaster(jacmap, crs = sppcrs, method = "ngb")
-habi   <- readRDS("data/tidy/merged_habitat.rds")
-habi$ns <- ifelse(habi$Latitude.1 > 6940000, 1, 0)
-habi$method <- dplyr::recode(habi$method,
-                             BOSS = "Drop Camera")
+
+aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                            # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
+montes <- aus[aus$GROUP_NAME %in% c("MONTEBELLO ISLANDS"), ]                      # just montes
+st_crs(montes) <- wgscrs
+montes <- st_transform(montes, sppcrs)
+# aus    <- aus[aus$FEAT_CODE == "mainland", ]
+
+aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
+mb_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                             # just Montes Aus MP
+# wampa  <- st_read("data/spatial/shp/WA_MPA_2018.shp")                           # all wa mpas
+
+mb_mpa <- st_transform(mb_mpa, sppcrs)
+# abnpza <- ab_npz
+# ab_npz <- st_transform(ab_npz, sppcrs)
+# jacmap <- raster("data/spatial/raster/ecosystem-types-19class-naland.tif")      # jac's aus habitat map
+# cropex <- extent(112, 116, -30, -27)
+# jacmap <- crop(jacmap, cropex)
+# jacmap <- projectRaster(jacmap, crs = sppcrs, method = "ngb")
+# habi    <- readRDS("data/tidy/merged_habitat.rds")
+# habi$ns <- ifelse(habi$Latitude.1 > 6940000, 1, 0)
+# habi$method <- dplyr::recode(habi$method,
+#                              BOSS = "Drop Camera")
 
 # read in outputs from 'R/4_habitat_model.R'
+rlist  <- list.files("output/spatial_predictions/", "*.tif", full.names = T)
+prasts <- stack(rlist)
+spreddf <- as.data.frame(prasts, xy = TRUE, na.rm = TRUE)
+
 # preddf <- readRDS("output/broad_habitat_predictions.rds")
-spreddf <- readRDS("output/site_habitat_predictions.rds")                       # site predictions only
-spreddf$dom_tag <- as.factor(spreddf$dom_tag)
+# spreddf <- readRDS("output/site_habitat_predictions.rds")                       # site predictions only
+spreddf$dom_tag <- as.factor(spreddf$layer_dom_tag)
 spreddf$dom_tag <- dplyr::recode(spreddf$dom_tag,
-                          pkelps = "Kelp",
-                          pmacroalg = "Macroalgae",
-                          prock = "Rock",
-                          psand = "Sand",
-                          pbiogenic = "Biogenic Reef")
-  
-spreddf$sitens <- ifelse(spreddf$y > 6940000, 1, 0)
+                          "1" = "Coral",
+                          "2" = "Macroalgae",
+                          "3" = "Mesophotic",
+                          "4" = "Photic",
+                          "5" = "Rock",
+                          "6" = "Sand")
 
 # fig 1: categorical habitat maps
 # assign mpa colours
-hab_cols <- scale_fill_manual(values = c("Kelp" = "goldenrod1",
-                                         "Macroalgae" = "darkgoldenrod4",
+hab_cols <- scale_fill_manual(values = c("Macroalgae" = "darkgoldenrod4",
+                                         "Coral" = "coral2",
                                          "Rock" = "grey40",
                                          "Sand" = "wheat",
-                                         "Biogenic Reef" = "plum"
+                                         "Mesophotic" = "plum",
+                                         "Photic" = "cadetblue2"
 ))
 
 p1 <- ggplot() +
-  geom_tile(data = spreddf[spreddf$sitens == 1, ], aes(x, y, fill = dom_tag)) +
+  geom_tile(data = spreddf, aes(x, y, fill = dom_tag)) +
   hab_cols +
-  geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
-  geom_point(data = habi[habi$ns == 1, ], 
-             aes(Longitude.1, Latitude.1, colour = method), 
-             shape = 10, size = 1, alpha = 3/5) +
-  scale_colour_manual(values = c("BRUV" = "indianred4", 
-                                 "Drop Camera" = "navyblue")) +
-  labs(x = NULL, y = NULL) +
-  guides(fill = "none", colour = "none") +
+  # geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
+  # geom_point(data = habi, 
+  #            aes(x, y, colour = method), 
+  #            shape = 10, size = 1, alpha = 3/5) +
+  # scale_colour_manual(values = c("BRUV" = "indianred4", 
+  #                                "Drop Camera" = "navyblue")) +
+  labs(x = NULL, y = NULL, fill = NULL) +
+  guides(colour = "none") +
   coord_sf() +
   theme_minimal()
 
-p11 <- ggplot() +
-  geom_tile(data = spreddf[spreddf$sitens == 0, ], aes(x, y, fill = dom_tag)) +
-  hab_cols +
-  geom_sf(data = ab_npz[ab_npz$parkid == 2, ], fill = NA, colour = "#7bbc63") +
-  geom_point(data = habi[habi$ns == 0, ], 
-             aes(Longitude.1, Latitude.1, colour = method), 
-             shape = 10, size = 1, alpha = 3/5) +
-  scale_colour_manual(values = c("BRUV" = "indianred4", 
-                                 "Drop Camera" = "navyblue")) +
-  labs(x = NULL, y = NULL, fill = "Habitat", colour = NULL) +
-  theme_minimal()
-
-p1 + p11
+p1
 ggsave("plots/site_dominant_habitat.png", width = 12, height = 8, dpi = 160)
 
 # fig 2: habitat multiplot
 # melt classes for faceting
-widehabit <- melt(spreddf, measure.vars = c(12:16))
+widehabit <- melt(spreddf, measure.vars = c(6:9))
 widehabit$variable <- dplyr::recode(widehabit$variable,
-                                    pkelps = "Kelp",
-                                    pmacroalg = "Macroalgae",
-                                    prock = "Rock",
-                                    psand = "Sand",
-                                    pbiogenic = "Biogenic Reef")
+                                    layer_pphotic = "Photic Reef",
+                                    layer_pmeso = "Mesophotic Reef",
+                                    layer_prock = "Rock",
+                                    layer_psand = "Sand")
+
+# # coord_sf(xlim = c(115.2, 116), ylim = c(-21, -20)) +
+# smb_mpa <- st_crop(mb_mpa, extent(c(-21, 116, -20, 115.2)))
+# plot(mb_mpa["ZoneName"])
+# plot(smb_mpa["ZoneName"])
 
 p2 <- ggplot() +
-  geom_tile(data = widehabit[widehabit$sitens == 1, ], 
-            aes(x, y, fill = value)) +
+  geom_tile(data = widehabit, aes(x, y, fill = value)) +
   scale_fill_viridis(direction = -1, limits = c(0, max(widehabit$value))) +
-  geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
-  labs(x = NULL, y = NULL) +
+  geom_sf(data = mb_mpa, fill = NA, colour = "#b9e6fb") +
+  geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
+  labs(x = NULL, y = NULL, fill = "Occurrence (p)") +
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
   theme_minimal() +
-  guides(fill = "none") +
-  facet_wrap(~variable, ncol = 1) + 
-  theme(axis.text = element_blank())
+  facet_wrap(~variable)
 
-p22 <- ggplot() +
-  geom_tile(data = widehabit[widehabit$sitens == 0, ], 
-            aes(x, y, fill = value)) +
-  scale_fill_viridis(direction = -1, limits = c(0, max(widehabit$value))) +
-  geom_sf(data = ab_npz[ab_npz$parkid == 2, ], fill = NA, colour = "#7bbc63") +
-  labs(x = NULL, y = NULL, fill = "Habitat (p)") +
-  theme_minimal() +
-  facet_wrap(~variable, ncol = 1) + 
-  theme(axis.text = element_blank())
-
-p2 + p22 + plot_layout(widths = c(0.84, 1))
-ggsave("plots/site_habitat_predicted.png", width = 8, height = 14, dpi = 160)
+p2
+ggsave("plots/site_habitat_predicted.png", width = 9, height = 8, dpi = 160)
 
 # # fig 3: biogenic reef
 # p3 <- ggplot(spreddf[widehabit$sitens == 1, ], aes(x, y)) +
