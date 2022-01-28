@@ -31,6 +31,8 @@ dat.taxa <-bind_rows(datmaxn,datlength)%>% #from local copy
  # rename(resp.var=response)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   mutate(label=NA)%>%
+  mutate(resp.var=factor(resp.var, levels = c("smaller than legal size","greater than legal size","species.richness","total.abundance")))%>%
+  mutate(predictor=factor(predictor, levels = c("depth","mean.relief","sd.relief","detrended","roughness","tpi","mesophotic.reef","photic.reef","status")))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="tpi"&resp.var=="total.abundance","X",label))%>%
@@ -76,13 +78,8 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
    geom_tile(show.legend=T) +
    scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
                          limits = c(-1, 1))+
-      scale_y_discrete(labels=c("*Chromis fumea* abundance",'*Pomacentrus coelestis* abundance',"*Lethrinus atkinsoni* abundance",
-                                 "Sublegal *Lethrinus atkinsoni*","Legal *Lethrinus atkinsoni*",
-                                 "Sublegal *Plectropomus* spp","Legal *Plectropomus* spp","Legal *Lethrinus nebulosus*",
-                                 "Sublegal","Legal",
-                                 "Targeted abundance","Species richness","Total abundance"))+         #Tidy Taxa names
-      scale_x_discrete(labels = c("Photic reef", "Mesophotic reef",  "Detrended bathymetry", "Roughness", "TPI", "Depth",
-                                 'Mean relief', "SD relief","Status"))+   #Tidy predictor names
+  scale_y_discrete(labels=c("Smaller than legal size","Greater than legal size","Species richness","Total abundance"))+
+  scale_x_discrete(labels=c("Depth","Mean relief","SD relief","Detrended","Roughness","TPI","Mesophotic reef","Photic reef","Status"))+
    xlab(NULL)+
    ylab(NULL)+
    theme_classic()+
@@ -92,4 +89,4 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
 gg.importance.scores
 
 #save output - changed dimensions for larger text in report
-save_plot("plots/montes.synthesis.fish.importance.png", gg.importance.scores,base_height = 6.75,base_width = 6.275)
+save_plot("plots/montes.synthesis.fish.importance.png", gg.importance.scores,base_height = 6,base_width = 8)
