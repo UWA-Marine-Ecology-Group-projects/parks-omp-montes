@@ -160,7 +160,7 @@ pcelldf$prelief[pcelldf$prelief > 5] <- 5
  
 prelief <- rasterFromXYZ(cbind(pcelldf[c(1:2, 7:8)]))
 plot(prelief[[2]])
-saveRDS(prelief[[2]], "output/predicted_relief_raster.rds")
+saveRDS(prelief[[2]], "output/spatial_predictions/predicted_relief_raster.rds")
 
 sitebuf <- buffer(habisp, 10000)
 prelief <- mask(prelief, sitebuf)
@@ -169,7 +169,7 @@ plot(prelief)
 # plot(habisp, add = TRUE, col = "red")
 pcelldf <- as.data.frame(prelief, xy = TRUE, na.rm = TRUE)
 
-saveRDS(pcelldf, 'output/predicted_relief_site.rds')
+saveRDS(pcelldf, 'output/spatial_predictions/predicted_relief_site.rds')
 
 ggplot(pcelldf, aes(x, y)) +
   geom_tile(aes(fill = prelief)) +
