@@ -18,9 +18,8 @@ p_files <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)
 preds   <- stack(p_files)
 
 # preds <- readRDS("output/spatial/spatial_covariates.rds")                         # spatial covs from 'R/1_mergedata.R'
-# colnames(habi)
-# trim predictor data cols and subset to npz6 area (if you want)
-habi      <- habi[ , c(1, 2, 3, 34:41)]
+colnames(habi)
+habi      <- habi[ , c(1, 2, 3, 35:42)]
 
 # Build with all data, or set aside test/train data
 # OR set aside train/test data
@@ -32,7 +31,7 @@ traind <- habi[!habi$sample %in% testd$sample , ]
 habisp         <- SpatialPointsDataFrame(coords = traind[4:5], data = traind)
 sitecoords     <- coordinates(habisp)
 sitelocs       <- as.matrix(sitecoords)
-max.edgelength <- c(2500, 12000)
+max.edgelength <- c(5000, 12000)
 mesha          <- inla.mesh.2d(loc = sitelocs, max.edge = max.edgelength,
                                offset = c(1200, 2000), cutoff = 800)
 plot(mesha)
@@ -125,7 +124,6 @@ ylim  <- c(extent(preds)[3], extent(preds)[4])
 xdims <- (xlim[2] - xlim[1]) / res(preds)[1]
 ydims <- (ylim[2] - ylim[1]) / res(preds)[2]
 
-
 proj       <- inla.mesh.projector(mesha, xlim = xlim, ylim = ylim, 
                                   dims = c(xdims, ydims))
 field.proj <- inla.mesh.project(proj, ypred)
@@ -149,7 +147,7 @@ names(pcells) <- c("depth", "dtren", "rough", "tpi", "p_sp")
 pcelldf <- as.data.frame(pcells, na.rm = TRUE, xy = TRUE)
 head(pcelldf)
 
-# recall formula: y ~ 1 + depth + rough + dtren + f(sp, model = spde)
+# recall formula: y ~ 1 + depth + dtren + tpi + f(sp, model = spde)
 pcelldf$prelief <- 1 + modout$mean[1] + 
   (pcelldf$depth * modout$mean[2]) + 
   (pcelldf$dtren * modout$mean[3]) + 

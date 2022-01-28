@@ -134,52 +134,29 @@ pcelldf$sitens <- ifelse(pcelldf$y > 6940000, 1, 0)
 pcelldf$prelief[pcelldf$prelief < 0] <- 0
 
 p4 <- ggplot() +
-  geom_tile(data = pcelldf[pcelldf$sitens == 1, ], aes(x, y, fill = prelief)) +
+  geom_tile(data = pcelldf, aes(x, y, fill = prelief)) +
   scale_fill_viridis(option = "C", direction = -1, 
                      limits = c(0, max(pcelldf$prelief))) +
-  geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
+  # geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
   labs(x= NULL, y = NULL, 
        fill = "p. relief") +
-  guides(fill = "none") +
   theme_minimal()
+p4
 
-p42 <- ggplot() +
-  geom_tile(data = pcelldf[pcelldf$sitens == 0, ], aes(x, y, fill = prelief)) +
-  scale_fill_viridis(option = "C", direction = -1, 
-                     limits = c(0, max(pcelldf$prelief))) +
-  geom_sf(data = ab_npz[ab_npz$parkid == 2, ], fill = NA, colour = "#7bbc63") +
-  labs(x= NULL, y = NULL, 
-       fill = "Relief score") +
-  theme_minimal()
-
-p4 + p42 + plot_layout(widths = c(0.44, 0.56))
 ggsave("plots/site_relief_p.png", width = 10, height = 6, dpi = 160)
 
 # fig 4.1.2: spatial random effect
 
 p5 <- ggplot() +
-  geom_tile(data = pcelldf[pcelldf$sitens == 1, ], aes(x, y, fill = p_sp)) +
+  geom_tile(data = pcelldf, aes(x, y, fill = p_sp)) +
   scale_fill_viridis(option = "B", 
                      limits = c(min(pcelldf$p_sp), max(pcelldf$p_sp))) +
-  geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
-  geom_point(data = habi[habi$ns == 1, ], aes(Longitude.1, Latitude.1), 
-             alpha = 0.7, colour = "grey70", size = 1, shape = 3) +
+  # geom_point(data = habi, aes(x, y), 
+  #            alpha = 0.7, colour = "grey70", size = 1, shape = 3) +
   labs(x= NULL, y = NULL) +
-  guides(fill = "none") +
   theme_minimal()
+p5
 
-p52 <- ggplot() +
-  geom_tile(data = pcelldf[pcelldf$sitens == 0, ], aes(x, y, fill = p_sp)) +
-  scale_fill_viridis(option = "B", 
-                     limits = c(min(pcelldf$p_sp), max(pcelldf$p_sp))) +
-  geom_sf(data = ab_npz[ab_npz$parkid == 2, ], fill = NA, colour = "#7bbc63") +
-  geom_point(data = habi[habi$ns == 0, ], aes(Longitude.1, Latitude.1), 
-             alpha = 0.7, colour = "grey70", size = 2, shape = 3) +
-  labs(x= NULL, y = NULL, 
-       fill = "spatial\ndependence") +
-  theme_minimal()
-
-p5 + p52 + plot_layout(widths = c(0.44, 0.56))
 ggsave("plots/site_relief_spatialeffect.png", 
        width = 10, height = 6, dpi = 160)
 
