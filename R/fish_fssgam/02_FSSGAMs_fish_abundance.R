@@ -39,7 +39,10 @@ setwd(working.dir)
 
 #read in data
 dat <- readRDS("data/tidy/dat.maxn.rds")%>%
+  dplyr::filter(response%in%c("total.abundance","species.richness"))%>%
   glimpse()
+
+unique(dat$response)
 
 # Set predictor variables---
 names(dat)
@@ -122,10 +125,3 @@ all.mod.fits=do.call("rbind",out.all)
 all.var.imp=do.call("rbind",var.imp)
 write.csv(all.mod.fits[ , -2], file = paste(savedir, paste(name, "all.mod.fits.csv", sep = "_"), sep = "/"))
 write.csv(all.var.imp, file = paste(savedir, paste(name, "all.var.imp.csv", sep = "_"), sep = "/"))
-
-# Generic importance plots-
-heatmap.2(all.var.imp,notecex=0.4,  dendrogram ="none",
-          col=colorRampPalette(c("white","yellow","red"))(10),
-          trace="none",key.title = "",keysize=2,
-          notecol="black",key=T,
-          sepcolor = "black",margins=c(12,14), lhei=c(4,15),Rowv=FALSE,Colv=FALSE)

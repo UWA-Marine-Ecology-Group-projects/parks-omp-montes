@@ -1,20 +1,5 @@
-"","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","tpi","roughness","detrended","status","cumsum.wi"
-"greater than legal size.depth+mean.relief+tpi","depth+mean.relief+tpi",867.363038735863,894.473706889273,0.21617,NA,6.46,0,0,4.449,0.572,0.091,1,1,0,0,0,1,0,0,0,0.572
-"greater than legal size.depth+mean.relief","depth+mean.relief",868.538152377373,890.024414318748,0.20233,NA,4.8,0,1.175,0,0.318,0.842,1,1,0,0,0,0,0,0,0,0.89
-"legal size atkinsoni.depth+mesophotic.reef+tpi","depth+mesophotic.reef+tpi",300.713439198409,323.893643919015,0.13979,NA,5.27,0,0,3.841,0.474,0.103,1,0,0,1,0,1,0,0,0,0.474
-"legal size atkinsoni.depth+mesophotic.reef","depth+mesophotic.reef",301.498001811976,320.052726737089,0.12791,NA,3.95,0,0.785,0,0.32,0.705,1,0,0,1,0,0,0,0,0,0.794
-"legal size spango.mesophotic.reef+status","mesophotic.reef+status",316.321807939901,334.764331983652,0.06612,NA,3.8,0,0,5.585,0.129,0.034,0,0,0,1,0,0,0,0,1,0.129
-"legal size spango.status","status",316.707165288522,329.179206079282,0.04852,NA,2,0,0.385,0,0.106,0.556,0,0,0,0,0,0,0,0,1,0.235
-"legal size spango.mesophotic.reef+photic.reef+status","mesophotic.reef+photic.reef+status",317.160698163018,338.615944218546,0.07084,NA,4.8,0,0.839,9.437,0.085,0.005,0,0,0,1,1,0,0,0,1,0.32
-"legal size spango.detrended+status","detrended+status",317.707685866244,335.696464886167,0.06209,NA,3.56,0,1.386,6.517,0.064,0.021,0,0,0,0,0,0,0,1,1,0.384
-"legal size spango.photic.reef+status","photic.reef+status",317.744250008079,333.277886129679,0.0533,NA,3,0,1.422,4.099,0.063,0.072,0,0,0,0,1,0,0,0,1,0.447
-"legal size spango.detrended+mesophotic.reef+status","detrended+mesophotic.reef+status",317.809628076825,341.552969063825,0.07825,NA,5.31,0,1.488,12.374,0.061,0.001,0,0,0,1,0,0,0,1,1,0.508
-"legal size spango.sd.relief+status","sd.relief+status",318.305194428947,333.835589186781,0.0513,NA,3,0,1.983,4.656,0.048,0.054,0,0,1,0,0,0,0,0,1,0.556
-"legal size trout","null",303.435281475117,312.825002349139,0,NA,1,0,0,0,0.495,0.821,0,0,0,0,0,0,0,0,0,0.495
-"smaller than legal size.depth+detrended+mean.relief","depth+detrended+mean.relief",703.406778477969,727.685016587371,0.23943,NA,5.61,0,0,3.433,0.379,0.084,1,1,0,0,0,0,0,1,0,0.379
-"smaller than legal size.depth+detrended+mesophotic.reef","depth+detrended+mesophotic.reef",703.408961236507,724.894553212011,0.26391,NA,4.83,0,0.002,0.642,0.379,0.338,1,0,0,1,0,0,0,1,0,0.758
-"sublegal size atkinsoni.depth+detrended+mean.relief","depth+detrended+mean.relief",483.298602452628,507.385451239602,0.15197,NA,5.51,0,0,0.53,0.511,0.237,1,1,0,0,0,0,0,1,0,0.511
-"sublegal size atkinsoni.depth+mean.relief+tpi","depth+mean.relief+tpi",485.252007843081,509.658761496131,0.13968,NA,5.7,0,1.953,2.803,0.192,0.076,1,1,0,0,0,1,0,0,0,0.703
-"sublegal size trout.depth+mean.relief","depth+mean.relief",272.049697390978,292.908673354163,0.16939,NA,4.42,0,0,0.737,0.286,0.291,1,1,0,0,0,0,0,0,0,0.286
-"sublegal size trout.depth+mesophotic.reef","depth+mesophotic.reef",272.214935266806,292.17157315333,0.21073,NA,4.15,0,0.165,0,0.263,0.421,1,0,0,1,0,0,0,0,0,0.549
-"sublegal size trout.depth+detrended+mesophotic.reef","depth+detrended+mesophotic.reef",273.874635565564,296.9055231704,0.21097,NA,5.18,0,1.825,4.734,0.115,0.039,1,0,0,1,0,0,0,1,0,0.664
+resp.var,modname,AICc,BIC,r2.vals,r2.vals.unique,edf,edf.less.1,delta.AICc,delta.BIC,wi.AICc,wi.BIC,depth,mean.relief,sd.relief,mesophotic.reef,photic.reef,tpi,roughness,detrended,status,cumsum.wi
+greater than legal size.depth+mean.relief+tpi,depth+mean.relief+tpi,867.3630387,894.4737069,0.21617,NA,6.46,0,0,4.449,0.572,0.091,1,1,0,0,0,1,0,0,0,0.572
+greater than legal size.depth+mean.relief,depth+mean.relief,868.5381524,890.0244143,0.20233,NA,4.8,0,1.175,0,0.318,0.842,1,1,0,0,0,0,0,0,0,0.89
+smaller than legal size.depth+detrended+mean.relief,depth+detrended+mean.relief,703.4067785,727.6850166,0.23943,NA,5.61,0,0,3.433,0.379,0.084,1,1,0,0,0,0,0,1,0,0.379
+smaller than legal size.depth+detrended+mesophotic.reef,depth+detrended+mesophotic.reef,703.4089612,724.8945532,0.26391,NA,4.83,0,0.002,0.642,0.379,0.338,1,0,0,1,0,0,0,1,0,0.758

@@ -20,32 +20,17 @@ working.dir <- getwd()
 setwd(working.dir)
 #OR Set manually once
 
+datmaxn <- read.csv("output/fssgam - fish/montebello.synthesis_all.var.imp.csv")%>%
+  glimpse()
+datlength <- read.csv("output/fssgam - fish/montebello.synthesis_length_all.var.imp.csv")%>%
+  glimpse()
+
 #read in data - negative values manually added
 #manually add in Xs for terms included in most parsimonious models
-dat.taxa <-read.csv("output/fssgam - fish/montebello.synthesis_combined.imp.csv")%>% #from local copy
+dat.taxa <-bind_rows(datmaxn,datlength)%>% #from local copy
  # rename(resp.var=response)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   mutate(label=NA)%>%
-  mutate(resp.var = factor(resp.var, levels = c("Chromis fumea","Pomacentrus coelestis","Lethrinus atkinsoni",
-                                                 "sublegal size atkinsoni","legal size atkinsoni",
-                                                 "sublegal size trout","legal size trout",
-                                                 "legal size spango",
-                                                 "smaller than legal size","greater than legal size",
-                                                 "targeted.abundance","species.richness","total.abundance")))%>%  #change order of response variables
-  mutate(predictor = factor(predictor, levels = c("photic.reef","mesophotic.reef","biota.unconsolidated","detrended",
-                                                  "roughness","tpi","depth","mean.relief","sd.relief","status")))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="targeted.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="targeted.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="targeted.abundance","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="Lethrinus atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="Lethrinus atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="Lethrinus atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="Pomacentrus coelestis","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="Pomacentrus coelestis","X",label))%>%
-  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="Pomacentrus coelestis","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="Chromis fumea","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="Chromis fumea","X",label))%>%
-  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="Chromis fumea","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="tpi"&resp.var=="total.abundance","X",label))%>%
@@ -54,17 +39,9 @@ dat.taxa <-read.csv("output/fssgam - fish/montebello.synthesis_combined.imp.csv"
   mutate(label=ifelse(predictor=="roughness"&resp.var=="species.richness","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="greater than legal size","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="greater than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="legal size atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="mesophotic.reef"&resp.var=="legal size atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="status"&resp.var=="legal size spango","X",label))%>%
   mutate(label=ifelse(predictor=="depth"&resp.var=="smaller than legal size","X",label))%>%
   mutate(label=ifelse(predictor=="detrended"&resp.var=="smaller than legal size","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="smaller than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="sublegal size atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="sublegal size atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="sublegal size atkinsoni","X",label))%>%
-  mutate(label=ifelse(predictor=="depth"&resp.var=="sublegal size trout","X",label))%>%
-  mutate(label=ifelse(predictor=="mesophotic.reef"&resp.var=="sublegal size trout","X",label))%>%
   glimpse()
 
 # Theme-

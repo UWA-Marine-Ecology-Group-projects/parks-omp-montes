@@ -29,7 +29,10 @@ working.dir <- getwd()
 setwd(working.dir)
 
 dat <- readRDS("data/tidy/dat.length.rds")%>%
+  dplyr::filter(response%in%c("greater than legal size","smaller than legal size"))%>%
   glimpse()
+
+unique(dat$response)
 
 # Set predictor variables---
 pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef", "tpi", "roughness","detrended") 
@@ -111,21 +114,14 @@ all.var.imp=do.call("rbind",var.imp)
 write.csv(all.mod.fits[ , -2], file = paste(savedir, paste(name, "all.mod.fits.csv", sep = "_"), sep = "/"))
 write.csv(all.var.imp, file = paste(savedir, paste(name, "all.var.imp.csv", sep = "_"), sep = "/"))
 
-#why is trout null
-trout <- dat %>%
-  dplyr::filter(response %in% c('legal size trout'))%>%
-  glimpse()
-
-# visualise patterns
-trout <- melt(trout, measure.vars = pred.vars)
-ggplot(trout, aes(value, number)) +
-  geom_jitter(alpha = 1/10) +
-  geom_smooth() +
-  facet_wrap(~ variable, scales = "free")
-
-# Generic importance plots-
-heatmap.2(all.var.imp,notecex=0.4,  dendrogram ="none",
-          col=colorRampPalette(c("white","yellow","red"))(10),
-          trace="none",key.title = "",keysize=2,
-          notecol="black",key=T,
-          sepcolor = "black",margins=c(12,12), lhei=c(4,15),Rowv=FALSE,Colv=FALSE)
+# #why is trout null
+# trout <- dat %>%
+#   dplyr::filter(response %in% c('legal size trout'))%>%
+#   glimpse()
+# 
+# # visualise patterns
+# trout <- melt(trout, measure.vars = pred.vars)
+# ggplot(trout, aes(value, number)) +
+#   geom_jitter(alpha = 1/10) +
+#   geom_smooth() +
+#   facet_wrap(~ variable, scales = "free")
