@@ -7,4 +7,4 @@
 
 [report](https://docs.google.com/document/d/1UNSuWRZQOD1Rijh3Hd00odl3gIsJtRnM0jdYQirZM-s/edit#heading=h.ew93u3jfkpct)
 
-[report plan] (https://docs.google.com/document/d/1DH3W4cnJsXlLs6IPlD5wOUyIUbCnPo4DuCLq9AL7F9Y/edit)
+[report plan](https://docs.google.com/document/d/1DH3W4cnJsXlLs6IPlD5wOUyIUbCnPo4DuCLq9AL7F9Y/edit)
