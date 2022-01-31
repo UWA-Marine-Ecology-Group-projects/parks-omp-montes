@@ -30,6 +30,8 @@ tifs  <- list.files("output/spatial_predictions/", "*.tif", full.names = TRUE)
 preds <- stack(tifs)
 plot(preds$layer_pphotic)
 
+
+
 # join habitat and relief predictions
 predsp <- SpatialPointsDataFrame(coords = cbind(preds$x, preds$y), data = preds)
 predsp$relief <- extract(prel, predsp)

@@ -17,25 +17,26 @@ working.dir <- getwd()
 setwd(working.dir)
 #OR Set manually once
 
-dat.taxa <-read.csv("output/fssgam/egall.var.imp.csv")%>% #from local copy
-  rename(resp.var=response)%>%
+dat.taxa <-read.csv("output/fssgam-habitat/egall.var.imp.csv")%>% #from local copy
+  # rename(resp.var=response)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   mutate(label=NA)%>%
-  mutate(label=ifelse(predictor=="Depth"&resp.var=="kelps","X",label))%>%
-  mutate(label=ifelse(predictor=="roughness"&resp.var=="kelps","X",label))%>%
-  mutate(label=ifelse(predictor=="tpi"&resp.var=="kelps","X",label))%>%
-  mutate(label=ifelse(predictor=="Depth"&resp.var=="macroalgae","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="macroalgae","X",label))%>%
-  mutate(label=ifelse(predictor=="roughness"&resp.var=="macroalgae","X",label))%>%
-  mutate(label=ifelse(predictor=="Depth"&resp.var=="biog","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="biog","X",label))%>%
-  mutate(label=ifelse(predictor=="roughness"&resp.var=="biog","X",label))%>%
-  mutate(label=ifelse(predictor=="Depth"&resp.var=="sand","X",label))%>%
-  mutate(label=ifelse(predictor=="roughness"&resp.var=="sand","X",label))%>%
-  mutate(label=ifelse(predictor=="tpi"&resp.var=="sand","X",label))%>%
-  mutate(label=ifelse(predictor=="Depth"&resp.var=="rock","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="rock","X",label))%>%
-  mutate(label=ifelse(predictor=="tpi"&resp.var=="rock","X",label))%>%
+  dplyr::filter(!resp.var%in%c("biota.macroalgae","biota.stony.corals"))%>%
+  mutate(label=ifelse(resp.var=="biota.consolidated"&predictor=="layer_depth","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.consolidated"&predictor=="layer_detrended","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.consolidated"&predictor=="layer_roughness","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.consolidated"&predictor=="layer_tpi","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.unconsolidated"&predictor=="layer_depth","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.unconsolidated"&predictor=="layer_detrended","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.unconsolidated"&predictor=="layer_roughness","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.unconsolidated"&predictor=="layer_tpi","X",label))%>%
+  mutate(label=ifelse(resp.var=="mesophotic.reef"&predictor=="layer_depth","X",label))%>%
+  mutate(label=ifelse(resp.var=="mesophotic.reef"&predictor=="layer_detrended","X",label))%>%
+  mutate(label=ifelse(resp.var=="mesophotic.reef"&predictor=="layer_roughness","X",label))%>%
+  mutate(label=ifelse(resp.var=="mesophotic.reef"&predictor=="layer_tpi","X",label))%>%
+  mutate(label=ifelse(resp.var=="photic.reef"&predictor=="layer_depth","X",label))%>%
+  mutate(label=ifelse(resp.var=="photic.reef"&predictor=="layer_detrended","X",label))%>%
+  mutate(label=ifelse(resp.var=="photic.reef"&predictor=="layer_roughness","X",label))%>%
   glimpse()
 
 # Theme-
@@ -70,7 +71,7 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
    geom_tile(show.legend=T) +
    scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
                          limits = c(-1, 1))+
-      scale_y_discrete( labels=c("Biogenic","Kelp", "Macroalgae", "Rock", "Sand"))+
+      scale_y_discrete( labels=c("Consolidated","Unconsolidated", "Mesophotic reef", "Photic reef"))+
    scale_x_discrete(labels = c("Depth","Detrended","Roughness", "TPI"))+
    xlab(NULL)+
    ylab(NULL)+
@@ -80,4 +81,4 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
 gg.importance.scores
 
 #save plots
-save_plot("plots/abrolhos.habitat.importance.scores.png", gg.importance.scores,base_height = 4.5,base_width = 4.25)
+save_plot("plots/montes.habitat.importance.scores.png", gg.importance.scores,base_height = 3,base_width = 4.25)

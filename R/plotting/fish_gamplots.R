@@ -1018,15 +1018,15 @@ ggmod.sublegal.relief
 #   Theme1
 # ggmod.fumea.relief
 
-# Combine with cowplot
-library(cowplot)
+# Combine with patchwork
+library(patchwork)
 
 # view plots
-plot.grid.gam <- plot_grid(ggmod.total.depth, ggmod.total.relief, ggmod.total.detrended,
-                                 ggmod.species.detrended, ggmod.species.relief,ggmod.species.roughness,
-                                 ggmod.legal.depth,ggmod.legal.relief, NULL,
-                                 ggmod.sublegal.depth,ggmod.sublegal.detrended,ggmod.sublegal.relief,
-                                 ncol = 3, labels = c('a','b','c','d','e','f', 'g','h','','i','j',"k"),align = "vh")
+plot.grid.gam <- ggmod.total.depth + ggmod.total.relief + ggmod.total.detrended +
+                                 ggmod.species.detrended + ggmod.species.relief + ggmod.species.roughness +
+                                 ggmod.legal.depth + ggmod.legal.relief + plot_spacer()+
+                                 ggmod.sublegal.depth + ggmod.sublegal.detrended +ggmod.sublegal.relief+
+                  plot_annotation(tag_levels = 'a')+plot_layout(ncol = 3,nrow = 4)
 plot.grid.gam
 
 

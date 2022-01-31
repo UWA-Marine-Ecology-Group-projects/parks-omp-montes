@@ -243,7 +243,8 @@ a.v <- readPNG("data/images/Pseudocaranx dentex-3cm.png")
 a.v <- as.raster(a.v)
 
 #plot final bar plot
-bar.deep.top.10<-ggplot(maxn.deep.10, aes(x=reorder(scientific,maxn), y=maxn)) +   
+bar.deep.top.10<-ggplot(maxn.deep.10%>%mutate(scientific=str_replace_all(.$scientific,          #is alepes vari fished?
+  c("gymnostethus"="gymnostethus*","ravus"="ravus*"))), aes(x=reorder(scientific,maxn), y=maxn)) +   
   geom_bar(stat="identity",colour="black",fill="lightgrey",position=position_dodge())+
   ylim (0, 600)+
   coord_flip()+
@@ -310,7 +311,8 @@ p.n <- readPNG("data/images/Pomacentrus milleri 5cmL.png")
 p.n <- as.raster(p.n)
 
 #plot final bar plot
-bar.shallow.top.10<-ggplot(maxn.shallow.10, aes(x=reorder(scientific,maxn), y=maxn)) +   
+bar.shallow.top.10<-ggplot(maxn.shallow.10%>%mutate(scientific=str_replace_all(.$scientific,          
+c("atkinsoni"="atkinsoni*","fulvoguttatus"="fulvoguttatus*","Herklotsichthys spp"="Herklotsichthys spp*"))), aes(x=reorder(scientific,maxn), y=maxn)) +   
   geom_bar(stat="identity",colour="black",fill="lightgrey",position=position_dodge())+
   ylim (0, 850)+
   coord_flip()+
@@ -333,6 +335,7 @@ bar.shallow.top.10<-ggplot(maxn.shallow.10, aes(x=reorder(scientific,maxn), y=ma
   ggtitle("Shallow assemblage (0-20m)") +
   theme(plot.title = element_text(hjust = 0))
 bar.shallow.top.10
+
 
 #save out plot
 ggsave("plots/stacked.bar.plot.deep.png",bar.deep.top.10,dpi=600,width=6.0)

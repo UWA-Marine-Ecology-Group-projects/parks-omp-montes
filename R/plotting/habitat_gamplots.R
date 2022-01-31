@@ -22,6 +22,7 @@ library(raster)
 library(png)
 library(cowplot)
 library(reshape2)
+library(patchwork)
 
 # set theme
 # Theme-
@@ -149,7 +150,9 @@ ggmod.consolidated.depth<- ggplot() +
   geom_line(data=predicts.consolidated.depth,aes(x=depth,y=response - se.fit),linetype="dashed",alpha=0.5)+
   geom_line(data=predicts.consolidated.depth,aes(x=depth,y=response + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
-  Theme1
+  Theme1+
+  ggtitle("Consolidated") +
+  theme(plot.title = element_text(hjust = 0))
 ggmod.consolidated.depth
 
 # detrended ----
@@ -175,6 +178,18 @@ ggmod.consolidated.roughness<- ggplot() +
   theme_classic()+
   Theme1
 ggmod.consolidated.roughness
+
+# TPI ----
+ggmod.consolidated.tpi<- ggplot() +
+  ylab("")+
+  xlab("TPI")+
+  geom_point(data=dat.consolidated,aes(x=tpi,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.consolidated.tpi,aes(x=tpi,y=response),alpha=0.5)+
+  geom_line(data=predicts.consolidated.tpi,aes(x=tpi,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.consolidated.tpi,aes(x=tpi,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.consolidated.tpi
 
 # MODEL Unconsolidated (depth + detrended + roughness + tpi) ----
 dat.unconsolidated <- dat %>% filter(taxa%in%"biota.unconsolidated")
@@ -253,7 +268,9 @@ ggmod.unconsolidated.depth<- ggplot() +
   geom_line(data=predicts.unconsolidated.depth,aes(x=depth,y=response - se.fit),linetype="dashed",alpha=0.5)+
   geom_line(data=predicts.unconsolidated.depth,aes(x=depth,y=response + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
-  Theme1
+  Theme1+
+  ggtitle("Unconsolidated") +
+  theme(plot.title = element_text(hjust = 0))
 ggmod.unconsolidated.depth
 
 # detrended ----
@@ -280,17 +297,231 @@ ggmod.unconsolidated.roughness<- ggplot() +
   Theme1
 ggmod.unconsolidated.roughness
 
-# Combine with cowplot
-library(cowplot)
+# TPI ----
+ggmod.unconsolidated.tpi<- ggplot() +
+  ylab("")+
+  xlab("TPI")+
+  geom_point(data=dat.unconsolidated,aes(x=tpi,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.unconsolidated.tpi,aes(x=tpi,y=response),alpha=0.5)+
+  geom_line(data=predicts.unconsolidated.tpi,aes(x=tpi,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.unconsolidated.tpi,aes(x=tpi,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.unconsolidated.tpi
 
-# view plots
-plot.grid.habitat <- plot_grid(ggmod.kelp.depth, ggmod.kelp.roughness,ggmod.kelp.tpi,
-                       ggmod.macroalgae.depth, ggmod.macro.detrended,ggmod.macro.roughness,
-                       ggmod.biog.depth, ggmod.biog.detrended, ggmod.biog.roughness,
-                       ggmod.sand.depth,ggmod.sand.roughness,ggmod.sand.tpi,
-                       ggmod.rock.depth,ggmod.rock.detrended,ggmod.rock.tpi,
-                       ncol = 3, labels = c('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o'),align = "vh")
-plot.grid.habitat
+# MODEL Mesophotic reef (depth + detrended + roughness + tpi) ----
+dat.mesophotic <- dat %>% filter(taxa%in%"mesophotic.reef")
+
+mod=gam(cbind(response, (Total.Sum - response)) ~ 
+          s(depth, bs = 'cr', k = 5)+s(detrended, bs = 'cr', k = 5)+s(roughness, bs = 'cr', k = 5)+s(tpi, bs = 'cr', k = 5),
+        family = binomial("logit"), method = "REML", data=dat.mesophotic)
+
+# predict - depth ----
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 100),
+                        detrended=mean(mod$model$detrended),
+                        roughness=mean(mod$model$roughness),
+                        tpi=mean(mod$model$tpi)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.mesophotic.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(response=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - detrended ----
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 100),
+                        depth=mean(mod$model$depth),
+                        roughness=mean(mod$model$roughness),
+                        tpi=mean(mod$model$tpi)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.mesophotic.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(response=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - roughness ----
+testdata <- expand.grid(roughness=seq(min(dat$roughness),max(dat$roughness),length.out = 100),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended),
+                        tpi=mean(mod$model$tpi)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.mesophotic.roughness = testdata%>%data.frame(fits)%>%
+  group_by(roughness)%>% #only change here
+  summarise(response=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - tpi ----
+testdata <- expand.grid(tpi=seq(min(dat$tpi),max(dat$tpi),length.out = 100),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended),
+                        roughness=mean(mod$model$roughness)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.mesophotic.tpi = testdata%>%data.frame(fits)%>%
+  group_by(tpi)%>% #only change here
+  summarise(response=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for mesophotic ----
+# depth ----
+ggmod.mesophotic.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.mesophotic,aes(x=depth,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.mesophotic.depth,aes(x=depth,y=response),alpha=0.5)+
+  geom_line(data=predicts.mesophotic.depth,aes(x=depth,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.mesophotic.depth,aes(x=depth,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Mesophotic reef") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.mesophotic.depth
+
+# detrended ----
+ggmod.mesophotic.detrended<- ggplot() +
+  ylab("")+
+  xlab("Detrended")+
+  geom_point(data=dat.mesophotic,aes(x=detrended,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.mesophotic.detrended,aes(x=detrended,y=response),alpha=0.5)+
+  geom_line(data=predicts.mesophotic.detrended,aes(x=detrended,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.mesophotic.detrended,aes(x=detrended,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.mesophotic.detrended
+
+# roughness ----
+ggmod.mesophotic.roughness<- ggplot() +
+  ylab("")+
+  xlab("Roughness")+
+  geom_point(data=dat.mesophotic,aes(x=roughness,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.mesophotic.roughness,aes(x=roughness,y=response),alpha=0.5)+
+  geom_line(data=predicts.mesophotic.roughness,aes(x=roughness,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.mesophotic.roughness,aes(x=roughness,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.mesophotic.roughness
+
+# TPI ----
+ggmod.mesophotic.tpi<- ggplot() +
+  ylab("")+
+  xlab("TPI")+
+  geom_point(data=dat.mesophotic,aes(x=tpi,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.mesophotic.tpi,aes(x=tpi,y=response),alpha=0.5)+
+  geom_line(data=predicts.mesophotic.tpi,aes(x=tpi,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.mesophotic.tpi,aes(x=tpi,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.mesophotic.tpi
+
+# MODEL Photic reef (depth + detrended + roughness) ----
+dat.photic <- dat %>% filter(taxa%in%"photic.reef")
+
+mod=gam(cbind(response, (Total.Sum - response)) ~ 
+          s(depth, bs = 'cr', k = 5)+s(detrended, bs = 'cr', k = 5)+s(roughness, bs = 'cr', k = 5),
+        family = binomial("logit"), method = "REML", data=dat.photic)
+
+# predict - depth ----
+testdata <- expand.grid(depth=seq(min(dat$depth),max(dat$depth),length.out = 100),
+                        detrended=mean(mod$model$detrended),
+                        roughness=mean(mod$model$roughness)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.photic.depth = testdata%>%data.frame(fits)%>%
+  group_by(depth)%>% #only change here
+  summarise(response=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - detrended ----
+testdata <- expand.grid(detrended=seq(min(dat$detrended),max(dat$detrended),length.out = 100),
+                        depth=mean(mod$model$depth),
+                        roughness=mean(mod$model$roughness)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.photic.detrended = testdata%>%data.frame(fits)%>%
+  group_by(detrended)%>% #only change here
+  summarise(response=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# predict - roughness ----
+testdata <- expand.grid(roughness=seq(min(dat$roughness),max(dat$roughness),length.out = 100),
+                        depth=mean(mod$model$depth),
+                        detrended=mean(mod$model$detrended)) %>%
+  distinct()%>%
+  glimpse()
+
+fits <- predict.gam(mod, newdata=testdata, type='response', se.fit=T)
+
+predicts.photic.roughness = testdata%>%data.frame(fits)%>%
+  group_by(roughness)%>% #only change here
+  summarise(response=mean(fit),se.fit=mean(se.fit))%>%
+  ungroup()
+
+# PLOTS for photic ----
+# depth ----
+ggmod.photic.depth<- ggplot() +
+  ylab("")+
+  xlab("Depth")+
+  geom_point(data=dat.photic,aes(x=depth,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.photic.depth,aes(x=depth,y=response),alpha=0.5)+
+  geom_line(data=predicts.photic.depth,aes(x=depth,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.photic.depth,aes(x=depth,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1+
+  ggtitle("Photic reef") +
+  theme(plot.title = element_text(hjust = 0))
+ggmod.photic.depth
+
+# detrended ----
+ggmod.photic.detrended<- ggplot() +
+  ylab("")+
+  xlab("Detrended")+
+  geom_point(data=dat.photic,aes(x=detrended,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.photic.detrended,aes(x=detrended,y=response),alpha=0.5)+
+  geom_line(data=predicts.photic.detrended,aes(x=detrended,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.photic.detrended,aes(x=detrended,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.photic.detrended
+
+# roughness ----
+ggmod.photic.roughness<- ggplot() +
+  ylab("")+
+  xlab("Roughness")+
+  geom_point(data=dat.photic,aes(x=roughness,y=response/Total.Sum),  alpha=0.2, size=1,show.legend=FALSE)+
+  geom_line(data=predicts.photic.roughness,aes(x=roughness,y=response),alpha=0.5)+
+  geom_line(data=predicts.photic.roughness,aes(x=roughness,y=response - se.fit),linetype="dashed",alpha=0.5)+
+  geom_line(data=predicts.photic.roughness,aes(x=roughness,y=response + se.fit),linetype="dashed",alpha=0.5)+
+  theme_classic()+
+  Theme1
+ggmod.photic.roughness
+
+#Combined plots into grid
+
+gg.grid <- ggmod.consolidated.depth+ggmod.consolidated.detrended+ggmod.consolidated.roughness+ggmod.consolidated.tpi+
+  ggmod.unconsolidated.depth+ggmod.unconsolidated.detrended+ggmod.unconsolidated.roughness+ggmod.unconsolidated.tpi+
+  ggmod.mesophotic.depth+ggmod.mesophotic.detrended+ggmod.mesophotic.roughness+ggmod.mesophotic.tpi+
+  ggmod.photic.depth+ggmod.photic.detrended+ggmod.photic.roughness+plot_spacer()+plot_annotation(tag_levels = 'a')+plot_layout(ncol = 4,nrow = 4)
+gg.grid
 
 #save plots
-save_plot("plots/abrolhos.habitat.gam.png", plot.grid.habitat,base_height = 9,base_width = 8.5)
+save_plot("plots/montes.habitat.gam.plots.png", gg.grid,base_height = 9,base_width = 8.5)

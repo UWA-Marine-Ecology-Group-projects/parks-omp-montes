@@ -161,10 +161,11 @@ pcelldf$prelief[pcelldf$prelief > 5] <- 5
 prelief <- rasterFromXYZ(cbind(pcelldf[c(1:2, 7:8)]))
 plot(prelief[[2]])
 saveRDS(prelief[[2]], "output/spatial_predictions/predicted_relief_raster.rds")
+# writeRaster(prelief, "output/spatial_predictions/prelief.tif", overwrite = TRUE)
 
 sitebuf <- buffer(habisp, 10000)
 prelief <- mask(prelief, sitebuf)
-prelief <- crop(prelief, extent(sitebuf))
+# prelief <- crop(prelief, extent(sitebuf))
 plot(prelief)
 # plot(habisp, add = TRUE, col = "red")
 pcelldf <- as.data.frame(prelief, xy = TRUE, na.rm = TRUE)
