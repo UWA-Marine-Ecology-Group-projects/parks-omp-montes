@@ -26,106 +26,73 @@ fabund <- bind_rows(dat1,dat2)                        # merged fish data used fo
 prel   <- readRDS("output/spatial_predictions/predicted_relief_raster.rds")           # predicted relief from 'R/habitat/5_krige_relief.R'
 str(prel)
 
-tifs  <- list.files("output/spatial_predictions/", "*.tif", full.names = TRUE)
+tifs  <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)
 preds <- stack(tifs)
-plot(preds$layer_pphotic)
 
+preddf <- as.data.frame(preds, xy = TRUE, na.rm = TRUE)
 
-
-# join habitat and relief predictions
-predsp <- SpatialPointsDataFrame(coords = cbind(preds$x, preds$y), data = preds)
-predsp$relief <- extract(prel, predsp)
-preddf        <- as.data.frame(predsp, xy = TRUE, na.rm = TRUE)
-preddf$depth  <- preddf$Z * -1
-preddf$rock   <- preddf$prock
-preddf$biog   <- preddf$pbiogenic
-preddf$macroalgae   <- preddf$pmacroalg
+# join habitat and relief predictions, fix column names
+predsp             <- SpatialPointsDataFrame(coords = cbind(preddf$x, preddf$y), data = preddf)
+preddf$relief      <- extract(prel, predsp)
+preddf             <- na.omit(preddf)
+preddf$depth       <- preddf$layer_depth
+preddf$detrended   <- preddf$layer_detrended
+preddf$roughness   <- preddf$layer_roughness
+preddf$tpi         <- preddf$layer_tpi
+preddf$mean.relief <- preddf$relief
+fabund$depthx      <- fabund$depth
+fabund$depth       <- fabund$bathy_depth
 head(preddf)
 
-# reduce predictor space to fit survey area
+# reduce predictor space to fit survey area (needed later)
 fishsp <- SpatialPointsDataFrame(coords = cbind(fabund$longitude.1, 
                                                 fabund$latitude.1), 
                                  data = fabund)
 sbuff  <- buffer(fishsp, 10000)
-unique(fabund$scientific)
 
 # use formula from top model from FSSGam model selection
-#NPZ6
 #total abundance
-m_totabund6 <- gam(number ~ s(relief, k = 3, bs = "cr"), 
-               data = fabund%>%dplyr::filter(scientific%in%"total.abundance",location%in%"NPZ6"), 
+m_totabund <- gam(number ~ s(depth, k = 3, bs = "cr") + s(mean.relief, k = 3, bs = "cr")+ s(tpi, k = 3, bs = "cr"), 
+               data = fabund%>%dplyr::filter(response%in%"total.abundance"), 
                method = "REML", family = tw())
-summary(m_totabund6)
+summary(m_totabund)
 
-m_richness6 <- gam(number ~ s(depth, k = 3, bs = "cr"),  # not necessarily the top model
-                     data = fabund%>%dplyr::filter(scientific%in%"species.richness",location%in%"NPZ6"), 
+m_richness <- gam(number ~ s(detrended, k = 3, bs = "cr")+s(mean.relief, k = 3, bs = "cr")+s(roughness, k = 3, bs = "cr"),  # not necessarily the top model
+                     data = fabund%>%dplyr::filter(response%in%"species.richness"), 
                      method = "REML", family = tw())
-summary(m_richness6)
-# gam.check(m_targetabund)
-# vis.gam(m_targetabund)
-m_legal6 <- gam(number ~ s(detrended, k = 3, bs = "cr")+status,  # not necessarily the top model
-                  data = fabund%>%dplyr::filter(scientific%in%"greater than legal size",location%in%"NPZ6"), 
-                  method = "REML", family = tw())
-summary(m_legal6)
+summary(m_richness)
 
-m_sublegal6 <- gam(number ~ s(tpi, k = 3, bs = "cr"),  # not necessarily the top model
-               data = fabund%>%dplyr::filter(scientific%in%"smaller than legal size",location%in%"NPZ6"), 
+m_legal <- gam(number ~ s(depth, k = 3, bs = "cr")+s(mean.relief, k = 3, bs = "cr"),  # not necessarily the top model
+                  data = fabund%>%dplyr::filter(response%in%"greater than legal size"), 
+                  method = "REML", family = tw())
+summary(m_legal)
+
+m_sublegal <- gam(number ~ s(depth, k = 3, bs = "cr")+s(detrended, k = 3, bs = "cr")+s(mean.relief, k = 3, bs = "cr"),  # not necessarily the top model
+               data = fabund%>%dplyr::filter(response%in%"smaller than legal size"), 
                method = "REML", family = tw())
-summary(m_sublegal6)
+summary(m_sublegal)
 
-#NPZ9
-#total abundance
-m_totabund9 <- gam(number ~ s(relief, k = 3, bs = "cr")+s(slope, k = 3, bs = "cr"), 
-                  data = fabund%>%dplyr::filter(scientific%in%"total.abundance",location%in%"NPZ9"), 
-                  method = "REML", family = tw())
-summary(m_totabund9)
-
-m_richness9 <- gam(number ~ s(depth, k = 3, bs = "cr"),  # not necessarily the top model
-                  data = fabund%>%dplyr::filter(scientific%in%"species.richness",location%in%"NPZ9"), 
-                  method = "REML", family = tw())
-summary(m_richness9)
-# gam.check(m_targetabund)
-# vis.gam(m_targetabund)
-m_legal9 <- gam(number ~ s(slope, k = 3, bs = "cr"),  # not necessarily the top model
-               data = fabund%>%dplyr::filter(scientific%in%"greater than legal size",location%in%"NPZ9"), 
-               method = "REML", family = tw())
-summary(m_legal9)
-
-m_sublegal9 <- gam(number ~ s(depth, k = 3, bs = "cr"),  # not necessarily the top model
-                  data = fabund%>%dplyr::filter(scientific%in%"smaller than legal size",location%in%"NPZ9"), 
-                  method = "REML", family = tw())
-summary(m_sublegal9)
-
-hist(preddf$slope)
 
 # predict, rasterise and plot
 preddf <- cbind(preddf, 
-                "p_totabund6" = predict(m_totabund6, preddf, type = "response"),
-                "p_richness6" = predict(m_richness6, preddf, type = "response"),
-                "p_legal6" = predict(m_legal6, preddf, type = "response"),
-                "p_sublegal6" = predict(m_sublegal6, preddf, type = "response"),
-                "p_totabund9" = predict(m_totabund9, preddf, type = "response"),
-                "p_richness9" = predict(m_richness9, preddf, type = "response"),
-                "p_legal9" = predict(m_legal9, preddf, type = "response"),
-                "p_sublegal9" = predict(m_sublegal9, preddf, type = "response"))
+                "p_totabund" = predict(m_totabund, preddf, type = "response"),
+                "p_richness" = predict(m_richness, preddf, type = "response"),
+                "p_legal" = predict(m_legal, preddf, type = "response"),
+                "p_sublegal" = predict(m_sublegal, preddf, type = "response"))
 
-prasts <- rasterFromXYZ(preddf[, c(1, 2, 28:35)], res = c(247, 277)) 
+prasts <- rasterFromXYZ(preddf[, c(1, 2, 14:17)], res = c(30, 30)) 
 plot(prasts)
 
 # subset to 10km from sites only
 sprast <- mask(prasts, sbuff)
 plot(sprast)
 
-plot(sprast$p_totabund9)
-plot(sprast$p_richness9)
-plot(sprast$p_legal9)
-
 # tidy and output data
 spreddf <- as.data.frame(sprast, xy = TRUE, na.rm = TRUE)
 
 summary(spreddf)
 
-saveRDS(preddf, "output/broad_fish_predictions.rds")
+#saveRDS(preddf, "output/broad_fish_predictions.rds")
 saveRDS(spreddf, "output/site_fish_predictions.rds")
 
 
