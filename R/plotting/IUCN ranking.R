@@ -43,13 +43,30 @@ master <- googlesheets4::read_sheet(url)%>%
   filter(grepl('NW', marine.region))%>%
   dplyr::select(family,genus,species,iucn.ranking,fishing.mortality,fishing.type,australian.common.name)%>% 
   distinct()%>%
+  mutate(scientific = paste(family,genus,species, sep = " "))%>%
   glimpse()
 
+unique(master$fishing.type)
 names(master)
 
 length(unique(metadata$sample))
 
 total.number.fish <- sum(maxn$maxn) # 13901
+
+#species list
+species.list <- as.data.frame(unique(maxn$scientific))
+species.list$scientific <- species.list$`unique(maxn$scientific)`
+
+fished.species <- species.list %>%
+  left_join(master)%>%
+  dplyr::filter(fishing.type%in%c("R","C/R","B/C","B/C/R","C","B/R" ))%>%
+  glimpse()
+
+spp.species <- maxn %>%
+  dplyr::filter(species%in%c("spp","sp"))%>%
+  glimpse()
+unique(spp.species$scientific)
+
 # total.number.measured <- length%>%
 #   filter(length>0)
 # sum(total.number.measured$number) # 7575
@@ -67,38 +84,38 @@ total.number.fish <- sum(maxn$maxn) # 13901
 
 ###### NEED TO READ IN LUMPED COMMON NAMES FOR PSEUDOCARANX
 ###### WILL ALSO NEED TO ADD INTO CHECKEM AND VISUALISER!!!!!!!
-
-# Create Species list ----
-species.table <- maxn%>%
-  group_by(family,genus,species,scientific)%>%
-  summarise_at(vars("maxn"),funs(sum,mean,sd,se=sd(.)/sqrt(n())))%>%
-  ungroup()%>%
-  mutate(mean=round(mean,digits=2))%>%
-  mutate(sd=round(sd,digits=2))%>%
-  mutate(se=round(se,digits=2))%>%
-  mutate(genus.species=paste(genus,species,sep=" "))%>%
-  arrange(family)%>%
-  left_join(master)%>%
-  dplyr::select(-c(scientific))%>%
-  dplyr::mutate(mean.relative.abundance.per.deployment.plus.minus.SE=paste(mean,"+/-",se,sep=" "))%>%
-  dplyr::rename(total.relative.abundance = sum)%>%
-  ungroup()
-
-unique(species.table$fishing.type)
-
-ubiquity <- maxn%>%
-  filter(maxn>0) %>%
-  group_by(family,genus,species,scientific)%>%
-  summarise(no.of.deployments=n())%>%
-  ungroup() %>%
-  mutate(ubiquity=(no.of.deployments/200)*100)
-
-cleaned<-species.table%>%
-  dplyr::select(family,genus.species,australian.common.name,fishing.type,iucn.ranking)%>%
-  ## fix up variables
-  mutate(fishing.type=ifelse(fishing.type%in%c("C/R","C","B/C"),"Commercial","")) %>%
-  dplyr::filter(iucn.ranking %in% c('Near Threatened', "Endangered", "Critically Endangered", "Vulnerable"))
-  # left_join(arch)
-## Make names nicer for table
-write.csv(cleaned,"data/tidy/endangered.species.table.csv")
+# 
+# # Create Species list ----
+# species.table <- maxn%>%
+#   group_by(family,genus,species,scientific)%>%
+#   summarise_at(vars("maxn"),funs(sum,mean,sd,se=sd(.)/sqrt(n())))%>%
+#   ungroup()%>%
+#   mutate(mean=round(mean,digits=2))%>%
+#   mutate(sd=round(sd,digits=2))%>%
+#   mutate(se=round(se,digits=2))%>%
+#   mutate(genus.species=paste(genus,species,sep=" "))%>%
+#   arrange(family)%>%
+#   left_join(master)%>%
+#   dplyr::select(-c(scientific))%>%
+#   dplyr::mutate(mean.relative.abundance.per.deployment.plus.minus.SE=paste(mean,"+/-",se,sep=" "))%>%
+#   dplyr::rename(total.relative.abundance = sum)%>%
+#   ungroup()
+# 
+# unique(species.table$fishing.type)
+# 
+# ubiquity <- maxn%>%
+#   filter(maxn>0) %>%
+#   group_by(family,genus,species,scientific)%>%
+#   summarise(no.of.deployments=n())%>%
+#   ungroup() %>%
+#   mutate(ubiquity=(no.of.deployments/200)*100)
+# 
+# cleaned<-species.table%>%
+#   dplyr::select(family,genus.species,australian.common.name,fishing.type,iucn.ranking)%>%
+#   ## fix up variables
+#   mutate(fishing.type=ifelse(fishing.type%in%c("C/R","C","B/C"),"Commercial","")) %>%
+#   dplyr::filter(iucn.ranking %in% c('Near Threatened', "Endangered", "Critically Endangered", "Vulnerable"))
+#   # left_join(arch)
+# ## Make names nicer for table
+# write.csv(cleaned,"data/tidy/endangered.species.table.csv")
 

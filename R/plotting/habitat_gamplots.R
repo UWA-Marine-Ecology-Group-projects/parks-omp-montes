@@ -309,7 +309,7 @@ ggmod.unconsolidated.tpi<- ggplot() +
   Theme1
 ggmod.unconsolidated.tpi
 
-# MODEL Mesophotic reef (depth + detrended + roughness + tpi) ----
+# MODEL Invertebrate reef (depth + detrended + roughness + tpi) ----
 dat.mesophotic <- dat %>% filter(taxa%in%"mesophotic.reef")
 
 mod=gam(cbind(response, (Total.Sum - response)) ~ 
@@ -387,7 +387,7 @@ ggmod.mesophotic.depth<- ggplot() +
   geom_line(data=predicts.mesophotic.depth,aes(x=depth,y=response + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
   Theme1+
-  ggtitle("Mesophotic reef") +
+  ggtitle("Invertebrate reef") +
   theme(plot.title = element_text(hjust = 0))
 ggmod.mesophotic.depth
 
@@ -427,7 +427,7 @@ ggmod.mesophotic.tpi<- ggplot() +
   Theme1
 ggmod.mesophotic.tpi
 
-# MODEL Photic reef (depth + detrended + roughness) ----
+# MODEL Macroalgae/coral reef (depth + detrended + roughness) ----
 dat.photic <- dat %>% filter(taxa%in%"photic.reef")
 
 mod=gam(cbind(response, (Total.Sum - response)) ~ 
@@ -487,7 +487,7 @@ ggmod.photic.depth<- ggplot() +
   geom_line(data=predicts.photic.depth,aes(x=depth,y=response + se.fit),linetype="dashed",alpha=0.5)+
   theme_classic()+
   Theme1+
-  ggtitle("Photic reef") +
+  ggtitle("Macroalgae/coral reef") +
   theme(plot.title = element_text(hjust = 0))
 ggmod.photic.depth
 
@@ -524,4 +524,4 @@ gg.grid <- ggmod.consolidated.depth+ggmod.consolidated.detrended+ggmod.consolida
 gg.grid
 
 #save plots
-save_plot("plots/montes.habitat.gam.plots.png", gg.grid,base_height = 9,base_width = 8.5)
+save_plot("plots/montes.habitat.gam.plots.png", gg.grid,base_height = 9,base_width = 11)

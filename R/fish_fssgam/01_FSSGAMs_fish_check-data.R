@@ -66,7 +66,7 @@ check <- metadata.maxn %>%
     group_by(scientific)%>%
     dplyr::summarise(maxn=sum(maxn))%>%
     ungroup()%>%
-    top_n(15)%>%                   #Claude added this - what is the point of plotting 6 billion species you cannot read the names of...
+    top_n(15)%>%                   
     ungroup()
 
 ## Total frequency of occurance
@@ -106,10 +106,14 @@ unique(master$fishing.type)
 
 fished.species <- maxn %>%
   dplyr::left_join(master) %>%
-  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Serranidae Plectropomus spp")
+  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Plectropomus spp","Scomberomorus spp","Sillago spp",
+                                                       "Herklotsichthys spp","Lethrinus spp")
                                       ,"R",fishing.type))%>%
+  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Plectropomus spp"), "450", minlegal.wa))%>%
+  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Scomberomorus spp"), "900", minlegal.wa))%>%
+  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Lethrinus spp"), "280", minlegal.wa))%>%
   dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
-  dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus
+  dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus - maybe remove herklotsichthys if it cooks everything
   glimpse()
   
 unique(fished.species$scientific)
@@ -163,9 +167,12 @@ check <- metadata.length %>%
 # Create abundance of all recreational fished species ----
 fished.species <- length %>%
   dplyr::left_join(master) %>%
-  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Serranidae Plectropomus spp"),"C/R",fishing.type))%>%
-  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Serranidae Plectropomus spp"), "450", minlegal.wa))%>%
-  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
+  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Plectropomus spp","Scomberomorus spp","Sillago spp",
+                                                       "Herklotsichthys spp","Lethrinus spp")
+                                      ,"R",fishing.type))%>%
+  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Plectropomus spp"), "450", minlegal.wa))%>%
+  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Scomberomorus spp"), "900", minlegal.wa))%>%
+  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Lethrinus spp"), "280", minlegal.wa))%>%
   dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus
   glimpse()
 
@@ -320,3 +327,4 @@ for (i in pred.vars) {
 
 #remove sand and slope
 #also remove all 'non-reef' predictors
+

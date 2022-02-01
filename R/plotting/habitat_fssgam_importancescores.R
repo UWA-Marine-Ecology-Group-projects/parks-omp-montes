@@ -71,7 +71,7 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
    geom_tile(show.legend=T) +
    scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
                          limits = c(-1, 1))+
-      scale_y_discrete( labels=c("Consolidated","Unconsolidated", "Mesophotic reef", "Photic reef"))+
+      scale_y_discrete( labels=c("Rock","Sand", "Invertebrate reef", "Macroalgae/coral reef"))+
    scale_x_discrete(labels = c("Depth","Detrended","Roughness", "TPI"))+
    xlab(NULL)+
    ylab(NULL)+

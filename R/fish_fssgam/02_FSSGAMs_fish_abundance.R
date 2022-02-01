@@ -59,7 +59,14 @@ for(i in 1:length(unique.vars)){
     unique.vars.use=c(unique.vars.use,unique.vars[i])}
 }
 
-unique.vars.use   
+unique.vars.use 
+
+#check for outliers
+plot(dat$number)
+
+dat <- dat %>%
+  dplyr::filter(number < 400)%>%
+  glimpse()
 
 # Run the full subset model selection----
 savedir <- "output/fssgam - fish"

@@ -21,8 +21,8 @@ library(sp)
 dat1 <- readRDS("data/tidy/dat.maxn.rds")%>%
   glimpse()
 dat2 <- readRDS("data/tidy/dat.length.rds")
-fabund <- bind_rows(dat1,dat2)                        # merged fish data used for fssgam script
-
+fabund <- bind_rows(dat1,dat2)  %>%                      # merged fish data used for fssgam script
+        dplyr::filter(number<400)
 prel   <- readRDS("output/spatial_predictions/predicted_relief_raster.rds")           # predicted relief from 'R/habitat/5_krige_relief.R'
 str(prel)
 
@@ -52,22 +52,22 @@ sbuff  <- buffer(fishsp, 10000)
 
 # use formula from top model from FSSGam model selection
 #total abundance
-m_totabund <- gam(number ~ s(depth, k = 3, bs = "cr") + s(mean.relief, k = 3, bs = "cr")+ s(tpi, k = 3, bs = "cr"), 
+m_totabund <- gam(number ~ s(detrended, k = 3, bs = "cr") + s(mean.relief, k = 3, bs = "cr")+ s(roughness, k = 3, bs = "cr"), 
                data = fabund%>%dplyr::filter(response%in%"total.abundance"), 
                method = "REML", family = tw())
 summary(m_totabund)
 
-m_richness <- gam(number ~ s(detrended, k = 3, bs = "cr")+s(mean.relief, k = 3, bs = "cr")+s(roughness, k = 3, bs = "cr"),  # not necessarily the top model
+m_richness <- gam(number ~ s(mean.relief, k = 3, bs = "cr"), 
                      data = fabund%>%dplyr::filter(response%in%"species.richness"), 
                      method = "REML", family = tw())
 summary(m_richness)
 
-m_legal <- gam(number ~ s(depth, k = 3, bs = "cr")+s(mean.relief, k = 3, bs = "cr"),  # not necessarily the top model
+m_legal <- gam(number ~ s(mean.relief, k = 3, bs = "cr") + s(roughness, k = 3, bs = "cr"),  
                   data = fabund%>%dplyr::filter(response%in%"greater than legal size"), 
                   method = "REML", family = tw())
 summary(m_legal)
 
-m_sublegal <- gam(number ~ s(depth, k = 3, bs = "cr")+s(detrended, k = 3, bs = "cr")+s(mean.relief, k = 3, bs = "cr"),  # not necessarily the top model
+m_sublegal <- gam(number ~ s(mean.relief, k = 3, bs = "cr")+s(roughness, k = 3, bs = "cr"),
                data = fabund%>%dplyr::filter(response%in%"smaller than legal size"), 
                method = "REML", family = tw())
 summary(m_sublegal)
