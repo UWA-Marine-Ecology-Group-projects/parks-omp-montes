@@ -36,10 +36,6 @@ max(spreddf$x) #361746.1
 min(spreddf$x) #313956.1
 max(spreddf$y) #7772921
 min(spreddf$y) #7717571
-mb_mpa_crop <- st_crop(mb_mpa,xmin = 313956.1, ymin = 7717571, xmax = 361746.1, ymax = 7772921)
-
-#make points higher than 250 equal to 250 - outliers in total abundance data from crazy tpi values
-spreddf$p_totabund <- ifelse(spreddf$p_totabund > 250,250,spreddf$p_totabund)
 
 #wa MPA colours
 mb_mpa$waname <- gsub("( \\().+(\\))", "", mb_mpa$ZONE_TYPE)
@@ -51,13 +47,13 @@ mb_mpa$waname <- dplyr::recode(mb_mpa$waname,
                                # "Recreation Area" = "Recreation Zone",
                                # "Conservation Area" = "Sanctuary Zone",
                                "Special Purpose Zone (Shore Based Activities)" = 
-                                 "Special Purpose Zone\n(Shore Based Activities)")
+                               "Special Purpose Zone\n(Shore Based Activities)")
 
 wampa_cols <- scale_color_manual(values = c("Sanctuary Zone" = "#7bbc63",      #changed to NPZ color as test from #bfd054
                                            #"Marine Nature Reserve" = "#bfd054",
                                            #"Conservation Area" = "#b3a63d",
                                            # "Habitat Protection Zone" = "#fffbcc",# State MPA colours
-                                          # "Fish Habitat Protection Area" = "#fbff85",
+                                           # "Fish Habitat Protection Area" = "#fbff85",
                                            # "National Park Zone" = "#a4d194",
                                            "General Use Zone" = "#bddde1",
                                            "Recreation Zone" = "#f4e952",
@@ -85,6 +81,16 @@ wampa_fills <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
 
 # plotting broad maps
 #total abundance
+#make points higher than 250 equal to 250 - outliers in total abundance data from crazy tpi values
+summary(spreddf$p_totabund)
+
+#testing to see if removing outliers looks better
+# spreddf.tot <- spreddf %>%
+#   dplyr::filter(p_totabund<200)%>%
+#   glimpse()
+spreddf$p_totabund <- ifelse(spreddf$p_totabund > 200,200,spreddf$p_totabund)
+hist(spreddf.tot$p_totabund)
+
 p11 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_totabund)) +
   scale_fill_viridis(direction = -1) +
@@ -93,9 +99,9 @@ p11 <- ggplot() +
   theme_minimal() +
   wampa_cols+
   coord_sf(xlim=c(313956.1,361746.1),ylim = c(7717571,7772921))+
-  #scale_x_continuous(breaks = c(113.2,113.4,113.6))+
   labs(x = NULL, y = NULL, fill = "Total Abundance")#+theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
 p11
+
 
 #species richness
 p21 <- ggplot() +
@@ -112,6 +118,10 @@ p21 <- ggplot() +
 p21
 
 # greater than legal size
+summary(spreddf$p_legal)
+spreddf$p_legal <- ifelse(spreddf$p_legal > 80,80,spreddf$p_legal)
+hist(spreddf$p_legal)
+
 p31 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_legal)) +
   scale_fill_viridis(direction = -1) +
@@ -126,6 +136,10 @@ p31 <- ggplot() +
 p31
 
 #smaller than legal size
+summary(spreddf$p_sublegal)
+spreddf$p_sublegal <- ifelse(spreddf$p_sublegal > 20,20,spreddf$p_sublegal)
+hist(spreddf$p_sublegal)
+
 p41 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_sublegal)) +
   scale_fill_viridis(direction = -1) +
@@ -142,4 +156,4 @@ p41
 gg.predictions <- p11+p21+p31+p41 & theme(legend.justification = "left", aspect.ratio=1)
 gg.predictions
 
-ggsave("plots/site_fish_predictions.png", gg.predictions,width = 10, height = 8, dpi = 160)
+ggsave("plots/site_fish_predictions.png", gg.predictions,width = 11, height = 8, dpi = 160)
