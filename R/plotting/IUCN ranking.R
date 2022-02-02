@@ -24,7 +24,7 @@ working.dir <- getwd()
 setwd(working.dir)
 #OR set manually once
 maxn <- read_csv("data/tidy/montebello.synthesis.checked.maxn.csv")%>%
-  mutate(scientific=paste(family,genus,species,sep=" "))%>%
+  mutate(scientific=paste(genus,species,sep=" "))%>%
   glimpse()
 
 mass <- read.csv("data/tidy/montebello.synthesis.complete.mass.csv")%>%
@@ -43,7 +43,7 @@ master <- googlesheets4::read_sheet(url)%>%
   filter(grepl('NW', marine.region))%>%
   dplyr::select(family,genus,species,iucn.ranking,fishing.mortality,fishing.type,australian.common.name)%>% 
   distinct()%>%
-  mutate(scientific = paste(family,genus,species, sep = " "))%>%
+  mutate(scientific = paste(genus,species, sep = " "))%>%
   glimpse()
 
 unique(master$fishing.type)
@@ -59,8 +59,15 @@ species.list$scientific <- species.list$`unique(maxn$scientific)`
 
 fished.species <- species.list %>%
   left_join(master)%>%
+  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Plectropomus spp","Scomberomorus spp","Sillago spp",
+                                                       "Herklotsichthys spp","Lethrinus spp")
+                                      ,"R",fishing.type))%>%
   dplyr::filter(fishing.type%in%c("R","C/R","B/C","B/C/R","C","B/R" ))%>%
+  dplyr::select(scientific,australian.common.name, fishing.type)%>%
   glimpse()
+unique(fished.species$scientific)
+
+write.csv(fished.species, file = "output/fssgam - fish/montes.fished.species.csv", row.names = F)
 
 spp.species <- maxn %>%
   dplyr::filter(species%in%c("spp","sp"))%>%
