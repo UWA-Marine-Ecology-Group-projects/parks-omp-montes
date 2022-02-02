@@ -13,7 +13,6 @@ library(ggplot2)
 library(dplyr)
 library(ggtext)
 library(tidyr)
-library(cowplot)
 
 ## Set working directory----
 working.dir <- getwd()
