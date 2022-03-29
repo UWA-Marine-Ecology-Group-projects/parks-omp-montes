@@ -1,5 +1,5 @@
 ###
-# Project: Parks - Abrolhos
+# Project: Parks - Montes
 # Data:    Oceanography - SST, SLA, currents & acidification
 # Task:    Load in netCDF files from local copy
 # author:  Jess Kolbusz & Claude
@@ -29,7 +29,7 @@ locations <-   read.csv("data/spatial/oceanography/network_scale_boundaries.csv"
   glimpse()
 
 #i use the "zone" column for each since it distinguishes them all spatially
-Zone <- 'SW Capes' #NW or SW
+Zone <- 'Montebello' #NW or SW
 locs <- locations[locations$Zone %in% c(Zone), ]               # just wa parks nearby
 
 #gets bounds
@@ -109,13 +109,13 @@ plot_sla_ts <- arr_long %>%
   ungroup()%>%
   glimpse()
 
-saveRDS(plot_sla_ts, "data/spatial/oceanography/SwC_SLA_ts.rds")
-saveRDS(plot_sla_month,"data/spatial/oceanography/SwC_SLA_month.rds")
-saveRDS(plot_sla_year,"data/spatial/oceanography/SwC_SLA_year.rds")
+saveRDS(plot_sla_ts, "data/spatial/oceanography/Montes_SLA_ts.rds")
+saveRDS(plot_sla_month,"data/spatial/oceanography/Montes_SLA_month.rds")
+saveRDS(plot_sla_year,"data/spatial/oceanography/Montes_SLA_year.rds")
 
 #clear out the memory
-rm(list= ls()[!(ls() %in% c('working.dir','locations', 'Zone','locs','Lon_w',
-                            'Lon_e','Lat_n','Lat_s'))])
+# rm(list= ls()[!(ls() %in% c('working.dir','locations', 'Zone','locs','Lon_w',
+#                             'Lon_e','Lat_n','Lat_s'))])
 gc()
 ######### SST #########
 #IMOS - SRS - SST - L3S - Single Sensor - 6 day - day and night time - Australia
@@ -157,16 +157,16 @@ arr = array(sst_all, dim=c(length(lon_i),length(lat_i),length(time_data$dates)),
             dimnames = list(lon_sst, lat_sst,time_data$dates))
 
 #careful - running out of memory
-rm(list=setdiff(ls(), "arr"))
-gc() #free unused memory
+# rm(list=setdiff(ls(), "arr"))
+# gc() #free unused memory
 
 arr_long <- arr %>%
   reshape2::melt(varnames = c("Lon","Lat","Date"))
-saveRDS(arr_long,"data/spatial/oceanography/SwC_SST.rds")
+saveRDS(arr_long,"data/spatial/oceanography/Montes_SST.rds")
 
 #careful - running out of memory
-rm(list=setdiff(ls(), "arr_long"))
-gc() #free unused memory
+# rm(list=setdiff(ls(), "arr_long"))
+# gc() #free unused memory
 
 #split into 2 halves as to not cook the memory
 arr_long <- arr_long %>%
@@ -195,30 +195,10 @@ plot_sst_ts <- arr_long %>%
   summarise(sst = mean(value,na.rm = TRUE), sd = sd(value,na.rm = TRUE)) %>% 
   glimpse()
 
-saveRDS(plot_sst_winter,"data/spatial/oceanography/SwC_SST_winter.rds")
-saveRDS(plot_sst_year,"data/spatial/oceanography/SwC_SST_year.rds")
-saveRDS(plot_sst_month,"data/spatial/oceanography/SwC_SST_month.rds")
-saveRDS(plot_sst_ts,"data/spatial/oceanography/SwC_SST_ts.rds")
-
-#We deleted these so add back in
-## get data locations /limits that need from MPA
-locations <-   read.csv("data/spatial/oceanography/network_scale_boundaries.csv", header = TRUE) %>%
-  glimpse()
-
-#i use the "zone" column for each since it distinguishes them all spatially
-Zone <- 'SW Capes' #NW or SW
-locs <- locations[locations$Zone %in% c(Zone), ]               # just wa parks nearby
-
-#gets bounds
-Lon_w <- locs$lon_w
-Lon_e <- locs$lon_e
-Lat_n <- locs$lat_n
-Lat_s <- locs$lat_s
-
-#clear out the memory
-rm(list= ls()[!(ls() %in% c('working.dir','locations', 'Zone','locs','Lon_w',
-                            'Lon_e','Lat_n','Lat_s'))])
-gc()
+saveRDS(plot_sst_winter,"data/spatial/oceanography/Montes_SST_winter.rds")
+saveRDS(plot_sst_year,"data/spatial/oceanography/Montes_SST_year.rds")
+saveRDS(plot_sst_month,"data/spatial/oceanography/Montes_SST_month.rds")
+saveRDS(plot_sst_ts,"data/spatial/oceanography/Montes_SST_ts.rds")
 
 ##### Acidification ####
 #Ocean_acidification_historical_reconstructionfrom AODN portal
@@ -249,9 +229,11 @@ acd_all <- var.get.nc(nc_file_to_get_acd,'pH_T', start = c(lon_i[1], lat_i[1],1)
 acd_ts_all <- as.data.frame(dates_acd)
 
 #different function to get mean since is only 2 in certain direction
-acd_ts_all$acdd <-apply(acd_all, 3, mean, na.rm = TRUE) #for larger ares is in 3D so use apply(acd_all, 3, mean, na.rm = TRUE) #acd_all for monties is only 1 cell #for abrolhos -> apply(acd_all, 2, mean, na.rm = TRUE) #3 is 3rd dumension
+acdd_dat <- as.data.frame(acd_all) #not sure about this, check with Jess
+acd_ts_all$acdd <- acdd_dat$acd_all
 acd_ts_all$month <- as.numeric(format(as.Date(acd_ts_all$dates_acd), "%m"))
 acd_ts_all$year <- as.numeric(format(as.Date(acd_ts_all$dates_acd), "%Y"))
+glimpse(acd_ts_all)
 
 acd_ts_monthly <- acd_ts_all %>% 
   dplyr::group_by(year) %>%
@@ -265,7 +247,7 @@ saveRDS(acd_ts_monthly,"data/spatial/oceanography/SwC_acidification.rds")
 #download from
 #https://coastwatch.pfeg.noaa.gov/erddap/griddap/NOAA_DHW.html
 #input bounds and times
-nc_file_to_get_dhw <- open.nc("data/spatial/oceanography/large/DHW_2021/dhw_5km_SwC_weekly_2002-2022.nc",write = TRUE)
+nc_file_to_get_dhw <- open.nc("data/spatial/oceanography/large/DHW_2021/dhw_5km_Montes_weekly_2002-2022.nc",write = TRUE)
 print.nc(nc_file_to_get_dhw) #shows you all the file details
 
 time_nc<- var.get.nc(nc_file_to_get_dhw, 'time')  #NC_CHAR time:units = "days since 1981-01-01 00:00:00" ;
@@ -331,10 +313,7 @@ plot_dhw_heatwave <- arr_long %>%
   summarise(dhw = mean(value,na.rm = TRUE), sd = sd(value,na.rm = TRUE)) %>% 
   glimpse()
 
-min_dhw = round(min(min(plot_dhw_heatwave$dhw,na.rm = TRUE), na.rm = TRUE))
-max_dhw = round(max(max(plot_dhw_heatwave$dhw,na.rm = TRUE), na.rm = TRUE))
-
-saveRDS(plot_dhw_month,"data/spatial/oceanography/SwC_DHW_month.rds")
-saveRDS(plot_dhw_year,"data/spatial/oceanography/SwC_DHW_year.rds")
-saveRDS(plot_dhw_ts,"data/spatial/oceanography/SwC_DHW_ts.rds")
-saveRDS(plot_dhw_heatwave,"data/spatial/oceanography/SwC_DHW_heatwave.rds")
+saveRDS(plot_dhw_month,"data/spatial/oceanography/Montes_DHW_month.rds")
+saveRDS(plot_dhw_year,"data/spatial/oceanography/Montes_DHW_year.rds")
+saveRDS(plot_dhw_ts,"data/spatial/oceanography/Montes_DHW_ts.rds")
+saveRDS(plot_dhw_heatwave,"data/spatial/oceanography/Montes_DHW_heatwave.rds")
