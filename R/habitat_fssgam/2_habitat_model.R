@@ -112,7 +112,7 @@ prasts$dom_tag <- which.max(prasts[[6:11]])
 plot(prasts[[6:12]])
 
 # categorise by dominant tag
-preddf$dom_tag <- apply(preddf[8:13], 1,
+preddf$dom_tag <- apply(preddf[10:13], 1,
                         FUN = function(x){names(which.max(x))})
 preddf$dom_tag <- sub('.', '', preddf$dom_tag)
 head(preddf)

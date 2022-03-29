@@ -17,6 +17,11 @@ library(sf)
 wgscrs <- CRS("+proj=longlat +datum=WGS84")
 sppcrs <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")       # crs for sp objects
 
+#National marine parks
+aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
+nw_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                             # just Abrolhos Aus MP
+nw_mpa <- st_transform(nw_mpa, sppcrs)
+
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                            # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
 montes <- aus[aus$GROUP_NAME %in% c("MONTEBELLO ISLANDS"), ]                      # just montes
 st_crs(montes) <- wgscrs
@@ -25,19 +30,22 @@ montes <- st_transform(montes, sppcrs)
 
 aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
 mb_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                             # just Montes Aus MP
-# wampa  <- st_read("data/spatial/shp/WA_MPA_2018.shp")                           # all wa mpas
+wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")
+mb_mpa <- wampa[wampa$NAME %in% "Montebello Islands" ,]
 
 mb_mpa <- st_transform(mb_mpa, sppcrs)
-# abnpza <- ab_npz
-# ab_npz <- st_transform(ab_npz, sppcrs)
-# jacmap <- raster("data/spatial/raster/ecosystem-types-19class-naland.tif")      # jac's aus habitat map
-# cropex <- extent(112, 116, -30, -27)
-# jacmap <- crop(jacmap, cropex)
-# jacmap <- projectRaster(jacmap, crs = sppcrs, method = "ngb")
-# habi    <- readRDS("data/tidy/merged_habitat.rds")
-# habi$ns <- ifelse(habi$Latitude.1 > 6940000, 1, 0)
-# habi$method <- dplyr::recode(habi$method,
-#                              BOSS = "Drop Camera")
+
+#wa MPA colours
+mb_mpa$waname <- gsub("( \\().+(\\))", "", mb_mpa$ZONE_TYPE)
+mb_mpa$waname <- gsub(" [1-4]", "", mb_mpa$waname)
+
+mb_mpa$waname <- dplyr::recode(mb_mpa$waname, 
+                               "General Use" = "General Use Zone",
+                               # "MMA" = "Marine Management Area",
+                               # "Recreation Area" = "Recreation Zone",
+                               # "Conservation Area" = "Sanctuary Zone",
+                               "Special Purpose Zone (Shore Based Activities)" = 
+                                 "Special Purpose Zone\n(Shore Based Activities)")
 
 # read in outputs from 'R/4_habitat_model.R'
 rlist  <- list.files("output/spatial_predictions/", "*.tif", full.names = T)
@@ -50,44 +58,59 @@ spreddf$dom_tag <- as.factor(spreddf$layer_dom_tag)
 spreddf$dom_tag <- dplyr::recode(spreddf$dom_tag,
                           "1" = "Coral",
                           "2" = "Macroalgae",
-                          "3" = "Mesophotic",
-                          "4" = "Photic",
+                          "3" = "Invertebrate reef",
+                          "4" = "Macroalgae/coral reef",
                           "5" = "Rock",
                           "6" = "Sand")
 
 # fig 1: categorical habitat maps
 # assign mpa colours
-hab_cols <- scale_fill_manual(values = c("Macroalgae" = "darkgoldenrod4",
-                                         "Coral" = "coral2",
+wampa_cols <- scale_color_manual(values = c("Sanctuary Zone" = "#7bbc63",      #changed to NPZ color as test from #bfd054
+                                            #"Marine Nature Reserve" = "#bfd054",
+                                            #"Conservation Area" = "#b3a63d",
+                                            # "Habitat Protection Zone" = "#fffbcc",# State MPA colours
+                                            # "Fish Habitat Protection Area" = "#fbff85",
+                                            # "National Park Zone" = "#a4d194",
+                                            "General Use Zone" = "#bddde1",
+                                            "Recreation Zone" = "#f4e952",
+                                            "Special Purpose Zone" = "#c5bcc9"
+                                            # "Special Purpose Zone\n(Shore Based Activities)" = "#ba3030"
+                                            # "Special Purpose Zone\n(Habitat Protection)" = "#f0ac41",
+                                            #"Reef Observation Area" = "#ddccff",
+                                            #"Marine Management Area" = "#b7cfe1"
+))
+
+hab_cols <- scale_fill_manual(values = c(#"Macroalgae" = "darkgoldenrod4",
+                                         #"Coral" = "coral2",
                                          "Rock" = "grey40",
                                          "Sand" = "wheat",
-                                         "Mesophotic" = "plum",
-                                         "Photic" = "cadetblue2"
+                                         "Invertebrate reef" = "plum",
+                                         "Macroalgae/coral reef" = "cadetblue2"
 ))
 
 p1 <- ggplot() +
-  geom_tile(data = spreddf, aes(x, y, fill = dom_tag)) +
+  geom_tile(data = spreddf%>%dplyr::filter(dom_tag%in%c("Rock","Sand","Invertebrate reef","Macroalgae/coral reef")), 
+            aes(x, y, fill = dom_tag)) +
   hab_cols +
-  # geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
-  # geom_point(data = habi, 
-  #            aes(x, y, colour = method), 
-  #            shape = 10, size = 1, alpha = 3/5) +
-  # scale_colour_manual(values = c("BRUV" = "indianred4", 
-  #                                "Drop Camera" = "navyblue")) +
+  geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.5) +
+  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
+          fill = NA, aes(color = waname), size = 0.5, show.legend = F) +
+  wampa_cols+
   labs(x = NULL, y = NULL, fill = NULL) +
   guides(colour = "none") +
-  coord_sf() +
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
   theme_minimal()
 
-p1
-ggsave("plots/site_dominant_habitat.png", width = 12, height = 8, dpi = 160)
+# p1
+ggsave("plots/site_dominant_habitat.png", width = 9, height = 6, dpi = 160)
 
 # fig 2: habitat multiplot
 # melt classes for faceting
 widehabit <- melt(spreddf, measure.vars = c(6:9))
 widehabit$variable <- dplyr::recode(widehabit$variable,
-                                    layer_pphotic = "Photic Reef",
-                                    layer_pmeso = "Mesophotic Reef",
+                                    layer_pphotic = "Macroalgae/coral reef",
+                                    layer_pmeso = "Invertebrate reef",
                                     layer_prock = "Rock",
                                     layer_psand = "Sand")
 
@@ -99,11 +122,14 @@ widehabit$variable <- dplyr::recode(widehabit$variable,
 p2 <- ggplot() +
   geom_tile(data = widehabit, aes(x, y, fill = value)) +
   scale_fill_viridis(direction = -1, limits = c(0, max(widehabit$value))) +
-  geom_sf(data = mb_mpa, fill = NA, colour = "#b9e6fb") +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.5) +
+  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
+          fill = NA, aes(color = waname), size = 0.5, show.legend = F) +
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
   labs(x = NULL, y = NULL, fill = "Occurrence (p)") +
   coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
   theme_minimal() +
+  wampa_cols+
   facet_wrap(~variable)
 
 p2

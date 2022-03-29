@@ -89,7 +89,6 @@ summary(spreddf$p_totabund)
 #   dplyr::filter(p_totabund<200)%>%
 #   glimpse()
 spreddf$p_totabund <- ifelse(spreddf$p_totabund > 200,200,spreddf$p_totabund)
-hist(spreddf.tot$p_totabund)
 
 p11 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_totabund)) +
@@ -98,9 +97,9 @@ p11 <- ggplot() +
   geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
   theme_minimal() +
   wampa_cols+
-  coord_sf(xlim=c(313956.1,361746.1),ylim = c(7717571,7772921))+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
   labs(x = NULL, y = NULL, fill = "Total Abundance")#+theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
-p11
+# p11
 
 
 #species richness
@@ -111,11 +110,11 @@ p21 <- ggplot() +
   geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
   theme_minimal() +
   wampa_cols+
-  coord_sf(xlim=c(313956.1,361746.1),ylim = c(7717571,7772921))+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
   #scale_x_continuous(breaks = c(113.2,113.4,113.6))+
   labs(x = NULL, y = NULL, fill = "Species Richness")#+theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
-p21
+# p21
 
 # greater than legal size
 summary(spreddf$p_legal)
@@ -129,11 +128,11 @@ p31 <- ggplot() +
   geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
   theme_minimal() +
   wampa_cols+
-  coord_sf(xlim=c(313956.1,361746.1),ylim = c(7717571,7772921))+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
   #scale_x_continuous(breaks = c(113.2,113.4,113.6))+
   labs(x = NULL, y = NULL, fill = "Legal")#+theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
-p31
+# p31
 
 #smaller than legal size
 summary(spreddf$p_sublegal)
@@ -147,13 +146,13 @@ p41 <- ggplot() +
   geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
   theme_minimal() +
   wampa_cols+
-  coord_sf(xlim=c(313956.1,361746.1),ylim = c(7717571,7772921))+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
   #scale_x_continuous(breaks = c(113.2,113.4,113.6))+
   labs(x = NULL, y = NULL, fill = "Sublegal")#+theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
-p41
+# p41
 
-gg.predictions <- p11+p21+p31+p41 & theme(legend.justification = "left", aspect.ratio=1)
-gg.predictions
+gg.predictions <- p11+p21+p31+p41 & theme(legend.justification = "left")
+# gg.predictions
 
-ggsave("plots/site_fish_predictions.png", gg.predictions,width = 11, height = 8, dpi = 160)
+ggsave("plots/site_fish_predictions.png", gg.predictions,width = 9, height = 8, dpi = 160)
