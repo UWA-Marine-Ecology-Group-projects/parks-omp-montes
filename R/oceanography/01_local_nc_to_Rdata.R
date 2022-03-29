@@ -30,6 +30,7 @@ locations <-   read.csv("data/spatial/oceanography/network_scale_boundaries.csv"
 
 #i use the "zone" column for each since it distinguishes them all spatially
 Zone <- 'Montebello' #NW or SW
+name <- 'Montes'   #for saving files
 locs <- locations[locations$Zone %in% c(Zone), ]               # just wa parks nearby
 
 #gets bounds
@@ -109,9 +110,9 @@ plot_sla_ts <- arr_long %>%
   ungroup()%>%
   glimpse()
 
-saveRDS(plot_sla_ts, "data/spatial/oceanography/Montes_SLA_ts.rds")
-saveRDS(plot_sla_month,"data/spatial/oceanography/Montes_SLA_month.rds")
-saveRDS(plot_sla_year,"data/spatial/oceanography/Montes_SLA_year.rds")
+saveRDS(plot_sla_ts,paste0("data/spatial/oceanography/",name,"_SLA_ts.rds"))
+saveRDS(plot_sla_month,paste0("data/spatial/oceanography/",name,"_SLA_month.rds"))
+saveRDS(plot_sla_year,paste0("data/spatial/oceanography/",name,"_SLA_year.rds"))
 
 #clear out the memory
 # rm(list= ls()[!(ls() %in% c('working.dir','locations', 'Zone','locs','Lon_w',
@@ -162,13 +163,11 @@ arr = array(sst_all, dim=c(length(lon_i),length(lat_i),length(time_data$dates)),
 
 arr_long <- arr %>%
   reshape2::melt(varnames = c("Lon","Lat","Date"))
-saveRDS(arr_long,"data/spatial/oceanography/Montes_SST.rds")
+saveRDS(arr_long,paste0("data/spatial/oceanography/",name,"_SST.rds"))
 
 #careful - running out of memory
 # rm(list=setdiff(ls(), "arr_long"))
 # gc() #free unused memory
-
-#split into 2 halves as to not cook the memory
 arr_long <- arr_long %>%
   dplyr::mutate(Date = as.Date(Date))%>%
   dplyr::mutate(year = year(Date),month = month(Date))%>%
@@ -195,10 +194,10 @@ plot_sst_ts <- arr_long %>%
   summarise(sst = mean(value,na.rm = TRUE), sd = sd(value,na.rm = TRUE)) %>% 
   glimpse()
 
-saveRDS(plot_sst_winter,"data/spatial/oceanography/Montes_SST_winter.rds")
-saveRDS(plot_sst_year,"data/spatial/oceanography/Montes_SST_year.rds")
-saveRDS(plot_sst_month,"data/spatial/oceanography/Montes_SST_month.rds")
-saveRDS(plot_sst_ts,"data/spatial/oceanography/Montes_SST_ts.rds")
+saveRDS(plot_sst_winter,paste0("data/spatial/oceanography/",name,"_SST_winter.rds"))
+saveRDS(plot_sst_year,paste0("data/spatial/oceanography/",name,"_SST_year.rds"))
+saveRDS(plot_sst_month,paste0("data/spatial/oceanography/",name,"_SST_month.rds"))
+saveRDS(plot_sst_ts,paste0("data/spatial/oceanography/",name,"_SST_ts.rds"))
 
 ##### Acidification ####
 #Ocean_acidification_historical_reconstructionfrom AODN portal
@@ -241,13 +240,13 @@ acd_ts_monthly <- acd_ts_all %>%
   glimpse()
 
 ## save acidification, don't need to get lat and lon for acd since is only time series 
-saveRDS(acd_ts_monthly,"data/spatial/oceanography/SwC_acidification.rds")
+saveRDS(acd_ts_monthly,paste0("data/spatial/oceanography/",Zone,"_acidification.rds"))
 
 ##### -----DEGREE HEATING WEEKS ####
 #download from
 #https://coastwatch.pfeg.noaa.gov/erddap/griddap/NOAA_DHW.html
 #input bounds and times
-nc_file_to_get_dhw <- open.nc("data/spatial/oceanography/large/DHW_2021/dhw_5km_Montes_weekly_2002-2022.nc",write = TRUE)
+nc_file_to_get_dhw <- open.nc(paste0("data/spatial/oceanography/large/DHW_2021/dhw_5km_Montes_weekly_2002-2022.nc"),write = TRUE)
 print.nc(nc_file_to_get_dhw) #shows you all the file details
 
 time_nc<- var.get.nc(nc_file_to_get_dhw, 'time')  #NC_CHAR time:units = "days since 1981-01-01 00:00:00" ;
@@ -308,12 +307,13 @@ plot_dhw_ts <- arr_long %>%
   glimpse()
 
 plot_dhw_heatwave <- arr_long %>% 
-  dplyr::filter(month%in%"5"&year%in%"2011"|month%in%"5"&year%in%"2021")%>%
+  dplyr::filter(month%in%"3"&year%in%"2013"|month%in%"3"&year%in%"2017")%>%
   group_by(year,month, Lon, Lat) %>% 
   summarise(dhw = mean(value,na.rm = TRUE), sd = sd(value,na.rm = TRUE)) %>% 
   glimpse()
 
-saveRDS(plot_dhw_month,"data/spatial/oceanography/Montes_DHW_month.rds")
-saveRDS(plot_dhw_year,"data/spatial/oceanography/Montes_DHW_year.rds")
-saveRDS(plot_dhw_ts,"data/spatial/oceanography/Montes_DHW_ts.rds")
-saveRDS(plot_dhw_heatwave,"data/spatial/oceanography/Montes_DHW_heatwave.rds")
+saveRDS(plot_dhw_month,paste0("data/spatial/oceanography/",name,"_DHW_month.rds"))
+saveRDS(plot_dhw_year,paste0("data/spatial/oceanography/",name,"_DHW_year.rds"))
+saveRDS(plot_dhw_ts,paste0("data/spatial/oceanography/",name,"_DHW_ts.rds"))
+saveRDS(plot_dhw_heatwave,paste0("data/spatial/oceanography/",name,"_DHW_heatwave.rds"))
+
