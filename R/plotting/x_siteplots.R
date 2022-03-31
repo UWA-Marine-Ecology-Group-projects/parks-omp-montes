@@ -25,30 +25,31 @@ working.dir <- getwd()
 setwd(working.dir)
 
 # get data and sort spatial boundaries
-aus    <- st_read("data/spatial/shape/cstauscd_r.mif")%>%                     # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
+aus    <- st_read("data/spatial/shape/cstauscd_r.mif")%>%                       # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
   dplyr::filter(FEAT_CODE %in% c("mainland","island"))
-aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")    # all aus mpas
-wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")                    # all wa mpas
-mb_mp <- wampa[wampa$NAME %in% c("Montebello Islands","Barrow Island"),]                   # just wa parks nearby
+aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")         # all aus mpas
+wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")                         # all wa mpas
+mb_mp <- wampa[wampa$NAME %in% c("Montebello Islands","Barrow Island"),]        # just wa parks nearby
 rg_nmp <- aumpa[aumpa$NetName %in% c("South-west", "North-west"), ]             # regional nat parks networks
-# nb_nmp <- rg_nmp[rg_nmp$ResName %in% c("South-west Corner", "Geographe"), ]     # just nat parks nearby
+# nb_nmp <- rg_nmp[rg_nmp$ResName %in% c("South-west Corner", "Geographe"), ]   # just nat parks nearby
 # nb_npz <- nb_nmp[nb_nmp$ZoneName == "National Park Zone", ]
-# wanew  <- st_read("data/spatial/shapefiles/test1.shp")                          # zones in ngari capes
+# wanew  <- st_read("data/spatial/shapefiles/test1.shp")                        # zones in ngari capes
 terrnp <- st_read(
-  "data/spatial/shape/Legislated_Lands_and_Waters_DBCA_011.shp")           # terrestrial reserves
-# jacmap <- raster("data/spatial/rasters/ecosystem-types-19class-naland.tif")     # jac's aus habitat map
-# cropex <- extent(112, 116, -35, -32)
-# jacmap <- crop(jacmap, cropex)
+  "data/spatial/shape/Legislated_Lands_and_Waters_DBCA_011.shp")                # terrestrial reserves
+jacmap <- raster("data/spatial/rasters/ecosystem-types-19class-naland.tif")     # jac's aus habitat map
+cropex <- extent(113, 118, -23, -20)
+jacmap <- crop(jacmap, cropex)
+plot(jacmap)
 # jacmap <- projectRaster(jacmap, crs = sppcrs, method = "ngb")
-cwatr  <- st_read("data/spatial/shape/amb_coastal_waters_limit.shp")       # coastal waters line
+cwatr  <- st_read("data/spatial/shape/amb_coastal_waters_limit.shp")            # coastal waters line
 cwatr <- st_crop(cwatr, c(xmin = 113, xmax = 118, ymin = -23, ymax = -20))      # crop down coastal waters line to general project area
-bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")            # bathymetry trimmed to project area
+bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
 bathdf <- as.data.frame(bathy, xy = T)
 colnames(bathdf)[3] <- "Depth"
 
 st_crs(aus)         <- st_crs(aumpa)
 
-metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv') %>%                     # get sampling data
+metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv') %>% # get sampling data
   glimpse()
 
 # simplify zone names
@@ -68,12 +69,14 @@ mb_mp$waname <- dplyr::recode(mb_mp$waname,
                                "Special Purpose Zone (Shore Based Activities)" =
                                 "Special Purpose Zone\n(Shore Based Activities)")
 mb_mp <- mb_mp %>%
-  dplyr::mutate(waname=ifelse(NAME%in%"Barrow Island"&TYPE%in%"Marine Park","Sanctuary Zone",waname))%>%
+  dplyr::mutate(waname=ifelse(NAME%in%"Barrow Island"&
+                              TYPE%in%"Marine Park","Sanctuary Zone",waname))%>%
   dplyr::filter(!waname%in%"Unassigned")
 
 # # reduce terrestrial parks
 terrnp <- terrnp[terrnp$leg_catego %in% c("Nature Reserve", "National Park"), ] # exclude state forests etc
-terrnp <- st_crop(terrnp, xmin = 114.75, ymin = -21.2, xmax = 116.25, ymax = -20)       # just montes
+terrnp <- st_crop(terrnp, 
+                  xmin = 114.75, ymin = -21.2, xmax = 116.25, ymax = -20)       # just montes
 
 plot(terrnp["leg_catego"])
 
@@ -91,7 +94,7 @@ wampa_cols <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
 
 # state terrestrial parks colours
 waterr_cols <- scale_fill_manual(values = c(#"National Park" = "#c4cea6",
-                                           "Nature Reserve" = "#e4d0bb"))
+                                           "Nature Reserve" = "#c4cea6")) #e4d0bb
 
 #nature reserve, section 5(1)(h) Reserve, Conservation park
 
