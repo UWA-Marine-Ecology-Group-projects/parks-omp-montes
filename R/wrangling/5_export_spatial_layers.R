@@ -25,6 +25,12 @@ cbathy <- cbathy[cbathy$Z <= 5, ]
 bath_r <- rasterFromXYZ(cbathy)
 plot(bath_r)
 
+cropex <- extent(114.75, 116.25, -21.2, -20)
+bath_crop <- crop(bath_r,cropex)
+plot(bath_crop)
+cropbath_df <- as.data.frame(bath_crop, xy = T)
+saveRDS(cropbath_df, 'data/spatial/rasters/ga_bathy_largerextent.rds')
+
 # bring in some drop data to check and refine area etc
 habitat <- read.csv("data/Tidy/montebello.synthesis.complete.habitat.csv")
 habsp   <- SpatialPointsDataFrame(coords = habitat[21:20], data = habitat)
