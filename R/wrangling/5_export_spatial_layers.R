@@ -21,15 +21,15 @@ sppcrs  <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")     #
 cbaths <- list.files("data/spatial/raster", "*tile", full.names = TRUE)
 cbathy <- lapply(cbaths, function(x){read.table(file = x, header = TRUE, sep = ",")})
 cbathy <- do.call("rbind", lapply(cbathy, as.data.frame)) 
-cbathy <- cbathy[cbathy$Z <= 5, ]
+cbathy <- cbathy[cbathy$Z <= 0, ]
 bath_r <- rasterFromXYZ(cbathy)
 plot(bath_r)
 
-cropex <- extent(114.75, 116.25, -21.2, -20)
+cropex <- extent(114.5, 116.5, -22, -19.5)
 bath_crop <- crop(bath_r,cropex)
 plot(bath_crop)
-cropbath_df <- as.data.frame(bath_crop, xy = T)
-saveRDS(cropbath_df, 'data/spatial/rasters/ga_bathy_largerextent.rds')
+# cropbath_df <- as.data.frame(bath_crop, xy = T)
+writeRaster(bath_crop, 'data/spatial/raster/ga_bathy_largerextent.tif', overwrite = T)
 
 # bring in some drop data to check and refine area etc
 habitat <- read.csv("data/Tidy/montebello.synthesis.complete.habitat.csv")

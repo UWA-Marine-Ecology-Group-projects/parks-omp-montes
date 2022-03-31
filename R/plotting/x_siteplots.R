@@ -27,12 +27,10 @@ setwd(working.dir)
 # get data and sort spatial boundaries
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")%>%                     # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
   dplyr::filter(FEAT_CODE %in% c("mainland","island"))
-# dirkh  <- aus[aus$ISLAND_NAME == "DIRK HARTOG ISLAND", ]                      # just dirk hartog island
-# aus    <- aus[aus$FEAT_CODE == "mainland", ]
 aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")    # all aus mpas
 wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")                    # all wa mpas
-# nb_mp  <- wampa[wampa$NAME %in% c("Ngari Capes"), ]                             # just wa parks nearby
-# rg_nmp <- aumpa[aumpa$NetName %in% c("South-west", "North-west"), ]             # regional nat parks networks
+mb_mp <- wampa[wampa$NAME %in% c("Montebello Islands","Barrow Island"),]                   # just wa parks nearby
+rg_nmp <- aumpa[aumpa$NetName %in% c("South-west", "North-west"), ]             # regional nat parks networks
 # nb_nmp <- rg_nmp[rg_nmp$ResName %in% c("South-west Corner", "Geographe"), ]     # just nat parks nearby
 # nb_npz <- nb_nmp[nb_nmp$ZoneName == "National Park Zone", ]
 # wanew  <- st_read("data/spatial/shapefiles/test1.shp")                          # zones in ngari capes
@@ -43,54 +41,59 @@ terrnp <- st_read(
 # jacmap <- crop(jacmap, cropex)
 # jacmap <- projectRaster(jacmap, crs = sppcrs, method = "ngb")
 cwatr  <- st_read("data/spatial/shape/amb_coastal_waters_limit.shp")       # coastal waters line
-cwatr <- st_crop(cwatr, c(xmin = 114.8, xmax = 116, ymin = -21.0, ymax = -19.5))      # crop down coastal waters line to general project area
-# bathdf <- readRDS("output/spatial_covariates/ga_bathy_fine.rds")            # bathymetry trimmed to project area
-# colnames(bathdf)[3] <- "Depth"
-bath_r <- raster("data/spatial/raster/WA_500m_bathy.tif")
-plot(bath_r)
+cwatr <- st_crop(cwatr, c(xmin = 113, xmax = 118, ymin = -23, ymax = -20))      # crop down coastal waters line to general project area
+bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")            # bathymetry trimmed to project area
+bathdf <- as.data.frame(bathy, xy = T)
+colnames(bathdf)[3] <- "Depth"
+
 st_crs(aus)         <- st_crs(aumpa)
 
 metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv') %>%                     # get sampling data
   glimpse()
 
 # simplify zone names
-nb_nmp$ZoneName <- dplyr::recode(nb_nmp$ZoneName,
+mb_mp$ZoneName <- dplyr::recode(mb_mp$ZoneName,
                                  "Special Purpose Zone (Mining Exclusion)" =
                                    "Special Purpose Zone\n(Mining Exclusion)")
 
-nb_mp$waname <- gsub("( \\().+(\\))", "", nb_mp$ZONE_TYPE)
-nb_mp$waname <- gsub(" [1-4]", "", nb_mp$waname)
-# ab_mpa$waname[ab_mpa$ZONE_TYPE == unique(ab_mpa$ZONE_TYPE)[14]] <- 
+mb_mp$waname <- gsub("( \\().+(\\))", "", mb_mp$ZONE_TYPE)
+mb_mp$waname <- gsub(" [1-4]", "", mb_mp$waname)
+# ab_mpa$waname[ab_mpa$ZONE_TYPE == unique(ab_mpa$ZONE_TYPE)[14]] <-
 #   c("Special Purpose Zone\n(Habitat Protection)")
-nb_mp$waname[nb_mp$NAME == "Ngari Capes"]     <- "General Use"
-nb_mp$waname <- dplyr::recode(nb_mp$waname, 
+mb_mp$waname <- dplyr::recode(mb_mp$waname,
                                "General Use" = "General Use Zone",
                                # "MMA" = "Marine Management Area",
                                # "Recreation Area" = "Recreation Zone",
                                # "Conservation Area" = "Sanctuary Zone",
-                               "Special Purpose Zone (Shore Based Activities)" = 
+                               "Special Purpose Zone (Shore Based Activities)" =
                                 "Special Purpose Zone\n(Shore Based Activities)")
+mb_mp <- mb_mp %>%
+  dplyr::mutate(waname=ifelse(NAME%in%"Barrow Island"&TYPE%in%"Marine Park","Sanctuary Zone",waname))%>%
+  dplyr::filter(!waname%in%"Unassigned")
 
-
-# reduce terrestrial parks
+# # reduce terrestrial parks
 terrnp <- terrnp[terrnp$leg_catego %in% c("Nature Reserve", "National Park"), ] # exclude state forests etc
-terrnp <- st_crop(terrnp, xmin = 113, ymin = -36, xmax = 116, ymax = -33)       # just swc
-# plot(terrnp["leg_catego"])
+terrnp <- st_crop(terrnp, xmin = 114.75, ymin = -21.2, xmax = 116.25, ymax = -20)       # just montes
+
+plot(terrnp["leg_catego"])
 
 # assign commonwealth zone colours
-nmpa_cols <- scale_fill_manual(values = c("National Park Zone" = "#7bbc63",
-                                          "Habitat Protection Zone" = "#fff8a3",
-                                          "Multiple Use Zone" = "#b9e6fb",
-                                          "Special Purpose Zone\n(Mining Exclusion)" = "#368ac1"))
+nmpa_cols <- scale_fill_manual(values = c(#"National Park Zone" = "#7bbc63",
+                                          #"Habitat Protection Zone" = "#fff8a3",
+                                          "Multiple Use Zone" = "#b9e6fb"))
+                                          #"Special Purpose Zone\n(Mining Exclusion)" = "#368ac1"
 
 # state colours
 wampa_cols <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
                                            "General Use Zone" = "#bddde1",
-                                           "Recreation Zone" = "#f4e952"))
+                                            "Recreation Zone" = "#f4e952",
+                                           "Special Purpose Zone" = "#7f66a7"))
 
 # state terrestrial parks colours
-waterr_cols <- scale_fill_manual(values = c("National Park" = "#c4cea6",
+waterr_cols <- scale_fill_manual(values = c(#"National Park" = "#c4cea6",
                                            "Nature Reserve" = "#e4d0bb"))
+
+#nature reserve, section 5(1)(h) Reserve, Conservation park
 
 # build basic plot elements
 p1 <- ggplot() +
@@ -104,29 +107,30 @@ p1 <- ggplot() +
   scale_fill_grey(start = 1, end = 0.5, guide = "none") +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   new_scale_fill() +
-  # geom_sf(data = nb_mp, aes(fill = waname), alpha = 2/5, colour = NA) +
-  # geom_sf(data = wanew, aes(fill = waname), alpha = 2/5, colour = NA) +
-  # wampa_cols +
-  # labs(fill = "State Marine Parks") +
-  # new_scale_fill() +
-  # geom_sf(data = terrnp, aes(fill = leg_catego), alpha = 4/5, colour = NA) +
-  # labs(fill = "Terrestrial Managed Areas") +
-  # waterr_cols +
-  # new_scale_fill() +
-  # geom_sf(data = nb_nmp, aes(fill = ZoneName), alpha = 4/5, colour = NA) +
-  # nmpa_cols + 
-  # geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
-  # geom_contour(data = bathdf, aes(x, y, z = Depth),
-  #              breaks = c(0, -40, -70, -120), colour = "white", 
-  #              alpha = 1, size = 0.1) +
-  # labs(x = NULL, y = NULL, fill = "Australian Marine Parks") +
-  # guides(fill = guide_legend(order = 1)) +
-  annotate("rect", xmin = min(metadata$longitude), xmax = max(metadata$longitude), 
+  geom_sf(data = mb_mp, aes(fill = waname), alpha = 1, colour = NA) +
+  wampa_cols +
+  labs(fill = "State Marine Parks") +
+  new_scale_fill() +
+  geom_sf(data = terrnp%>%dplyr::filter(leg_catego%in%c("National Park","Nature Reserve")), 
+          aes(fill = leg_catego), alpha = 4/5, colour = NA) +
+  labs(fill = "Terrestrial Managed Areas") +
+  waterr_cols +
+  new_scale_fill() +
+  geom_sf(data = aumpa, aes(fill = ZoneName), alpha = 4/5, colour = NA) +
+  nmpa_cols +
+  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
+  geom_contour(data = bathdf, aes(x, y, z = Depth),
+               breaks = c(0, -40, -70, -120), colour = "white",
+               alpha = 1, size = 0.1) +
+  labs(x = 'Longitude', y = 'Latitude', fill = "Australian Marine Parks") +
+  guides(fill = guide_legend(order = 1)) +
+  annotate("rect", xmin = min(metadata$longitude), xmax = max(metadata$longitude),
            ymin = min(metadata$latitude), ymax = max(metadata$latitude),
            colour = "grey15", fill = "white", alpha = 0.2, size = 0.1) +
   coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20))+
-  # coord_sf(xlim = c(min(bathdf$x), max(bathdf$x)), ylim = c(min(bathdf$y), max(bathdf$y))) +
-  theme_minimal()
+  theme_minimal()+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
 p1
 
 # inset map
@@ -135,14 +139,14 @@ p2 <- ggplot(data = aus) +
   geom_sf(data = rg_nmp, alpha = 5/6, colour = "grey85", size = 0.02) +
   # geom_sf(data = ab_mpa, alpha = 4/5, colour = "grey85") +
   coord_sf(xlim = c(108, 125), ylim = c(-37, -13)) +
-  annotate("rect", xmin = 114.3, xmax = 115.8, ymin = -34.5, ymax = -33.2,
+  annotate("rect", xmin = 114.75, xmax = 116.25, ymin = -21.2, ymax = -20,
            colour = "grey25", fill = "white", alpha = 1/5, size = 0.2) +
   theme_bw() +
   theme(axis.text = element_blank(), 
         axis.ticks = element_blank(),
         panel.grid.major = element_blank(),
         panel.border = element_rect(colour = "grey70"))
-# p2
+p2
 
 # plot both 
 p2 + p1 + plot_layout(widths = c(0.8, 2.2))
@@ -163,44 +167,51 @@ s_wampa_cols <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
 
 # make closer plot
 # trim down bathy for nicer contour labels
-sitebathy <- bathdf[bathdf$Depth > -500, ]                               # trim to reduce legend
-sitebathy <- sitebathy[sitebathy$x > 114.4 & sitebathy$x < 115, ]
-sitebathy <- sitebathy[sitebathy$y > -34.1 & sitebathy$y < -33.7, ]
+sitebathy <- bathdf[bathdf$Depth > -201, ]                               # trim to reduce legend
+sitebathy <- sitebathy[sitebathy$x > 114.75 & sitebathy$x < 116.25, ]
+sitebathy <- sitebathy[sitebathy$y > -21.2 & sitebathy$y < -20, ]
+# coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20))+
 
+depth_cols <- scale_fill_manual(values = c("#a3bbff","#98c4f7","#9acbec", "#a7cfe0"),guide = "none")
+#"#a7cfe0","#9acbec","#98c4f7", "#a3bbff"
 p3 <- ggplot() +
   # # geom_raster(data = bathdf, aes(x, y, fill = Depth), alpha = 0.9) +
-  # geom_contour_filled(data = bathdf, aes(x = x, y = y, z = Depth), 
-  #              binwidth = 50, colour = "white", alpha = 4/5, size = 0.1) +
-  # scale_fill_gradient(low = "black", high = "grey70", guide = "none") +
+  geom_contour_filled(data = sitebathy, aes(x = x, y = y, z = Depth, fill = after_stat(level)),
+               breaks = c(-30,-70,-200), colour = "white", alpha = 1, size = 0.3) +
+  scale_fill_grey(start = 0.6, end = 0.5, guide = "none") +
+  # depth_cols+
+  new_scale_fill()+
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   new_scale_fill() +
-  geom_sf(data = nb_mp, aes(fill = waname), alpha = 3/5, colour = NA) +
-  geom_sf(data = wanew, aes(fill = waname), alpha = 3/5, colour = NA) +
-  s_wampa_cols +
+  geom_sf(data = mb_mp, aes(fill = waname), alpha = 3/5, colour = NA) +
+  wampa_cols +
   labs(fill = "State Marine Parks") +
   new_scale_fill() +
-  geom_sf(data = terrnp, aes(fill = leg_catego), alpha = 3/5, colour = NA) +
-  waterr_cols +
-  labs(fill = "Terrestrial Managed Areas") +
-  new_scale_fill() +
-  geom_sf(data = nb_nmp, aes(fill = ZoneName), alpha = 3/5, colour = NA) +
-  s_nmpa_cols + 
+  # geom_sf(data = terrnp, aes(fill = leg_catego), alpha = 3/5, colour = NA) +
+  # waterr_cols +
+  # labs(fill = "Terrestrial Managed Areas") +
+  # new_scale_fill() +
+  geom_sf(data = aumpa, aes(fill = ZoneName), alpha = 3/5, colour = NA) +
+  nmpa_cols +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
-  geom_contour(data = bathdf, aes(x = x, y = y, z = Depth), 
-               binwidth = 50, colour = "white", alpha = 4/5, size = 0.1) +
-  geom_text_contour(data = sitebathy, aes(x = x, y = y, z = Depth), 
-                    binwidth = 50, size = 2.5, label.placer = label_placer_n(1)) +
-  geom_point(data = habitat, aes(longitude, latitude, colour = method), 
+  # geom_contour(data = bathdf, aes(x = x, y = y, z = Depth),
+  #              binwidth = 50, colour = "white", alpha = 4/5, size = 0.1) +
+  # geom_text_contour(data = sitebathy, aes(x = x, y = y, z = Depth),
+  #                   breaks = c(-30,-70.-200), size = 2.5, label.placer = label_placer_n(1)) +
+  annotate("text", x = c(115.24,115.317,115.607), y = c(-20.425,-20.19,-20.3), label = c("50m","50m","50m"), size = 2)+
+  geom_point(data = metadata, aes(longitude, latitude), colour = "indianred4",
              alpha = 3/5, shape = 10) +
-  scale_colour_manual(values = c("BRUV" = "indianred4",
-                                 "Drop Camera" = "seagreen4")) +
-  labs(x = NULL, y = NULL, fill = "Australian Marine Parks", colour = "Sample") +
+  labs(x = NULL, y = NULL, fill = "Australian Marine Parks") +
   guides(fill = guide_legend(order = 1)) +
-  annotate("rect", xmin = 114.7, xmax = 114.95, ymin = -34.14, ymax = -34.01,
-           colour = "grey15", fill = "white", alpha = 0.1, size = 0.1) +
-  coord_sf(xlim = c(114.4, 115.1), ylim = c(-34.15, -33.65)) +
-  theme_minimal()
-p3
+  # annotate("rect", xmin = 114.7, xmax = 114.95, ymin = -34.14, ymax = -34.01,
+  #          colour = "grey15", fill = "white", alpha = 0.1, size = 0.1) +
+  coord_sf(xlim = c(min(metadata$longitude),max(metadata$longitude)), 
+           ylim = c(min(metadata$latitude), max(metadata$latitude)))+
+  theme_minimal()+
+  theme(panel.background = element_rect(fill = "#CCCCCC"),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+# p3
 
 ggsave("plots/site_overview_map.png", dpi = 200, width = 10, height = 6)
 
