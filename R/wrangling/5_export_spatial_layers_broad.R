@@ -7,6 +7,8 @@
 # date:    Nov-Dec 2021
 ##
 
+rm(list = ls())
+
 library(sp)
 library(raster)
 library(sf)
@@ -33,7 +35,7 @@ writeRaster(bath_crop, 'data/spatial/raster/ga_bathy_largerextent.tif', overwrit
 
 # bring in some drop data to check and refine area etc
 habitat <- read.csv("data/Tidy/montebello.synthesis.complete.habitat.csv")
-habsp   <- SpatialPointsDataFrame(coords = habitat[21:20], data = habitat)
+habsp   <- SpatialPointsDataFrame(coords = habitat[22:21], data = habitat)
 plot(habsp, add = T)
 habuff  <- buffer(habsp, 100000)
 plot(habuff, add = T)
@@ -59,35 +61,36 @@ fbath    <- crop(bath_r, extent(habuff))
 fbath_df <- as.data.frame(fbath, xy = TRUE)
 saveRDS(fbath_df, 'output/spatial_covariates/ga_bathy_fine.rds')
 
-# get fine bathy from the merged data in: https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/144600
-mbathy <- raster('data/spatial/raster/North_West_Shelf_DEM_v2_Bathymetry_2020_30m_MSL_cog.tif')
-
-# use habitat utm to crop this finer bathy down to a manageable size rather than 4gb
-proj4string(habsp) <- wgscrs
-habsp_t   <- spTransform(habsp, sppcrs)
-habt_buff <- buffer(habsp_t, 2000)
-fbathy    <- crop(mbathy, habt_buff)
-fbathy[fbathy$North_West_Shelf_DEM_v2_Bathymetry_2020_30m_MSL_cog > 0] <- NA
-plot(fbathy)
-plot(habsp_t, add = T)
-names(fbathy) <- "depth"
-
-rm(mbathy) # get this connection closed
+# # get fine bathy from the merged data in: https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/144600
+# mbathy <- raster('data/spatial/raster/North_West_Shelf_DEM_v2_Bathymetry_2020_30m_MSL_cog.tif')
+# 
+# # use habitat utm to crop this finer bathy down to a manageable size rather than 4gb
+# proj4string(habsp) <- wgscrs
+# habsp_t   <- spTransform(habsp, sppcrs)
+# habt_buff <- buffer(habsp_t, 2000)
+# fbathy    <- crop(mbathy, habt_buff)
+# fbathy[fbathy$North_West_Shelf_DEM_v2_Bathymetry_2020_30m_MSL_cog > 0] <- NA
+# plot(fbathy)
+# plot(habsp_t, add = T)
+# names(fbathy) <- "depth"
+# 
+# rm(mbathy) # get this connection closed
 
 # # transform bathy to projected coords for modelling
-# proj4string(fbath) <- wgscrs
-# fbath_t <- projectRaster(fbath, crs = sppcrs)
+proj4string(bath_r) <- wgscrs
+bath_utm <- projectRaster(bath_r, crs = sppcrs)
+plot(bath_utm)
 # 
 # # reduce bathy area further to keep lightweight
 # fbath_t <- crop(fbath_t, extent(c(105000, 165000, 6880000, 7000000)))
 
 # calculate terrain on fine bathy
-preds <- terrain(fbathy, neighbors = 8,
+preds <- terrain(bath_utm, neighbors = 8,
                  opt = c("slope",  "TPI", "roughness"))
-preds <- stack(fbathy, preds)
-
+preds <- stack(bath_utm, preds)
+plot(preds)
 # detrend bathy to highlight local topo
-zstar <- st_as_stars(fbathy)
+zstar <- st_as_stars(bath_utm)
 detre <- detrend(zstar, parallel = 8)
 detre <- as(object = detre, Class = "Raster")
 names(detre) <- c("detrended", "lineartrend")
@@ -96,8 +99,8 @@ plot(preds)
 
 # saveRDS(preds, "output/spatial_covariates.rds")
 # in this project, the rds is too large for git so we're using individual layers instead
-writeRaster(preds, "output/spatial_covariates/layer.tif", 
+writeRaster(preds, "output/spatial_covariates/layer_ga.tif", 
             bylayer = TRUE, suffix = names(preds), overwrite = TRUE)
 
 # clear workspace of large rasters etc
-rm(ls())
+rm(list=ls())

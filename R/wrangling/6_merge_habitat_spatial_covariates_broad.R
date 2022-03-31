@@ -27,7 +27,7 @@ habitat <- read.csv("data/tidy/montebello.synthesis.complete.habitat.csv")%>%
   glimpse()
 
 # get spatial covariates (made in 'R/wrangling/A1_spatial_layers.R')
-tifs  <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)
+tifs  <- list.files("output/spatial_covariates/", "layer_ga*", full.names = TRUE)
 preds <- stack(tifs)
 
 ## extract bathy derivatives for modelling
