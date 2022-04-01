@@ -1,0 +1,6 @@
+"","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","tpi","roughness","detrended","status","cumsum.wi"
+"greater than legal size.mean.relief+status","mean.relief+status",1127.86578460757,1143.77264019739,0.17237,NA,3.92,0,0,0.863,0.345,0.297,0,1,0,0,0,0,0,0,1,0.345
+"greater than legal size.mean.relief","mean.relief",1129.56399974594,1142.9092257389,0.15351,NA,2.91,0,1.698,0,0.148,0.457,0,1,0,0,0,0,0,0,0,0.493
+"smaller than legal size.detrended+mean.relief+tpi","detrended+mean.relief+tpi",597.464826465772,620.685755271475,0.18401,NA,6.61,0,0,2.958,0.306,0.055,0,1,0,0,0,1,0,1,0,0.306
+"smaller than legal size.depth+mean.relief+tpi","depth+mean.relief+tpi",597.5292438893,618.39884143166,0.19925,NA,5.79,0,0.064,0.671,0.296,0.171,1,1,0,0,0,1,0,0,0,0.602
+"smaller than legal size.detrended+mean.relief+roughness","detrended+mean.relief+roughness",598.696895302518,619.567420586234,0.17417,NA,5.79,0,1.232,1.84,0.165,0.095,0,1,0,0,0,0,1,1,0,0.767

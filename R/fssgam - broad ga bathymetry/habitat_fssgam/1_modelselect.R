@@ -31,13 +31,13 @@ rm(list=ls())
 library(FSSgam)
 
 # Bring in and format the data----
-habi <- readRDS("data/tidy/merged_habitat.rds")                                 # merged data from 'R/1_mergedata.R'
+habi <- readRDS("data/tidy/broad_merged_habitat.rds")                           # merged data from 'R/1_mergedata.R'
 colnames(habi)
-habi <- melt(habi, measure.vars = c(9, 12, 15, 16, 33, 34))                               # collect all taxa tags for univariate stats
+habi <- melt(habi, measure.vars = c(9, 12, 15, 16, 33, 34))                     # collect all taxa tags for univariate stats
 
 # Set predictor variables---
-pred.vars <- c("layer_depth","layer_detrended", 
-               "layer_roughness", "layer_tpi") 
+pred.vars <- c("depth_ga","detrended", 
+               "roughness", "tpi") 
 
 # Check for correlation of predictor variables- remove anything highly correlated (>0.95)---
 round(cor(habi[ , pred.vars]), 2)
@@ -82,19 +82,19 @@ unique.vars.use <- unique.vars
 # unique.vars.use     
 
 # Run the full subset model selection----
-outdir    <- ("output/fssgam-habitat/") #Set wd for example outputs - will differ on your computer
+outdir    <- ("output/fssgam-habitat_broad/") 
 resp.vars <- unique.vars.use
 use.dat   <- habi[habi$Taxa %in% c(unique.vars.use), ]
 # factor.vars <- c("Status")# Status as a Factor with two levels
 out.all <- list()
 var.imp <- list()
-name <- "eg"
+name <- "montebello.synthesis"
 
 # Loop through the FSS function for each Taxa----
 for(i in 1:length(resp.vars)){
   use.dat <- habi[habi$Taxa == resp.vars[i],]
   # use.dat$Site <- as.factor(use.dat$Site)
-  Model1  <- gam(cbind(response, (Total.Sum - response)) ~ s(layer_depth, bs = 'cr'),
+  Model1  <- gam(cbind(response, (Total.Sum - response)) ~ s(depth_ga, bs = 'cr'),
                  family = binomial(link = "logit"),  data = use.dat)
   
   model.set <- generate.model.set(use.dat = use.dat,
@@ -117,7 +117,7 @@ for(i in 1:length(resp.vars)){
   mod.table <- out.list$mod.data.out  # look at the model selection table
   mod.table <- mod.table[order(mod.table$AICc), ]
   mod.table$cumsum.wi <- cumsum(mod.table$wi.AICc)
-  out.i     <- mod.table[which(mod.table$delta.AICc <= 200), ]
+  out.i     <- mod.table[which(mod.table$delta.AICc <= 2), ]
   out.all   <- c(out.all, list(out.i))
   var.imp   <- c(var.imp, list(out.list$variable.importance$aic$variable.weights.raw))
   
@@ -125,7 +125,7 @@ for(i in 1:length(resp.vars)){
   for(m in 1:nrow(out.i)){
     best.model.name <- as.character(out.i$modname[m])
     
-    png(file = paste(outdir, m, resp.vars[i], "mod_fits.png", sep = ""))
+    png(file = paste(outdir, m, resp.vars[i], "mod_fits.png", sep = "_"))
     if(best.model.name != "null"){
       par(mfrow = c(3, 1), mar = c(9, 4, 3, 1))
       best.model = out.list$success.models[[best.model.name]]
@@ -140,12 +140,13 @@ names(out.all) <- resp.vars
 names(var.imp) <- resp.vars
 all.mod.fits <- do.call("rbind", out.all)
 all.var.imp  <- do.call("rbind", var.imp)
-write.csv(all.mod.fits[ , -2], file = paste(outdir, name, "all.mod.fits.csv", sep = ""))
-write.csv(all.var.imp,         file = paste(outdir, name, "all.var.imp.csv", sep = ""))
-out.all
- # Generic importance plots- - unsure why we're not getting any value for the other preds. internal m.cor exclusion?
-heatmap.2(all.var.imp, notecex = 0.4,  dendrogram = "none",
-          col = colorRampPalette(c("white", "yellow", "red"))(10),
-          trace = "none", key.title = "", keysize = 2,
-          notecol = "black", key = T,
-          sepcolor = "black", margins = c(20, 20), lhei = c(2, 6), Rowv = FALSE, Colv = FALSE)
+write.csv(all.mod.fits[ , -2], file = paste(outdir, name, "all.mod.fits.csv", sep = "_"))
+write.csv(all.var.imp,         file = paste(outdir, name, "all.var.imp.csv", sep = "_"))
+
+# out.all
+#  # Generic importance plots- - unsure why we're not getting any value for the other preds. internal m.cor exclusion?
+# heatmap.2(all.var.imp, notecex = 0.4,  dendrogram = "none",
+#           col = colorRampPalette(c("white", "yellow", "red"))(10),
+#           trace = "none", key.title = "", keysize = 2,
+#           notecol = "black", key = T,
+#           sepcolor = "black", margins = c(20, 20), lhei = c(2, 6), Rowv = FALSE, Colv = FALSE)
