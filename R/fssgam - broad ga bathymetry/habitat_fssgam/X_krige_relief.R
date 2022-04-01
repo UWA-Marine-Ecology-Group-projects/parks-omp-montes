@@ -31,7 +31,7 @@ traind <- habi[!habi$sample %in% testd$sample , ]
 habisp         <- SpatialPointsDataFrame(coords = traind[4:5], data = traind)
 sitecoords     <- coordinates(habisp)
 sitelocs       <- as.matrix(sitecoords)
-max.edgelength <- c(5000, 12000)
+max.edgelength <- c(7000, 10000)
 mesha          <- inla.mesh.2d(loc = sitelocs, max.edge = max.edgelength,
                                offset = c(1200, 2000), cutoff = 800)
 plot(mesha)
@@ -119,7 +119,7 @@ ypred <- m1$summary.random$s$mean
 # xdims <- (xlim[2] - xlim[1]) / 250
 # ydims <- (ylim[2] - ylim[1]) / 250
 
-xlim <- c(extent(preds)[1], extent(preds)[2])
+xlim  <- c(extent(preds)[1], extent(preds)[2])
 ylim  <- c(extent(preds)[3], extent(preds)[4])
 xdims <- (xlim[2] - xlim[1]) / res(preds)[1]
 ydims <- (ylim[2] - ylim[1]) / res(preds)[2]
@@ -141,9 +141,9 @@ predrast <- rasterize(x = cbind(datpred$x, datpred$y),
 modout  <- m1$summary.fixed
 hypout  <- m1$summary.hyperpar
 pmask   <- predrast / predrast
-pcells  <- preds[[c(1, 2, 3, 5)]] * pmask
+pcells  <- preds[[c(5, 1, 4)]] * pmask
 pcells  <- stack(pcells, predrast)
-names(pcells) <- c("depth", "dtren", "rough", "tpi", "p_sp")
+names(pcells) <- c("depth", "dtren", "tpi", "p_sp")
 pcelldf <- as.data.frame(pcells, na.rm = TRUE, xy = TRUE)
 head(pcelldf)
 
@@ -158,9 +158,9 @@ pcelldf$prelief <- 1 + modout$mean[1] +
 pcelldf$prelief[pcelldf$prelief < 0] <- 0                                       # rm p out of sample range (-ve relief)
 pcelldf$prelief[pcelldf$prelief > 5] <- 5
  
-prelief <- rasterFromXYZ(cbind(pcelldf[c(1:2, 7:8)]))
+prelief <- rasterFromXYZ(cbind(pcelldf[c(1:2, 6:7)]))
 plot(prelief[[2]])
-saveRDS(prelief[[2]], "output/spatial_predictions/predicted_relief_raster.rds")
+saveRDS(prelief[[2]], "output/spatial_predictions/predicted_relief_raster_ga.rds")
 # writeRaster(prelief, "output/spatial_predictions/prelief.tif", overwrite = TRUE)
 
 sitebuf <- buffer(habisp, 10000)
@@ -170,7 +170,7 @@ plot(prelief)
 # plot(habisp, add = TRUE, col = "red")
 pcelldf <- as.data.frame(prelief, xy = TRUE, na.rm = TRUE)
 
-saveRDS(pcelldf, 'output/spatial_predictions/predicted_relief_site.rds')
+saveRDS(pcelldf, 'output/spatial_predictions/predicted_relief_site_ga.rds')
 
 ggplot(pcelldf, aes(x, y)) +
   geom_tile(aes(fill = prelief)) +
@@ -217,5 +217,5 @@ ggplot(testd, aes(mean.relief, predicted)) +
   theme_minimal() + 
   labs(x = "observed")
 
-ggsave("plots/relief_prediction_accuracy.png", width = 5, height = 4, dpi = 160)
+ggsave("plots/relief_prediction_accuracy_ga.png", width = 5, height = 4, dpi = 160)
 
