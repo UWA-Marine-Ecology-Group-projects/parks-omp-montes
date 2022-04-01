@@ -1,9 +1,9 @@
 ###
-# Project: Parks - Abrolhos
-# Data:    BOSS fish, habitat
+# Project: Parks - montes
+# Data:    BRUV fish, habitat
 # Task:    Check predictors and combine data for FSSgam fish length and abundance
 # author:  Claude
-# date:    Nov-Dec 2021
+# date:    April 2022
 ##
 
 # Part 1-FSS modeling----
@@ -45,12 +45,7 @@ length(unique(maxn$sample))
 
 names(maxn)
 
-habitat <- readRDS("data/tidy/merged_habitat.rds")%>%
-  dplyr::rename('tpi'='layer_tpi',
-                'slope'='layer_slope',
-                'roughness'='layer_roughness',
-                'detrended'='layer_detrended',
-                'bathy_depth'='layer_depth',)%>%
+habitat <- readRDS("data/tidy/broad_merged_habitat.rds")%>%
   glimpse()
 
 metadata.maxn <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')%>%
@@ -92,60 +87,59 @@ ta.sr <- maxn %>%
     tidyr::gather(.,"response","number",2:3) %>%
   dplyr::glimpse()
 
-# Create abundance of all recreational fished species ----
-url <- "https://docs.google.com/spreadsheets/d/1SMLvR9t8_F-gXapR2EemQMEPSw_bUbPLcXd3lJ5g5Bo/edit?ts=5e6f36e2#gid=825736197"
+# # Create abundance of all recreational fished species ----
+# url <- "https://docs.google.com/spreadsheets/d/1SMLvR9t8_F-gXapR2EemQMEPSw_bUbPLcXd3lJ5g5Bo/edit?ts=5e6f36e2#gid=825736197"
+# 
+# master<-googlesheets4::read_sheet(url)%>%
+#   ga.clean.names()%>%
+#   filter(grepl('Australia', global.region))%>% # Change country here
+#   dplyr::select(family,genus,species,fishing.type,australian.common.name,minlegal.wa)%>%
+#   distinct()%>%
+#   glimpse()
 
-master<-googlesheets4::read_sheet(url)%>%
-  ga.clean.names()%>%
-  filter(grepl('Australia', global.region))%>% # Change country here
-  dplyr::select(family,genus,species,fishing.type,australian.common.name,minlegal.wa)%>%
-  distinct()%>%
-  glimpse()
-
-unique(master$fishing.type)
-
-fished.species <- maxn %>%
-  dplyr::left_join(master) %>%
-  dplyr::mutate(fishing.type = ifelse(scientific %in%c("Plectropomus spp","Scomberomorus spp","Sillago spp",
-                                                       "Herklotsichthys spp","Lethrinus spp")
-                                      ,"R",fishing.type))%>%
-  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Plectropomus spp"), "450", minlegal.wa))%>%
-  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Scomberomorus spp"), "900", minlegal.wa))%>%
-  dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Lethrinus spp"), "280", minlegal.wa))%>%
-  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
-  dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus - maybe remove herklotsichthys if it cooks everything
-  glimpse()
-  
-unique(fished.species$scientific)
+# unique(master$fishing.type)
+# 
+# fished.species <- maxn %>%
+#   dplyr::left_join(master) %>%
+#   dplyr::mutate(fishing.type = ifelse(scientific %in%c("Plectropomus spp","Scomberomorus spp","Sillago spp",
+#                                                        "Herklotsichthys spp","Lethrinus spp")
+#                                       ,"R",fishing.type))%>%
+#   dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Plectropomus spp"), "450", minlegal.wa))%>%
+#   dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Scomberomorus spp"), "900", minlegal.wa))%>%
+#   dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Lethrinus spp"), "280", minlegal.wa))%>%
+#   dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
+#   dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus - maybe remove herklotsichthys if it cooks everything
+#   glimpse()
+#   
+# unique(fished.species$scientific)
 
 # Come back to maybe getting rid of some of these, but for now we continue on
-fished.maxn <- fished.species %>%
-  dplyr::ungroup() %>%
-  dplyr::group_by(scientific,sample) %>%
-  dplyr::summarise(maxn = sum(maxn)) %>%
-  spread(scientific,maxn, fill = 0) %>%
-  dplyr::mutate(targeted.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
-  dplyr::select(sample,targeted.abundance) %>%
-  gather(.,"response","number",2:2) %>%
-  dplyr::glimpse()
+# fished.maxn <- fished.species %>%
+#   dplyr::ungroup() %>%
+#   dplyr::group_by(scientific,sample) %>%
+#   dplyr::summarise(maxn = sum(maxn)) %>%
+#   spread(scientific,maxn, fill = 0) %>%
+#   dplyr::mutate(targeted.abundance=rowSums(.[,2:(ncol(.))],na.rm = TRUE )) %>% #Add in Totals
+#   dplyr::select(sample,targeted.abundance) %>%
+#   gather(.,"response","number",2:2) %>%
+#   dplyr::glimpse()
 
 # Pick top 3 species                      second most abundant species is 'unknown spp'
-species.maxn <- maxn %>%
-  dplyr::filter(scientific %in% c("Pomacentrus coelestis",
-                                  "Chromis fumea",
-                                  "Lethrinus atkinsoni"
-  ))%>%
-  dplyr::select(sample,scientific,maxn) %>%
-  dplyr::rename('number' = maxn)%>%
-  dplyr::mutate(response = scientific)%>%
-  distinct()
+# species.maxn <- maxn %>%
+#   dplyr::filter(scientific %in% c("Pomacentrus coelestis",
+#                                   "Chromis fumea",
+#                                   "Lethrinus atkinsoni"
+#   ))%>%
+#   dplyr::select(sample,scientific,maxn) %>%
+#   dplyr::rename('number' = maxn)%>%
+#   dplyr::mutate(response = scientific)%>%
+#   distinct()
 
-dat.maxn <- bind_rows(fished.maxn, species.maxn, 
-                      ta.sr)%>%
+dat.maxn <- bind_rows(ta.sr)%>% # fished.maxn, species.maxn, 
   dplyr::left_join(metadata.maxn)%>%
   dplyr::left_join(habitat)%>%
-  dplyr::select(-scientific)%>%
-  drop_na(fieldofview.open)%>%
+  # dplyr::select(-scientific)%>%
+  drop_na(fieldofview.open)%>%                                                  #get rid of drops with no habitat
   glimpse()
 
 #Export the data to .rds for use in next script
@@ -156,12 +150,26 @@ length <- read.csv("data/tidy/montebello.synthesis.complete.length.csv")%>%
   mutate(scientific=paste(family,genus,species))%>%
   glimpse()
 
+length(unique(length$sample)) #205 samples
+
 metadata.length <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')%>%
   dplyr::filter(successful.length %in% c('Yes'))%>%
   glimpse()
 
+length(unique(metadata.length$sample)) #179
+
 check <- metadata.length %>%
   dplyr::anti_join(length)%>%
+  glimpse()
+
+# Create abundance of all recreational fished species ----
+url <- "https://docs.google.com/spreadsheets/d/1SMLvR9t8_F-gXapR2EemQMEPSw_bUbPLcXd3lJ5g5Bo/edit?ts=5e6f36e2#gid=825736197"
+
+master<-googlesheets4::read_sheet(url)%>%
+  ga.clean.names()%>%
+  filter(grepl('Australia', global.region))%>% # Change country here
+  dplyr::select(family,genus,species,fishing.type,australian.common.name,minlegal.wa)%>%
+  distinct()%>%
   glimpse()
 
 # Create abundance of all recreational fished species ----
@@ -199,56 +207,56 @@ sublegal <- fished.species %>%
   dplyr::glimpse()
 
 
-#Atkinsoni
-atkinsoni.legal <- fished.species %>%
-  dplyr::filter(species%in%c("atkinsoni")) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size atkinsoni") %>%
-  dplyr::glimpse()
-
-atkinsoni.sublegal <- fished.species %>%
-  dplyr::filter(species%in%c("atkinsoni")) %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size atkinsoni") %>%
-  dplyr::glimpse() 
-
-#plectropomus
-plectropomus.legal <- fished.species %>%
-  dplyr::filter(genus%in%c("Plectropomus")) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size trout") %>%
-  dplyr::glimpse()
-
-plectropomus.sublegal <- fished.species %>%
-  dplyr::filter(genus%in%c("Plectropomus")) %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size trout") %>%
-  dplyr::glimpse() 
-
-#nebulosus
-nebulosus.legal <- fished.species %>%
-  dplyr::filter(species%in%c("nebulosus")) %>%
-  dplyr::filter(length>minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "legal size spango") %>%
-  dplyr::glimpse()
-
-nebulosus.sublegal <- fished.species %>%
-  dplyr::filter(species%in%c("nebulosus")) %>%
-  dplyr::filter(length<minlegal.wa) %>%
-  dplyr::group_by(sample) %>%
-  dplyr::summarise(number = sum(number)) %>%
-  dplyr::mutate(scientific = "sublegal size spango") %>%
-  dplyr::glimpse() 
+# #Atkinsoni
+# atkinsoni.legal <- fished.species %>%
+#   dplyr::filter(species%in%c("atkinsoni")) %>%
+#   dplyr::filter(length>minlegal.wa) %>%
+#   dplyr::group_by(sample) %>%
+#   dplyr::summarise(number = sum(number)) %>%
+#   dplyr::mutate(scientific = "legal size atkinsoni") %>%
+#   dplyr::glimpse()
+# 
+# atkinsoni.sublegal <- fished.species %>%
+#   dplyr::filter(species%in%c("atkinsoni")) %>%
+#   dplyr::filter(length<minlegal.wa) %>%
+#   dplyr::group_by(sample) %>%
+#   dplyr::summarise(number = sum(number)) %>%
+#   dplyr::mutate(scientific = "sublegal size atkinsoni") %>%
+#   dplyr::glimpse() 
+# 
+# #plectropomus
+# plectropomus.legal <- fished.species %>%
+#   dplyr::filter(genus%in%c("Plectropomus")) %>%
+#   dplyr::filter(length>minlegal.wa) %>%
+#   dplyr::group_by(sample) %>%
+#   dplyr::summarise(number = sum(number)) %>%
+#   dplyr::mutate(scientific = "legal size trout") %>%
+#   dplyr::glimpse()
+# 
+# plectropomus.sublegal <- fished.species %>%
+#   dplyr::filter(genus%in%c("Plectropomus")) %>%
+#   dplyr::filter(length<minlegal.wa) %>%
+#   dplyr::group_by(sample) %>%
+#   dplyr::summarise(number = sum(number)) %>%
+#   dplyr::mutate(scientific = "sublegal size trout") %>%
+#   dplyr::glimpse() 
+# 
+# #nebulosus
+# nebulosus.legal <- fished.species %>%
+#   dplyr::filter(species%in%c("nebulosus")) %>%
+#   dplyr::filter(length>minlegal.wa) %>%
+#   dplyr::group_by(sample) %>%
+#   dplyr::summarise(number = sum(number)) %>%
+#   dplyr::mutate(scientific = "legal size spango") %>%
+#   dplyr::glimpse()
+# 
+# nebulosus.sublegal <- fished.species %>%
+#   dplyr::filter(species%in%c("nebulosus")) %>%
+#   dplyr::filter(length<minlegal.wa) %>%
+#   dplyr::group_by(sample) %>%
+#   dplyr::summarise(number = sum(number)) %>%
+#   dplyr::mutate(scientific = "sublegal size spango") %>%
+#   dplyr::glimpse() 
 
 # #lethrinids
 # lethrinid.legal <- fished.species %>%
@@ -267,10 +275,13 @@ nebulosus.sublegal <- fished.species %>%
 #   dplyr::mutate(scientific = "sublegal size emperor") %>%
 #   dplyr::glimpse() 
 
-combined.length <- bind_rows(legal, sublegal, atkinsoni.legal, atkinsoni.sublegal, plectropomus.legal, plectropomus.sublegal,
-                             nebulosus.legal, nebulosus.sublegal) #lethrinid.legal, lethrinid.sublegal
+combined.length <- bind_rows(legal, sublegal)
 
 unique(combined.length$scientific)
+
+samples <- metadata.length %>%
+  dplyr::select(sample)%>%
+  glimpse()
 
 dat.length <- combined.length %>%
   dplyr::right_join(metadata.length, by = c("sample")) %>% # add in all samples
@@ -298,9 +309,10 @@ saveRDS(dat.length, "data/tidy/dat.length.rds")
 names(dat.maxn)
 names(habitat)
 
-pred.vars=c("depth","biota.unconsolidated", "biota.macroalgae", "biota.crinoids",
-            "photic.reef","mesophotic.reef", "biota.octocoral.black", "biota.consolidated", "biota.sponges", "biota.hydroids", "biota.stony.corals",
-            "mean.relief", "sd.relief", "tpi", "roughness", "slope","detrended", "bathy_depth") 
+pred.vars=c("depth","biota.unconsolidated",
+            "photic.reef","mesophotic.reef", 
+            "mean.relief", "sd.relief", "tpi", 
+            "roughness", "detrended", "depth_ga") 
 
 # Check for correalation of predictor variables- remove anything highly correlated (>0.95)---
 round(cor(dat.maxn[,pred.vars]),2)

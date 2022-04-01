@@ -1,0 +1,11 @@
+"","modname","AICc","BIC","r2.vals","r2.vals.unique","edf","edf.less.1","delta.AICc","delta.BIC","wi.AICc","wi.BIC","depth","mean.relief","sd.relief","mesophotic.reef","photic.reef","tpi","roughness","detrended","status","cumsum.wi"
+"total.abundance.detrended+mean.relief+roughness","detrended+mean.relief+roughness",1305.84516608329,1326.63933061075,0.26242,NA,5.22,0,0,1.124,0.347,0.12,0,1,0,0,0,0,1,1,0,0.347
+"total.abundance.mean.relief+roughness+tpi","mean.relief+roughness+tpi",1307.15960877021,1328.26383251711,0.27183,NA,5.35,0,1.314,2.749,0.18,0.053,0,1,0,0,0,1,1,0,0,0.527
+"species.richness.mean.relief+status+tpi","mean.relief+status+tpi",939.618132397899,961.322810087604,0.40671,NA,5.73,0,0,6.326,0.178,0.018,0,1,0,0,0,1,0,0,1,0.178
+"species.richness.mean.relief+roughness","mean.relief+roughness",940.25476124993,956.815319495366,0.38771,NA,3.92,0,0.637,1.819,0.13,0.167,0,1,0,0,0,0,1,0,0,0.308
+"species.richness.mean.relief+status","mean.relief+status",940.321544132444,956.879142905666,0.38642,NA,3.92,0,0.703,1.883,0.126,0.162,0,1,0,0,0,0,0,0,1,0.434
+"species.richness.detrended+mean.relief+roughness","detrended+mean.relief+roughness",940.954494782772,960.152610711352,0.39416,NA,4.91,0,1.336,5.156,0.091,0.031,0,1,0,0,0,0,1,1,0,0.525
+"species.richness.mean.relief","mean.relief",941.117437639945,954.996538658139,0.37053,NA,2.92,0,1.499,0,0.084,0.414,0,1,0,0,0,0,0,0,0,0.609
+"species.richness.mean.relief+tpi","mean.relief+tpi",941.210571954825,960.2280228549,0.38714,NA,4.66,0,1.592,5.231,0.08,0.03,0,1,0,0,0,1,0,0,0,0.689
+"species.richness.detrended+mean.relief","detrended+mean.relief",941.441110445694,957.993655548622,0.37962,NA,3.91,0,1.823,2.997,0.072,0.093,0,1,0,0,0,0,0,1,0,0.761
+"species.richness.detrended+mean.relief+status","detrended+mean.relief+status",941.61780284669,960.81431767912,0.39093,NA,4.91,0,2,5.818,0.066,0.023,0,1,0,0,0,0,0,1,1,0.827

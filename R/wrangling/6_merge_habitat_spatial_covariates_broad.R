@@ -44,7 +44,15 @@ plot(allhab_t, add=T)
 habt_df   <- as.data.frame(allhab_t, xy = T)
 habi_df   <- cbind(habt_df, raster::extract(preds, allhab_t))
 
+#tidy names
+habi_df <- habi_df %>%
+  dplyr::rename("depth_ga" = layer_ga_Z, "detrended" = layer_ga_detrended, 
+                "roughness" = layer_ga_roughness, "slope" = layer_ga_slope,
+                "tpi" = layer_ga_tpi)%>%
+  dplyr::mutate(depth_ga = abs(depth_ga))%>%
+  glimpse()
+
 names(habi_df)
 
 #save out the habitat with spatial covariates
-saveRDS(habi_df, "data/tidy/merged_habitat.rds")
+saveRDS(habi_df, "data/tidy/broad_merged_habitat.rds")

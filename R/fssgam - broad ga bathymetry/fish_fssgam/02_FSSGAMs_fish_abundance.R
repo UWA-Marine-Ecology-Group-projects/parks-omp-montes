@@ -1,9 +1,9 @@
 ###
-# Project: Parks - Abrolhos
+# Project: Parks - Montes
 # Data:    BOSS fish, habitat
 # Task:    Modelling fish abundance w/ FSSGAM
 # author:  Claude
-# date:    Nov-Dec 2021
+# date:    April 2022
 ##
 
 # Part 1-FSS modeling----
@@ -68,8 +68,10 @@ dat <- dat %>%
   dplyr::filter(number < 400)%>%
   glimpse()
 
+plot(dat$number)
+
 # Run the full subset model selection----
-savedir <- "output/fssgam - fish"
+savedir <- "output/fssgam - fish_broad"
 resp.vars=unique.vars.use
 use.dat=as.data.frame(dat)
 str(use.dat)

@@ -1,3 +1,11 @@
+###
+# Project: Parks - Montes
+# Data:    BOSS fish, habitat
+# Task:    Modelling fish abundance w/ FSSGAM
+# author:  Claude
+# date:    April 2022
+##
+
 # Part 1-FSS modeling----
 rm(list=ls())
 
@@ -50,7 +58,7 @@ for(i in 1:length(unique.vars)){
 unique.vars.use 
 
 # Run the full subset model selection----
-savedir <- "output/fssgam - fish"
+savedir <- "output/fssgam - fish_broad"
 resp.vars=unique.vars.use
 use.dat=as.data.frame(dat)
 str(use.dat)

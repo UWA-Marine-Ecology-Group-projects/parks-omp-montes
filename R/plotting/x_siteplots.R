@@ -32,12 +32,11 @@ wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")                         
 mb_mp <- wampa[wampa$NAME %in% c("Montebello Islands","Barrow Island"),]        # just wa parks nearby
 rg_nmp <- aumpa[aumpa$NetName %in% c("South-west", "North-west"), ]             # regional nat parks networks
 # nb_nmp <- rg_nmp[rg_nmp$ResName %in% c("South-west Corner", "Geographe"), ]   # just nat parks nearby
-# nb_npz <- nb_nmp[nb_nmp$ZoneName == "National Park Zone", ]
-# wanew  <- st_read("data/spatial/shapefiles/test1.shp")                        # zones in ngari capes
+nb_npz <- rg_nmp[rg_nmp$ZoneName == "National Park Zone", ]
 terrnp <- st_read(
   "data/spatial/shape/Legislated_Lands_and_Waters_DBCA_011.shp")                # terrestrial reserves
 jacmap <- raster("data/spatial/rasters/ecosystem-types-19class-naland.tif")     # jac's aus habitat map
-cropex <- extent(113, 118, -23, -20)
+cropex <- extent(113, 118, -23, -19)
 jacmap <- crop(jacmap, cropex)
 plot(jacmap)
 # jacmap <- projectRaster(jacmap, crs = sppcrs, method = "ngb")
@@ -72,6 +71,9 @@ mb_mp <- mb_mp %>%
   dplyr::mutate(waname=ifelse(NAME%in%"Barrow Island"&
                               TYPE%in%"Marine Park","Sanctuary Zone",waname))%>%
   dplyr::filter(!waname%in%"Unassigned")
+
+wa_mp <- mb_mp %>%
+  dplyr::filter(waname%in%"Sanctuary Zone")
 
 # # reduce terrestrial parks
 terrnp <- terrnp[terrnp$leg_catego %in% c("Nature Reserve", "National Park"), ] # exclude state forests etc
@@ -180,7 +182,7 @@ depth_cols <- scale_fill_manual(values = c("#a3bbff","#98c4f7","#9acbec", "#a7cf
 p3 <- ggplot() +
   # # geom_raster(data = bathdf, aes(x, y, fill = Depth), alpha = 0.9) +
   geom_contour_filled(data = sitebathy, aes(x = x, y = y, z = Depth, fill = after_stat(level)),
-               breaks = c(-30,-70,-200), colour = "white", alpha = 1, size = 0.3) +
+               breaks = c(-50,-100,-150,-200), colour = "white", alpha = 1, size = 0.3) +
   scale_fill_grey(start = 0.6, end = 0.5, guide = "none") +
   # depth_cols+
   new_scale_fill()+
@@ -201,7 +203,7 @@ p3 <- ggplot() +
   #              binwidth = 50, colour = "white", alpha = 4/5, size = 0.1) +
   # geom_text_contour(data = sitebathy, aes(x = x, y = y, z = Depth),
   #                   breaks = c(-30,-70.-200), size = 2.5, label.placer = label_placer_n(1)) +
-  annotate("text", x = c(115.24,115.317,115.607), y = c(-20.425,-20.19,-20.3), label = c("50m","50m","50m"), size = 2)+
+  annotate("text", x = c(115.24,115.283,115.52,115.21), y = c(-20.425,-20.55,-20.2453, -20.27), label = c("50m","50m","50m","50m"), size = 2)+
   geom_point(data = metadata, aes(longitude, latitude), colour = "indianred4",
              alpha = 3/5, shape = 10) +
   labs(x = NULL, y = NULL, fill = "Australian Marine Parks") +
@@ -226,14 +228,10 @@ jclass[["class"]] <- c("shelf.unvegetated.soft.sediments",
                        "Upper.slope.unvegetated.soft.sediments",
                        "Mid.slope.sediments",
                        "Lower.slope.reef.and.sediments",
-                       "Abyssal.reef.and.sediments",
-                       "Seamount.soft.sediments",
                        "Shelf.incising.and.other.canyons",
                        "Shelf.vegetated.sediments",
                        "Shallow.coral.reefs.less.than.30.m.depth",
-                       "Shallow.rocky.reefs.less.than.30.m.depth",
                        "Mesophotic.coral.reefs",
-                       "Mesophotic.rocky.reefs",
                        "Rariophotic.shelf.reefs",
                        "Upper.slope.rocky.reefs.shelf.break.to.700.m.depth",
                        "Mid.slope.reef",
@@ -252,39 +250,56 @@ waterr_cols <- scale_fill_manual(values = c("National Park" = "#c4cea6",
 jmap_df$classname <- dplyr::recode(jmap_df$classname, "shelf unvegetated soft sediments" =
                               "Shelf unvegetated soft sediments")
 
-jcls_cols <- scale_fill_manual(values = c(
-  # "Shallow coral reefs less than 30 m depth" = "coral2", 
-  "Shallow rocky reefs less than 30 m depth" = "darkgoldenrod1", 
-  "Mesophotic rocky reefs" = "khaki4",
+jcls_fills <- scale_fill_manual(values = c(
+  "Shallow coral reefs less than 30 m depth" = "coral2",
+  # "Shallow rocky reefs less than 30 m depth" = "darkgoldenrod1", 
+  # "Mesophotic rocky reefs" = "khaki4",
   "Shelf vegetated sediments" = "seagreen3",
   "Shelf unvegetated soft sediments" = "cornsilk1",
   "Rariophotic shelf reefs" = "steelblue3",
   "Upper slope rocky reefs shelf break to 700 m depth" = "indianred3",
   "Upper slope unvegetated soft sediments" = "wheat1", 
-  "Mid slope sediments" = "navajowhite1"))
+  "Mid slope sediments" = "navajowhite1",
+  # "Shelf incising and other canyons" = "peru",
+  "Mesophotic coral reefs" = "orange",
+  # "Mid slope reef" = "sienna",
+  "Artificial reefs pipelines and cables" = "darkgoldenrod1"))
 
-nb_wasz <- wanew[wanew$waname == "Sanctuary Zone", ]
+jcls_cols <- scale_color_manual(values = c(
+  "Shallow coral reefs less than 30 m depth" = "coral2",
+  # "Shallow rocky reefs less than 30 m depth" = "darkgoldenrod1", 
+  # "Mesophotic rocky reefs" = "khaki4",
+  "Shelf vegetated sediments" = "seagreen3",
+  "Shelf unvegetated soft sediments" = "cornsilk1",
+  "Rariophotic shelf reefs" = "steelblue3",
+  "Upper slope rocky reefs shelf break to 700 m depth" = "indianred3",
+  "Upper slope unvegetated soft sediments" = "wheat1", 
+  "Mid slope sediments" = "navajowhite1",
+  # "Shelf incising and other canyons" = "peru",
+  "Mesophotic coral reefs" = "orange",
+  # "Mid slope reef" = "sienna",
+  "Artificial reefs pipelines and cables" = "darkgoldenrod1"))
 
 p6 <- ggplot() +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   geom_sf(data = terrnp, aes(fill = leg_catego), alpha = 4/5, colour = NA) +
   waterr_cols +
   new_scale_fill() + 
-  geom_tile(data = jmap_df, aes(x, y, fill = classname)) +
-  jcls_cols +
-  geom_sf(data = nb_npz, colour = "#7bbc63", alpha = 3/5, fill = NA) +
-  geom_sf(data = nb_wasz, colour = "#7bbc63", alpha = 3/5, fill = NA) +
+  geom_tile(data = jmap_df, aes(x, y, fill = classname, color = classname)) +
+  jcls_cols+
+  jcls_fills+
+  geom_sf(data = wa_mp, colour = "#7bbc63", alpha = 3/5, fill = NA) +
+  # geom_sf(data = nb_npz, colour = "#7bbc63", alpha = 3/5, fill = NA) +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
-  labs(x = NULL, y = NULL, fill = "Habitat classification") +
+  labs(x = NULL, y = NULL, fill = "Habitat classification", color = "Habitat classification") +
   theme_minimal() +
-  coord_sf(xlim = c(114.4, 115.1), ylim = c(-34.15, -33.65))
+  coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20))+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
 p6
 
 ggsave("plots/overall_jmonk_natmap.png",
        width = 10, height = 6, dpi = 160)
-
-
-
 
 
 # # saving for later

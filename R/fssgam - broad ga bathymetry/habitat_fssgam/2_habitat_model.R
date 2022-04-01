@@ -13,11 +13,14 @@ library(viridis)
 library(raster)
 
 # read in
-habi  <- readRDS("data/tidy/merged_habitat.rds")                               # merged data from 'R/1_mergedata.R'
-tifs  <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)
+habi  <- readRDS("data/tidy/broad_merged_habitat.rds")                               # merged data from 'R/1_mergedata.R'
+tifs  <- list.files("output/spatial_covariates/", "layer_ga*", full.names = TRUE)
 preds <- stack(tifs)
-preddf <- as.data.frame(preds, xy = TRUE, na.rm = TRUE)
-# preddf$Depth <- preddf$Z * -1
+preddf <- as.data.frame(preds, xy = TRUE, na.rm = TRUE)%>%
+  dplyr::rename(detrended=layer_ga_detrended, roughness = layer_ga_roughness, slope = layer_ga_slope,
+                tpi = layer_ga_tpi, depth_ga = layer_ga_Z)%>%
+  dplyr::mutate(depth_ga = abs(depth_ga))%>%
+  glimpse()
 
 # reduce predictor space to fit survey area
 # preddf <- preddf[preddf$Depth > min(habi$Depth), ]
@@ -39,60 +42,66 @@ sbuff  <- buffer(habisp, 10000)
 #   facet_grid(habitat ~ covariate, scales = "free")
 
 # use formula from top model from '2_modelselect.R'
+#photic reef
 m_photic <- gam(cbind(photic.reef, Total.Sum - photic.reef) ~ 
-                  s(layer_depth,     k = 5, bs = "cr")  + 
-                  s(layer_detrended, k = 5, bs = "cr") + 
-                  s(layer_roughness, k = 5, bs = "cr") +
-                  s(layer_tpi, k = 5, bs = "cr"), 
+                  s(depth_ga,     k = 5, bs = "cr")  + 
+                  s(detrended, k = 5, bs = "cr") + 
+                  s(roughness, k = 5, bs = "cr") +
+                  s(tpi, k = 5, bs = "cr"), 
                 data = habi, method = "REML", family = binomial("logit"))
 summary(m_photic)
 gam.check(m_photic)
 vis.gam(m_photic)
 
+#mesophotic reef
 m_meso <- gam(cbind(mesophotic.reef, Total.Sum - mesophotic.reef) ~ 
-                s(layer_depth,     k = 5, bs = "cr")  + 
-                s(layer_detrended, k = 5, bs = "cr") + 
-                s(layer_roughness, k = 5, bs = "cr") +
-                s(layer_tpi, k = 5, bs = "cr"), 
+                s(depth,     k = 5, bs = "cr")  + 
+                s(detrended, k = 5, bs = "cr") + 
+                s(roughness, k = 5, bs = "cr") +
+                s(tpi, k = 5, bs = "cr"), 
               data = habi, method = "REML", family = binomial("logit"))
 summary(m_meso)
 gam.check(m_meso)
 vis.gam(m_meso)
 
+#macroalgae
 m_macro <- gam(cbind(biota.macroalgae, Total.Sum - biota.macroalgae) ~ 
-                 s(layer_depth,     k = 5, bs = "cr")  + 
-                 s(layer_detrended, k = 5, bs = "cr") + 
-                 s(layer_roughness, k = 5, bs = "cr") +
-                 s(layer_tpi, k = 5, bs = "cr"), 
+                 s(depth,     k = 5, bs = "cr")  + 
+                 s(detrended, k = 5, bs = "cr") + 
+                 s(roughness, k = 5, bs = "cr") +
+                 s(tpi, k = 5, bs = "cr"), 
           data = habi, method = "REML", family = binomial("logit"))
 summary(m_macro)
 gam.check(m_macro)
 vis.gam(m_macro)
 
+#stony corals
 m_stony <- gam(cbind(biota.stony.corals, Total.Sum - biota.stony.corals) ~ 
-                s(layer_depth,     k = 5, bs = "cr")  + 
-                s(layer_detrended, k = 5, bs = "cr") + 
-                s(layer_roughness, k = 5, bs = "cr"), 
+                s(depth,     k = 5, bs = "cr")  + 
+                s(detrended, k = 5, bs = "cr") + 
+                s(roughness, k = 5, bs = "cr"),
               data = habi, method = "REML", family = binomial("logit"))
 summary(m_stony)
 gam.check(m_stony)
 vis.gam(m_stony)
 
+#rock
 m_rock <- gam(cbind(biota.consolidated, Total.Sum - biota.consolidated) ~ 
-                s(layer_depth,     k = 5, bs = "cr")  + 
-                s(layer_detrended, k = 5, bs = "cr") + 
-                s(layer_roughness, k = 5, bs = "cr") +
-                s(layer_tpi, k = 5, bs = "cr"), 
+                s(depth,     k = 5, bs = "cr")  + 
+                s(detrended, k = 5, bs = "cr") + 
+                s(roughness, k = 5, bs = "cr") +
+                s(tpi, k = 5, bs = "cr"), 
               data = habi, method = "REML", family = binomial("logit"))
 summary(m_rock)
 gam.check(m_rock)
 vis.gam(m_rock)
 
+#sand
 m_sand <- gam(cbind(biota.unconsolidated, Total.Sum - biota.unconsolidated) ~ 
-                s(layer_depth,     k = 5, bs = "cr")  + 
-                s(layer_detrended, k = 5, bs = "cr") + 
-                s(layer_roughness, k = 5, bs = "cr") +
-                s(layer_tpi, k = 5, bs = "cr"), 
+                s(depth,     k = 5, bs = "cr")  + 
+                s(detrended, k = 5, bs = "cr") + 
+                s(roughness, k = 5, bs = "cr") +
+                s(tpi, k = 5, bs = "cr"), 
               data = habi, method = "REML", family = binomial("logit"))
 summary(m_sand)
 gam.check(m_sand)
