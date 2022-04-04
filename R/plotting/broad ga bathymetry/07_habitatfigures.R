@@ -6,12 +6,15 @@
 # date:    Jan 22
 ##
 
+rm(list = ls())
+
 library(reshape2)
 library(ggplot2)
 library(viridis)
 library(raster)
 library(patchwork)
 library(sf)
+library(ggnewscale)
 
 # spatial setup and bring in layers
 wgscrs <- CRS("+proj=longlat +datum=WGS84")
@@ -48,7 +51,7 @@ mb_mpa$waname <- dplyr::recode(mb_mpa$waname,
                                  "Special Purpose Zone\n(Shore Based Activities)")
 
 # read in outputs from 'R/4_habitat_model.R'
-rlist  <- list.files("output/spatial_predictions/", "*.tif", full.names = T)
+rlist  <- list.files("output/spatial_predictions_broad/", "*.tif", full.names = T)
 prasts <- stack(rlist)
 spreddf <- as.data.frame(prasts, xy = TRUE, na.rm = TRUE)
 
@@ -56,12 +59,10 @@ spreddf <- as.data.frame(prasts, xy = TRUE, na.rm = TRUE)
 # spreddf <- readRDS("output/site_habitat_predictions.rds")                       # site predictions only
 spreddf$dom_tag <- as.factor(spreddf$layer_dom_tag)
 spreddf$dom_tag <- dplyr::recode(spreddf$dom_tag,
-                          "1" = "Coral",
-                          "2" = "Macroalgae",
-                          "3" = "Invertebrate reef",
-                          "4" = "Macroalgae/coral reef",
-                          "5" = "Rock",
-                          "6" = "Sand")
+                          "1" = "Invertebrate reef",
+                          "2" = "Macroalgae/coral reef",
+                          "3" = "Rock",
+                          "4" = "Sand")
 
 # fig 1: categorical habitat maps
 # assign mpa colours
@@ -101,14 +102,14 @@ p1 <- ggplot() +
   guides(colour = "none") +
   coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
   theme_minimal()
+p1
 
-# p1
 ggsave("plots/site_dominant_habitat.png", width = 9, height = 6, dpi = 160)
 
 # fig 2: habitat multiplot
 # melt classes for faceting
 widehabit <- melt(spreddf, measure.vars = c(6:9))
-widehabit$variable <- dplyr::recode(widehabit$variable,
+widehabit$variable <- dplyr::recode(widehabit$variable,                         #wide habitat but its long :P
                                     layer_pphotic = "Macroalgae/coral reef",
                                     layer_pmeso = "Invertebrate reef",
                                     layer_prock = "Rock",
@@ -133,6 +134,7 @@ p2 <- ggplot() +
   facet_wrap(~variable)
 
 p2
+
 ggsave("plots/site_habitat_predicted.png", width = 9, height = 8, dpi = 160)
 
 # # fig 3: biogenic reef
@@ -155,18 +157,26 @@ ggsave("plots/site_habitat_predicted.png", width = 9, height = 8, dpi = 160)
 # ggsave("plots/site_biogenicreef_p.png", width = 10, height = 6, dpi = 160)
 
 # fig 4: predicted relief
-pcelldf <- readRDS('output/predicted_relief_site.rds')
-pcelldf$sitens <- ifelse(pcelldf$y > 6940000, 1, 0)
+pcelldf <- readRDS('output/spatial_predictions_broad/predicted_relief_site_ga.rds')
+# pcelldf$sitens <- ifelse(pcelldf$y > 6940000, 1, 0)
 pcelldf$prelief[pcelldf$prelief < 0] <- 0
 
 p4 <- ggplot() +
-  geom_tile(data = pcelldf, aes(x, y, fill = prelief)) +
+  geom_tile(data = pcelldf, aes(x, y, fill = prelief, color = prelief)) +
+  labs(fill = "Relief score", color = "Relief score")+
   scale_fill_viridis(option = "C", direction = -1, 
                      limits = c(0, max(pcelldf$prelief))) +
-  # geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
-  labs(x= NULL, y = NULL, 
-       fill = "p. relief") +
-  theme_minimal()
+  scale_color_viridis(option = "C", direction = -1,
+                     limits = c(0, max(pcelldf$prelief))) +
+  new_scale_color()+
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.5) +
+  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
+          fill = NA, aes(color = waname), size = 0.5, show.legend = F) +
+  wampa_cols+
+  geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
+  labs(x= NULL, y = NULL) +
+  theme_minimal()+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000))
 p4
 
 ggsave("plots/site_relief_p.png", width = 10, height = 6, dpi = 160)

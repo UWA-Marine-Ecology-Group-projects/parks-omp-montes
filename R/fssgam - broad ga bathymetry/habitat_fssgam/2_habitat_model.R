@@ -6,11 +6,14 @@
 # date:    Jan 22
 ##
 
+rm(list = ls())
+
 library(reshape2)
 library(mgcv)
 library(ggplot2)
 library(viridis)
 library(raster)
+library(dplyr)
 
 # read in
 habi  <- readRDS("data/tidy/broad_merged_habitat.rds")                               # merged data from 'R/1_mergedata.R'
@@ -55,8 +58,8 @@ vis.gam(m_photic)
 
 #mesophotic reef
 m_meso <- gam(cbind(mesophotic.reef, Total.Sum - mesophotic.reef) ~ 
-                s(depth,     k = 5, bs = "cr")  + 
-                s(detrended, k = 5, bs = "cr") + 
+                s(depth_ga,     k = 5, bs = "cr")  + 
+                s(detrended, k = 5, bs = "cr") +
                 s(roughness, k = 5, bs = "cr") +
                 s(tpi, k = 5, bs = "cr"), 
               data = habi, method = "REML", family = binomial("logit"))
@@ -66,7 +69,7 @@ vis.gam(m_meso)
 
 #macroalgae
 m_macro <- gam(cbind(biota.macroalgae, Total.Sum - biota.macroalgae) ~ 
-                 s(depth,     k = 5, bs = "cr")  + 
+                 s(depth_ga,     k = 5, bs = "cr")  + 
                  s(detrended, k = 5, bs = "cr") + 
                  s(roughness, k = 5, bs = "cr") +
                  s(tpi, k = 5, bs = "cr"), 
@@ -77,9 +80,10 @@ vis.gam(m_macro)
 
 #stony corals
 m_stony <- gam(cbind(biota.stony.corals, Total.Sum - biota.stony.corals) ~ 
-                s(depth,     k = 5, bs = "cr")  + 
+                s(depth_ga,     k = 5, bs = "cr")  + 
                 s(detrended, k = 5, bs = "cr") + 
-                s(roughness, k = 5, bs = "cr"),
+                # s(roughness, k = 5, bs = "cr"),
+                s(tpi, k = 5, bs = "cr"),
               data = habi, method = "REML", family = binomial("logit"))
 summary(m_stony)
 gam.check(m_stony)
@@ -87,7 +91,7 @@ vis.gam(m_stony)
 
 #rock
 m_rock <- gam(cbind(biota.consolidated, Total.Sum - biota.consolidated) ~ 
-                s(depth,     k = 5, bs = "cr")  + 
+                s(depth_ga,     k = 5, bs = "cr")  + 
                 s(detrended, k = 5, bs = "cr") + 
                 s(roughness, k = 5, bs = "cr") +
                 s(tpi, k = 5, bs = "cr"), 
@@ -98,10 +102,10 @@ vis.gam(m_rock)
 
 #sand
 m_sand <- gam(cbind(biota.unconsolidated, Total.Sum - biota.unconsolidated) ~ 
-                s(depth,     k = 5, bs = "cr")  + 
+                s(depth_ga,     k = 5, bs = "cr")  + 
                 s(detrended, k = 5, bs = "cr") + 
                 s(roughness, k = 5, bs = "cr") +
-                s(tpi, k = 5, bs = "cr"), 
+                s(tpi, k = 5, bs = "cr"),
               data = habi, method = "REML", family = binomial("logit"))
 summary(m_sand)
 gam.check(m_sand)
@@ -116,23 +120,25 @@ preddf <- cbind(preddf,
                 "prock" = predict(m_rock, preddf, type = "response"),
                 "psand" = predict(m_sand, preddf, type = "response"))
 
-prasts <- rasterFromXYZ(preddf, res = c(30, 30))
-prasts$dom_tag <- which.max(prasts[[6:11]])
+prasts <- rasterFromXYZ(preddf, res = c(261, 277))
+head(prasts)
+prasts$dom_tag <- which.max(prasts[[8:11]])
 plot(prasts[[6:12]])
-
-# categorise by dominant tag
-preddf$dom_tag <- apply(preddf[10:13], 1,
-                        FUN = function(x){names(which.max(x))})
-preddf$dom_tag <- sub('.', '', preddf$dom_tag)
-head(preddf)
 
 # subset to 10km from sites only
 sprast <- mask(prasts, sbuff)
 sprast <- sprast[[6:12]]
 plot(sprast)
 
+# # categorise by dominant tag
+# sprast$dom_tag <- apply(sprast[5:8], 1,
+#                         FUN = function(x){names(which.max(x))})
+# sprast$dom_tag <- sub('.', '', sprast$dom_tag)
+# head(sprast)
+
 # write to tifs to reduce file sizes for git
-writeRaster(sprast, "output/spatial_predictions/layer.tif", 
+
+writeRaster(sprast, "output/spatial_predictions_broad/layer.tif", 
             bylayer = TRUE, suffix = names(sprast), overwrite = TRUE)
 
 # # tidy and output data - not keeping this, too big for git

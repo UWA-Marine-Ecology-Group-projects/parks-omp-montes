@@ -175,7 +175,7 @@ saveRDS(pcelldf, 'output/spatial_predictions/predicted_relief_site_ga.rds')
 ggplot(pcelldf, aes(x, y)) +
   geom_tile(aes(fill = prelief)) +
   scale_fill_viridis() +
-  geom_point(data = habi, aes(longitude.1, latitude.1, colour = mean.relief), 
+  geom_point(data = habi, aes(longitude.1, latitude.1, colour = mean.relief),
              alpha = 4/5, size = 1) +
   scale_colour_viridis() +
   coord_equal() +
