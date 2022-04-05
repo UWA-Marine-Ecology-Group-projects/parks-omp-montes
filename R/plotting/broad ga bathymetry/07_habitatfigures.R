@@ -162,13 +162,10 @@ pcelldf <- readRDS('output/spatial_predictions_broad/predicted_relief_site_ga.rd
 pcelldf$prelief[pcelldf$prelief < 0] <- 0
 
 p4 <- ggplot() +
-  geom_tile(data = pcelldf, aes(x, y, fill = prelief, color = prelief)) +
+  geom_tile(data = pcelldf, aes(x, y, fill = prelief)) +
   labs(fill = "Relief score", color = "Relief score")+
   scale_fill_viridis(option = "C", direction = -1, 
                      limits = c(0, max(pcelldf$prelief))) +
-  scale_color_viridis(option = "C", direction = -1,
-                     limits = c(0, max(pcelldf$prelief))) +
-  new_scale_color()+
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.5) +
   geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
           fill = NA, aes(color = waname), size = 0.5, show.legend = F) +
@@ -187,10 +184,16 @@ p5 <- ggplot() +
   geom_tile(data = pcelldf, aes(x, y, fill = p_sp)) +
   scale_fill_viridis(option = "B", 
                      limits = c(min(pcelldf$p_sp), max(pcelldf$p_sp))) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.5) +
+  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
+          fill = NA, aes(color = waname), size = 0.5, show.legend = F) +
+  wampa_cols+
+  geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
   # geom_point(data = habi, aes(x, y), 
   #            alpha = 0.7, colour = "grey70", size = 1, shape = 3) +
-  labs(x= NULL, y = NULL) +
-  theme_minimal()
+  labs(x= NULL, y = NULL, fill = "Spatial dependence") +
+  theme_minimal()+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000))
 p5
 
 ggsave("plots/site_relief_spatialeffect.png", 
