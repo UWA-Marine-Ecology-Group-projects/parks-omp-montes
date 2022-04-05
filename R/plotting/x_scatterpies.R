@@ -30,6 +30,31 @@ aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")%>%      
   dplyr::filter(ResName%in%"Montebello")
 #bring in state MP
 wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")
+mb_mp <- wampa[wampa$NAME %in% c("Montebello Islands","Barrow Island"),]        # just wa parks nearby
+
+# simplify zone names
+mb_mp$ZoneName <- dplyr::recode(mb_mp$ZoneName,
+                                "Special Purpose Zone (Mining Exclusion)" =
+                                  "Special Purpose Zone\n(Mining Exclusion)")
+
+mb_mp$waname <- gsub("( \\().+(\\))", "", mb_mp$ZONE_TYPE)
+mb_mp$waname <- gsub(" [1-4]", "", mb_mp$waname)
+# ab_mpa$waname[ab_mpa$ZONE_TYPE == unique(ab_mpa$ZONE_TYPE)[14]] <-
+#   c("Special Purpose Zone\n(Habitat Protection)")
+mb_mp$waname <- dplyr::recode(mb_mp$waname,
+                              "General Use" = "General Use Zone",
+                              # "MMA" = "Marine Management Area",
+                              # "Recreation Area" = "Recreation Zone",
+                              # "Conservation Area" = "Sanctuary Zone",
+                              "Special Purpose Zone (Shore Based Activities)" =
+                                "Special Purpose Zone\n(Shore Based Activities)")
+mb_mp <- mb_mp %>%
+  dplyr::mutate(waname=ifelse(NAME%in%"Barrow Island"&
+                                TYPE%in%"Marine Park","Sanctuary Zone",waname))%>%
+  dplyr::filter(!waname%in%"Unassigned")
+
+wa_mp <- mb_mp %>%
+  dplyr::filter(waname%in%"Sanctuary Zone")
 
 # get aus outline data
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                     # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
@@ -49,7 +74,15 @@ dat <- readRDS("data/tidy/broad_merged_habitat.rds")%>%
                 "Sand" = biota.unconsolidated)%>%
   glimpse()
 
+datsp <- SpatialPointsDataFrame(coords = cbind(dat$longitude.1, 
+                                               dat$latitude.1), data = dat)
+crs(datsp) <- sppcrs
+datsp_t <- spTransform(datsp,wgscrs)
 
+dat <- as.data.frame(datsp_t, xy = T)%>%
+  dplyr::select(-longitude.1, - latitude.1)%>%
+  dplyr::rename(longitude.1 = coords.x1, latitude.1 = coords.x2, "Macroalgae/coral reef" = Macroalgae.coral.reef,
+                "Invertebrate reef" = Invertebrate.reef)
 
 #bring in bathy for contour lines
 bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
@@ -84,30 +117,31 @@ gg.scatterpie <- ggplot() +
                       breaks = c(-30, -70, -200,-700,-10000), size = 0.1) +
   # annotate("text", x = c(114.40,114.467,114.72,114.945), y = -33.85, label = c("700m","200m","70m","30m"), size = 2)+
   scale_fill_grey(start = 0.5, end = 0.8) +
-  # depth_cols+
+  depth_cols+
   new_scale_fill()+
-  # geom_sf(data = aus, fill = "seashell2", colour = "black", size = 0.1) +
-  # geom_sf(data = wampa,fill = "#bfd054", alpha = 2/5, color = NA)+
-  # wampa_cols+
-  # labs(fill = "State Marine Parks")+
-  # new_scale_fill()+
-  # geom_sf(data = aumpa, fill = "#7bbc63",alpha = 2/5, color = NA) +
-  # labs(fill = "Australian Marine Parks")+
-  # nmpa_cols+
-  # new_scale_fill()+
+  geom_sf(data = wa_mp,fill = "#bfd054", alpha = 2/5, color = NA)+
+  wampa_cols+
+  labs(fill = "State Marine Parks")+
+  new_scale_fill()+
+  geom_sf(data = aus, fill = "seashell2", colour = "black", size = 0.1) +
+  new_scale_fill()+
+  geom_sf(data = aumpa, aes(fill = ZoneName),alpha = 1, color = NA) +
+  labs(fill = "Australian Marine Parks")+
+  nmpa_cols+
+  new_scale_fill()+
   geom_scatterpie(aes(x=longitude.1, y=latitude.1, group=grouping), data=dat,
                   cols = c("Invertebrate reef","Macroalgae/coral reef","Rock",
                            "Sand"),
                   pie_scale = 0.45, color = NA) +
   labs(fill = "Habitat",x = 'Longitude', y = 'Latitude')+
   hab_cols+
-  # coord_sf(xlim = c(min(dat$longitude.1),max(dat$longitude.1)), 
-           # ylim = c(min(dat$latitude.1), max(dat$latitude.1)))+
-  coord_sf(xlim = c(314179, 359788), ylim = c(7719520, 7770980))+
+  coord_sf(xlim = c(min(dat$longitude.1),max(dat$longitude.1)),
+  ylim = c(min(dat$latitude.1), max(dat$latitude.1)))+
+  # coord_sf(xlim = c(314179, 359788), ylim = c(7719520, 7770980))+
   theme_minimal()+
   theme(panel.background = element_rect(fill = "#b9d1d6"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 gg.scatterpie
 
-save_plot("plots/spatial/scatterpies.png", gg.scatterpie,base_height = 6.5,base_width = 7)
+save_plot("plots/scatterpies.png", gg.scatterpie,base_height = 6.5,base_width = 7)

@@ -104,7 +104,7 @@ p1 <- ggplot() +
   theme_minimal()
 p1
 
-ggsave("plots/site_dominant_habitat.png", width = 9, height = 6, dpi = 160)
+ggsave("plots/site_dominant_habitat.pdf", width = 9, height = 6, dpi = 1000)
 
 # fig 2: habitat multiplot
 # melt classes for faceting
