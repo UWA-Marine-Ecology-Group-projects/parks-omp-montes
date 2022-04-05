@@ -81,7 +81,7 @@ p_1 <- ggplot() +
   facet_wrap(~month, nrow = 4, ncol = 3)
 # p_1
 
-ggsave(paste0('plots/spatial/',name,'_SLA_monthly_spatial.png'),p_1, dpi = 300, width = 8, height = 6.5)
+ggsave(paste0('plots/spatial/',name,'_SLA_monthly_spatial.pdf'),p_1, dpi = 300, width = 8, height = 6.5)
 dev.off()
 
 ######### SST #########
@@ -118,7 +118,7 @@ p_2 <- ggplot() +
   facet_wrap(~month, nrow = 4, ncol = 3)
 # p_2
 
-ggsave(paste('plots/spatial/',name,'_SST_monthly_spatial.png'),p_2, dpi = 300, width = 8, height = 6.5)
+ggsave(paste('plots/spatial/',name,'_SST_monthly_spatial.pdf'),p_2, dpi = 300, width = 8, height = 6.5)
 
 dev.off()
 
@@ -149,7 +149,7 @@ p_3 <- ggplot() +
   facet_wrap(~title)
 # p_3
 
-ggsave(paste0('plots/spatial/',name,'_DHW_monthly_spatial.png'),p_3, dpi = 300, width = 6, height = 3.5)
+ggsave(paste0('plots/spatial/',name,'_DHW_monthly_spatial.pdf'),p_3, dpi = 300, width = 6, height = 3.5)
 
 dev.off()
 

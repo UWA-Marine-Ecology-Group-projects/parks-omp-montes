@@ -104,7 +104,7 @@ p1 <- ggplot() +
   theme_minimal()
 p1
 
-ggsave("plots/site_dominant_habitat.pdf", width = 9, height = 6, dpi = 1000)
+ggsave("plots/site_dominant_habitat.pdf", width = 9, height = 6, dpi = 160)
 
 # fig 2: habitat multiplot
 # melt classes for faceting
@@ -135,7 +135,7 @@ p2 <- ggplot() +
 
 p2
 
-ggsave("plots/site_habitat_predicted.png", width = 9, height = 8, dpi = 160)
+ggsave("plots/site_habitat_predicted.pdf", width = 9, height = 8, dpi = 160)
 
 # # fig 3: biogenic reef
 # p3 <- ggplot(spreddf[widehabit$sitens == 1, ], aes(x, y)) +
@@ -176,7 +176,7 @@ p4 <- ggplot() +
   coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000))
 p4
 
-ggsave("plots/site_relief_p.png", width = 10, height = 6, dpi = 160)
+ggsave("plots/site_relief_p.pdf", width = 10, height = 6, dpi = 160)
 
 # fig 4.1.2: spatial random effect
 
@@ -196,7 +196,7 @@ p5 <- ggplot() +
   coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000))
 p5
 
-ggsave("plots/site_relief_spatialeffect.png", 
+ggsave("plots/site_relief_spatialeffect.pdf", 
        width = 10, height = 6, dpi = 160)
 
 # jac's map, eh

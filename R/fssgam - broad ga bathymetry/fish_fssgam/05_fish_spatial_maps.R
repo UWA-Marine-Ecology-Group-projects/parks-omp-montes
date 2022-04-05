@@ -151,4 +151,4 @@ p41
 gg.predictions <- p11+p21+p31+p41 & theme(legend.justification = "left")
 gg.predictions
 
-ggsave("plots/site_fish_predictions.png", gg.predictions,width = 9, height = 8, dpi = 160)
+ggsave("plots/site_fish_predictions.pdf", gg.predictions,width = 9, height = 8, dpi = 160)
