@@ -199,6 +199,76 @@ p5
 ggsave("plots/site_relief_spatialeffect.pdf", 
        width = 10, height = 6, dpi = 160)
 
+tifs  <- list.files("output/spatial_covariates/", "layer_ga*", full.names = TRUE)
+preds <- stack(tifs)
+preds <- as.data.frame(preds, xy = T, na.rm = T)
+preds$layer_ga_Z <- abs(preds$layer_ga_Z)
+
+# depth
+pd <- ggplot() +
+  geom_tile(data = preds, aes(x, y, fill = layer_ga_Z)) +
+  scale_fill_viridis(option = "A", direction = -1) +
+  # geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
+  labs(x= NULL, y = NULL, fill = "Depth (m)") +
+  theme_minimal() 
+pd
+
+# tpi
+pt <- ggplot() +
+  geom_tile(data = spreddf, aes(x, y, fill = layer_ga_tpi)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  # geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
+  labs(x= NULL, y = NULL, fill = "TPI") +
+  theme_minimal()
+pt
+
+# roughness
+pr <- ggplot() +
+  geom_tile(data = spreddf, aes(x, y, fill = roughness)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
+  labs(x= NULL, y = NULL, fill = "Roughness") +
+  theme_minimal() 
+pr
+
+# detrended
+pdt <- ggplot() +
+  geom_tile(data = spreddf, aes(x, y, fill = detrended)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
+  labs(x= NULL, y = NULL, fill = "Detrended (m)") +
+  theme_minimal()
+pdt
+
+# fig 4: predicted relief
+pcelldf <- readRDS('output/spatial/raster/predicted_relief_site.rds')
+
+p4 <- ggplot() +
+  geom_tile(data = pcelldf, aes(x, y, fill = prelief)) +
+  scale_fill_viridis(option = "C", direction = -1) +
+  geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
+  labs(x= NULL, y = NULL, 
+       fill = "Relief (predicted)") +
+  theme_minimal()
+
+# relief only
+p4
+
+
+# combined spatial layers
+
+(pd + pt ) /
+  (pr + pdt) /
+  (p4 + plot_spacer()) +
+  theme(text = element_text(size = 8))
+
+ggsave("plots/original gamms/site_spatial_layers.png", width = 12, height = 15, dpi = 160)
+
+
+
+
+#I believe this is already done in x_siteplots
+
 # jac's map, eh
 # sort out the classes
 jlevs <- ratify(jacmap)

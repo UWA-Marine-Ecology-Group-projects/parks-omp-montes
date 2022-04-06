@@ -90,22 +90,21 @@ bathdf <- as.data.frame(bathy, xy = T)%>%
   dplyr::rename("longitude.1" = x, "latitude.1" = y)
 colnames(bathdf)[3] <- "Depth"
 # assign commonwealth zone colours
-nmpa_cols <- scale_fill_manual(values = c("National Park Zone" = "#7bbc63",
+nmpa_cols <- scale_color_manual(values = c("National Park Zone" = "#7bbc63",
                                           "Habitat Protection Zone" = "#fff8a3",
                                           "Multiple Use Zone" = "#b9e6fb",
-                                          "Special Purpose Zone\n(Mining Exclusion)" = "#368ac1")) 
+                                          "Special Purpose Zone\n(Mining Exclusion)" = "#368ac1"), guide = "none") 
 
 # state colours
-wampa_cols <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
+wampa_cols <- scale_color_manual(values = c("Sanctuary Zone" = "#bfd054",
                                            "General Use Zone" = "#bddde1",
                                            "Recreation Zone" = "#f4e952"))
 
 #class colours 
 hab_cols <- scale_fill_manual(values = c("Rock" = "grey40",
-                                         "Invertebrate reef" = "plum",
+                                         "Sand" = "wheat",
                                          "Macroalgae/coral reef" = "darkgoldenrod4",
-                                         # "Seagrasses" = "forestgreen",
-                                         "Sand" = "wheat"))
+                                         "Invertebrate reef" = "plum"))
 
 #depth colours 
 depth_cols <- scale_fill_manual(values = c("#a7cfe0","#9acbec","#98c4f7", "#a3bbff"),guide = "none")
@@ -115,20 +114,18 @@ depth_cols <- scale_fill_manual(values = c("#a7cfe0","#9acbec","#98c4f7", "#a3bb
 gg.scatterpie <- ggplot() + 
   geom_contour_filled(data = bathdf, aes(longitude.1, latitude.1, z = Depth, fill = after_stat(level)), color = "black",
                       breaks = c(-30, -70, -200,-700,-10000), size = 0.1) +
-  # annotate("text", x = c(114.40,114.467,114.72,114.945), y = -33.85, label = c("700m","200m","70m","30m"), size = 2)+
-  scale_fill_grey(start = 0.5, end = 0.8) +
+  annotate("text", x = c(115.34,115.22, 115.415,115.582), y = c(-20.6,-20.18,-20.27,-20.145), label = c("30m","70m", "30m","70m"), size = 2)+
   depth_cols+
   new_scale_fill()+
-  geom_sf(data = wa_mp,fill = "#bfd054", alpha = 2/5, color = NA)+
+  geom_sf(data = wa_mp,color = "#bfd054", alpha = 1, fill = NA)+
   wampa_cols+
   labs(fill = "State Marine Parks")+
-  new_scale_fill()+
-  geom_sf(data = aus, fill = "seashell2", colour = "black", size = 0.1) +
-  new_scale_fill()+
-  geom_sf(data = aumpa, aes(fill = ZoneName),alpha = 1, color = NA) +
-  labs(fill = "Australian Marine Parks")+
+  new_scale_color()+
+  geom_sf(data = aumpa, aes(color = ZoneName),alpha = 1, fill = NA) +
+  # labs(fill = NA)+
   nmpa_cols+
-  new_scale_fill()+
+  new_scale_color()+
+  geom_sf(data = aus, fill = "seashell2", colour = "black", size = 0.1) +
   geom_scatterpie(aes(x=longitude.1, y=latitude.1, group=grouping), data=dat,
                   cols = c("Invertebrate reef","Macroalgae/coral reef","Rock",
                            "Sand"),
@@ -137,7 +134,6 @@ gg.scatterpie <- ggplot() +
   hab_cols+
   coord_sf(xlim = c(min(dat$longitude.1),max(dat$longitude.1)),
   ylim = c(min(dat$latitude.1), max(dat$latitude.1)))+
-  # coord_sf(xlim = c(314179, 359788), ylim = c(7719520, 7770980))+
   theme_minimal()+
   theme(panel.background = element_rect(fill = "#b9d1d6"),
         panel.grid.major = element_blank(),
