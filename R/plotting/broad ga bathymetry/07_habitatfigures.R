@@ -26,10 +26,11 @@ nw_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                           
 nw_mpa <- st_transform(nw_mpa, sppcrs)
 
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                            # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
+aus    <- aus[aus$FEAT_CODE == c("mainland","island"), ]
 montes <- aus[aus$GROUP_NAME %in% c("MONTEBELLO ISLANDS"), ]                      # just montes
 st_crs(montes) <- wgscrs
 montes <- st_transform(montes, sppcrs)
-# aus    <- aus[aus$FEAT_CODE == "mainland", ]
+
 
 aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
 mb_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                             # just Montes Aus MP
@@ -199,59 +200,82 @@ p5
 ggsave("plots/site_relief_spatialeffect.pdf", 
        width = 10, height = 6, dpi = 160)
 
+#load in bathymetry derivatives and relief
 tifs  <- list.files("output/spatial_covariates/", "layer_ga*", full.names = TRUE)
 preds <- stack(tifs)
-preds <- as.data.frame(preds, xy = T, na.rm = T)
-preds$layer_ga_Z <- abs(preds$layer_ga_Z)
+preds <- projectRaster(preds, crs = wgscrs)
+
+
+pcell <- rasterFromXYZ(pcelldf[, c(1, 2, 4)])
+crs(pcell) <- sppcrs
+pcell <- projectRaster(pcell, crs = wgscrs)
+pcelldf <- as.data.frame(pcell, xy = T, na.rm = T)
+coordinates(pcelldf) <- ~x+y
+predsx <- raster::extract(preds, pcelldf, sp = T)
+
+predsdf <- as.data.frame(predsx, xy = T, na.rm = T)
+predsdf$layer_ga_Z <- abs(predsdf$layer_ga_Z)
 
 # depth
 pd <- ggplot() +
-  geom_tile(data = preds, aes(x, y, fill = layer_ga_Z)) +
+  geom_tile(data = predsdf, aes(x, y, fill = layer_ga_Z)) +
+  geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "A", direction = -1) +
   # geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
   labs(x= NULL, y = NULL, fill = "Depth (m)") +
+  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
+           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
   theme_minimal() 
 pd
 
 # tpi
 pt <- ggplot() +
-  geom_tile(data = spreddf, aes(x, y, fill = layer_ga_tpi)) +
+  geom_tile(data = predsdf, aes(x, y, fill = layer_ga_tpi)) +
+  geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "D", direction = 1) +
   # geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
   labs(x= NULL, y = NULL, fill = "TPI") +
+  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
+           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
   theme_minimal()
 pt
 
 # roughness
 pr <- ggplot() +
-  geom_tile(data = spreddf, aes(x, y, fill = roughness)) +
+  geom_tile(data = predsdf, aes(x, y, fill = layer_ga_roughness)) +
+  geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "D", direction = 1) +
-  geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
+  # geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
   labs(x= NULL, y = NULL, fill = "Roughness") +
+  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
+           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
   theme_minimal() 
 pr
 
 # detrended
 pdt <- ggplot() +
-  geom_tile(data = spreddf, aes(x, y, fill = detrended)) +
+  geom_tile(data = predsdf, aes(x, y, fill = layer_ga_detrended)) +
+  geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "D", direction = 1) +
-  geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
+  # geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
   labs(x= NULL, y = NULL, fill = "Detrended (m)") +
+  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
+           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
   theme_minimal()
 pdt
 
 # fig 4: predicted relief
-pcelldf <- readRDS('output/spatial/raster/predicted_relief_site.rds')
 
 p4 <- ggplot() +
-  geom_tile(data = pcelldf, aes(x, y, fill = prelief)) +
+  geom_tile(data = predsdf, aes(x, y, fill = prelief)) +
+  geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "C", direction = -1) +
-  geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
+  # geom_sf(data = nb_npz, fill = NA, colour = "#7bbc63") +
   labs(x= NULL, y = NULL, 
        fill = "Relief (predicted)") +
+  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
+           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
   theme_minimal()
-
-# relief only
 p4
 
 
@@ -262,7 +286,7 @@ p4
   (p4 + plot_spacer()) +
   theme(text = element_text(size = 8))
 
-ggsave("plots/original gamms/site_spatial_layers.png", width = 12, height = 15, dpi = 160)
+ggsave("plots/site_spatial_layers.pdf", width = 12, height = 15, dpi = 160)
 
 
 
