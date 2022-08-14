@@ -19,15 +19,15 @@ working.dir <- getwd()
 setwd(working.dir)
 #OR Set manually once
 
-datmaxn <- read.csv("output/fssgam - fish/montebello.synthesis_all.var.imp.csv")%>%
+datmaxn <- read.csv("output/fssgam - fish_broad/montebello.synthesis_all.var.imp.csv")%>%
   glimpse()
-datlength <- read.csv("output/fssgam - fish/montebello.synthesis_length_all.var.imp.csv")%>%
+datlength <- read.csv("output/fssgam - fish_broad/montebello.synthesis_length_all.var.imp.csv")%>%
   glimpse()
 
 #read in data - negative values manually added
 #manually add in Xs for terms included in most parsimonious models
 dat.taxa <-bind_rows(datmaxn,datlength)%>% #from local copy
- # rename(resp.var=response)%>%
+ rename(resp.var=X)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   mutate(label=NA)%>%
   mutate(resp.var=factor(resp.var, levels = c("smaller than legal size","greater than legal size","species.richness","total.abundance")))%>%
@@ -70,19 +70,60 @@ re <- colorRampPalette(c("blue3", "white","red2"))(200)
 legend_title<-"Importance"
 
 # Plot gg.importance.scores ----
-gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importance)) +
-   geom_tile(show.legend=T) +
-   scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
-                         limits = c(-1, 1))+
-  scale_y_discrete(labels=c("Smaller than legal size","Greater than legal size","Species richness","Total abundance"))+
-  scale_x_discrete(labels=c("Depth","Mean relief","SD relief","Detrended","Roughness","TPI","Invertebrate reef","Macroalgae/coral reef","Status"))+
-   xlab(NULL)+
-   ylab(NULL)+
-   theme_classic()+
-   Theme1+
-   geom_text(aes(label=label))+
-  theme(axis.text.y = ggtext::element_markdown())
+# gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importance)) +
+#    geom_tile(show.legend=T) +
+#    scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
+#                          limits = c(-1, 1))+
+#   scale_y_discrete(labels=c("Smaller than legal size","Greater than legal size","Species richness","Total abundance"))+
+#   scale_x_discrete(labels=c("Depth","Mean relief","SD relief","Detrended","Roughness","TPI","Invertebrate reef","Macroalgae/coral reef","Status"))+
+#    xlab(NULL)+
+#    ylab(NULL)+
+#    theme_classic()+
+#    Theme1+
+#    geom_text(aes(label=label))+
+#   theme(axis.text.y = ggtext::element_markdown())
+# gg.importance.scores
+
+gg.importance.full <- ggplot(dat.taxa%>%dplyr::filter(resp.var%in%c("total.abundance", "species.richness")), 
+                             aes(x=predictor,y=resp.var,fill=importance))+
+  geom_tile(show.legend=T) +
+  scale_fill_gradientn(legend_title,colours=c("white", re), na.value = "grey98",
+                       limits = c(-1.01, 1))+
+  scale_y_discrete(labels=c("Species richness","Total abundance"))+         #Tidy Taxa names
+  scale_x_discrete(labels = c("Depth","Mean relief","SD relief","Detrended",
+                              "Roughness","TPI","Invertebrate reef",
+                              "Macroalgae/coral reef","Status"))+   #Tidy predictor names
+  labs(x = NULL, y = NULL, title = "Whole assemblage") +
+  theme_classic()+
+  Theme1+
+  geom_text(aes(label=label)) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.line.x = element_blank(),
+        axis.text.y = ggtext::element_markdown(),
+        plot.title = element_text(hjust = -0.43, vjust = -15)) # Looks crap here but title comes back in exported version
+gg.importance.full
+
+gg.importance.tar <- ggplot(dat.taxa%>%dplyr::filter(resp.var%in%c("greater than legal size", "smaller than legal size")), 
+                            aes(x=predictor,y=resp.var,fill=importance))+
+  geom_tile(show.legend=F) +
+  scale_fill_gradientn(legend_title,colours=c("white", re), na.value = "grey98",
+                       limits = c(-1.01, 1))+
+  scale_y_discrete(labels=c("Smaller than legal size","Greater than legal size"))+         #Tidy Taxa names
+  scale_x_discrete(labels = c("Depth","Mean relief","SD relief","Detrended",
+                              "Roughness","TPI","Invertebrate reef",
+                              "Macroalgae/coral reef","Status"))+   #Tidy predictor names
+  labs(x = NULL, y = NULL, title = "Targeted assemblage") +
+  theme_classic()+
+  Theme1+
+  theme(axis.text.y = ggtext::element_markdown(),
+        plot.title = element_text(hjust = -0.45))+
+  geom_text(aes(label=label))
+gg.importance.tar
+
+gg.importance.scores <- gg.importance.full / gg.importance.tar
 gg.importance.scores
 
 #save output - changed dimensions for larger text in report
-save_plot("plots/montes.synthesis.fish.importance.png", gg.importance.scores,base_height = 6,base_width = 8)
+save_plot("plots/montes.synthesis.fish.importance.png", gg.importance.scores,base_height = 5,base_width = 7)

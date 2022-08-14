@@ -38,10 +38,13 @@ montes <- aus[aus$GROUP_NAME %in% c("MONTEBELLO ISLANDS"), ]                    
 st_crs(montes) <- wgscrs
 montes <- st_transform(montes, sppcrs)
 
-max(spreddf$x) #362426.3
-min(spreddf$x) #314141.3
-max(spreddf$y) #7774100
-min(spreddf$y) #7716761
+#bring in bathy for contour lines
+bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
+proj4string(bathy) <- wgscrs
+bathy <- projectRaster(bathy, crs = sppcrs)
+bathdf <- as.data.frame(bathy, xy = T)%>%
+  dplyr::rename("longitude.1" = x, "latitude.1" = y)
+colnames(bathdf)[3] <- "Depth"
 
 #wa MPA colours
 mb_mpa$waname <- gsub("( \\().+(\\))", "", mb_mpa$ZONE_TYPE)
@@ -91,13 +94,18 @@ wampa_fills <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
 p11 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_totabund)) +
   scale_fill_viridis(direction = -1) +
-  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.8) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
+  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+               breaks = c(-30, -70, -200), size = 0.2) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.4) +
+  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
+          aes(color = waname), size = 0.4, show.legend = F) +
   theme_minimal() +
   wampa_cols+
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
-  labs(x = NULL, y = NULL, fill = "Total Abundance")
+  annotate("text", x = c(327004.392,313992.301, 334705), 
+           y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
+  labs(x = NULL, y = NULL, fill = "Total Abundance", title = "Whole assemblage")
 p11
 
 
@@ -105,13 +113,17 @@ p11
 p21 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_richness)) +
   scale_fill_viridis(direction = -1) +
-  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.8) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
+  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+               breaks = c(-30, -70, -200), size = 0.2) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.4) +
+  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
+          aes(color = waname), size = 0.4, show.legend = F) +
   theme_minimal() +
   wampa_cols+
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000))+
-  # scale_x_continuous(breaks = c(113.2,113.4,113.6))+
+  annotate("text", x = c(327004.392,313992.301, 334705), 
+           y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
   labs(x = NULL, y = NULL, fill = "Species Richness")
 
 p21
@@ -121,14 +133,18 @@ p21
 p31 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_legal)) +
   scale_fill_viridis(direction = -1) +
-  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.8) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
+  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+               breaks = c(-30, -70, -200), size = 0.2) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.4) +
+  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
+          aes(color = waname), size = 0.4, show.legend = F) +
   theme_minimal() +
   wampa_cols+
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
-  #scale_x_continuous(breaks = c(113.2,113.4,113.6))+
-  labs(x = NULL, y = NULL, fill = "Legal")
+  annotate("text", x = c(327004.392,313992.301, 334705), 
+           y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
+  labs(x = NULL, y = NULL, fill = "Legal", title = "Targeted assemblage")
 
 p31
 
@@ -137,18 +153,24 @@ p31
 p41 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_sublegal)) +
   scale_fill_viridis(direction = -1) +
-  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.8) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
+  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+               breaks = c(-30, -70, -200), size = 0.2) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.4) +
+  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
+          aes(color = waname), size = 0.4, show.legend = F) +
   theme_minimal() +
   wampa_cols+
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
-  #scale_x_continuous(breaks = c(113.2,113.4,113.6))+
+  annotate("text", x = c(327004.392,313992.301, 334705), 
+           y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
+  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
   labs(x = NULL, y = NULL, fill = "Sublegal")
 
 p41
 
-gg.predictions <- p11+p21+p31+p41 & theme(legend.justification = "left")
+gg.predictions <- p11 + p21 + p31 + p41 & theme(legend.justification = "left")
+png(filename = "plots/site_fish_predictions.png", width = 10, height = 8,
+    res = 300, units = "in")
 gg.predictions
+dev.off()
 
-ggsave("plots/site_fish_predictions.pdf", gg.predictions,width = 9, height = 8, dpi = 160)

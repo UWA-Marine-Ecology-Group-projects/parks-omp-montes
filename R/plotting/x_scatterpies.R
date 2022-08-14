@@ -58,7 +58,7 @@ wa_mp <- mb_mp %>%
 
 # get aus outline data
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                     # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
-aus    <- aus[aus$FEAT_CODE == c("mainland","island"), ]
+aus <- aus[aus$GROUP_NAME == c("MONTEBELLO ISLANDS"),]
 st_crs(aus)         <- st_crs(aumpa)
 
 dat <- readRDS("data/tidy/broad_merged_habitat.rds")%>%
@@ -112,32 +112,30 @@ depth_cols <- scale_fill_manual(values = c("#a7cfe0","#9acbec","#98c4f7", "#a3bb
 
 #make the plot
 gg.scatterpie <- ggplot() + 
-  geom_contour_filled(data = bathdf, aes(longitude.1, latitude.1, z = Depth, fill = after_stat(level)), color = "black",
-                      breaks = c(-30, -70, -200,-700,-10000), size = 0.1) +
-  annotate("text", x = c(115.34,115.22, 115.415,115.582), y = c(-20.6,-20.18,-20.27,-20.145), label = c("30m","70m", "30m","70m"), size = 2)+
-  depth_cols+
+  geom_contour_filled(data = bathdf, aes(longitude.1, latitude.1, z = Depth, fill = after_stat(level)), color = NA,
+                      breaks = c(-30, -70, -200), size = 0.1) +
+  scale_fill_grey(start = 0.8, end = 0.5, guide = "none") +
   new_scale_fill()+
-  geom_sf(data = wa_mp,color = "#bfd054", alpha = 1, fill = NA)+
-  wampa_cols+
-  labs(fill = "State Marine Parks")+
-  new_scale_color()+
-  geom_sf(data = aumpa, aes(color = ZoneName),alpha = 1, fill = NA) +
-  # labs(fill = NA)+
-  nmpa_cols+
-  new_scale_color()+
+  geom_sf(data = wa_mp,fill = "#bfd054", alpha = 2/5, color = NA)+
+  geom_sf(data = aumpa, fill = "#b9e6fb", alpha = 3/5, color = NA) +
   geom_sf(data = aus, fill = "seashell2", colour = "black", size = 0.1) +
+  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+               breaks = c(-30, -70, -200), size = 0.1) +
   geom_scatterpie(aes(x=longitude.1, y=latitude.1, group=grouping), data=dat,
                   cols = c("Invertebrate reef","Macroalgae/coral reef","Rock",
                            "Sand"),
                   pie_scale = 0.45, color = NA) +
   labs(fill = "Habitat",x = 'Longitude', y = 'Latitude')+
   hab_cols+
+  annotate("text", x = c(115.34,115.22, 115.415,115.582), y = c(-20.6,-20.18,-20.27,-20.145), label = c("30m","70m", "30m","70m"), size = 2)+
   coord_sf(xlim = c(min(dat$longitude.1),max(dat$longitude.1)),
   ylim = c(min(dat$latitude.1), max(dat$latitude.1)))+
   theme_minimal()+
-  theme(panel.background = element_rect(fill = "#b9d1d6"),
+  theme(panel.background = element_rect(fill = "#e0e0e0"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
+png(filename = "plots/scatterpies.png", 
+    height = 6,width = 7, units = "in", res = 300)
 gg.scatterpie
+dev.off()
 
-save_plot("plots/scatterpies.png", gg.scatterpie,base_height = 6.5,base_width = 7)

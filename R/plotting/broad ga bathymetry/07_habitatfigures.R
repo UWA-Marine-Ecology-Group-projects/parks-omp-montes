@@ -2,8 +2,8 @@
 # Project: Parks - Montes Post-Survey
 # Data:    BRUVS, BOSS Habitat data
 # Task:    Habitat figures
-# author:  Kingsley Griffin
-# date:    Jan 22
+# author:  Kingsley Griffin & Claude
+# date:    Jan-August 2022 (lol)
 ##
 
 rm(list = ls())
@@ -26,11 +26,18 @@ nw_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                           
 nw_mpa <- st_transform(nw_mpa, sppcrs)
 
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                            # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
-aus    <- aus[aus$FEAT_CODE == c("mainland","island"), ]
-montes <- aus[aus$GROUP_NAME %in% c("MONTEBELLO ISLANDS"), ]                      # just montes
-st_crs(montes) <- wgscrs
+st_crs(aus) <- wgscrs
+# aus    <- aus[aus$FEAT_CODE == c("mainland","island"), ]
+montes <- st_crop(aus, xmin = 115.4, ymin = -20.3, xmax = 115.7, ymax = -20.6)
+montes    <- montes[montes$FEAT_CODE == c("island"), ]
 montes <- st_transform(montes, sppcrs)
 
+# Old version just randomly deleted an island ???
+# aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                            # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
+# aus    <- aus[aus$FEAT_CODE == c("mainland","island"), ]
+# montes <- aus[aus$GROUP_NAME %in% c("MONTEBELLO ISLANDS"), ]                      # just montes
+# st_crs(montes) <- wgscrs
+# montes <- st_transform(montes, sppcrs)
 
 aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
 mb_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                             # just Montes Aus MP
@@ -38,6 +45,14 @@ wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")
 mb_mpa <- wampa[wampa$NAME %in% "Montebello Islands" ,]
 
 mb_mpa <- st_transform(mb_mpa, sppcrs)
+
+#bring in bathy for contour lines
+bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
+proj4string(bathy) <- wgscrs
+bathy <- projectRaster(bathy, crs = sppcrs)
+bathdf <- as.data.frame(bathy, xy = T)%>%
+  dplyr::rename("longitude.1" = x, "latitude.1" = y)
+colnames(bathdf)[3] <- "Depth"
 
 #wa MPA colours
 mb_mpa$waname <- gsub("( \\().+(\\))", "", mb_mpa$ZONE_TYPE)
@@ -87,25 +102,31 @@ hab_cols <- scale_fill_manual(values = c(#"Macroalgae" = "darkgoldenrod4",
                                          "Rock" = "grey40",
                                          "Sand" = "wheat",
                                          "Invertebrate reef" = "plum",
-                                         "Macroalgae/coral reef" = "cadetblue2"
+                                         "Macroalgae/coral reef" = "darkgoldenrod4"
 ))
 
 p1 <- ggplot() +
-  geom_tile(data = spreddf%>%dplyr::filter(dom_tag%in%c("Rock","Sand","Invertebrate reef","Macroalgae/coral reef")), 
+  geom_tile(data = spreddf %>% dplyr::filter(dom_tag %in% c("Rock","Sand","Invertebrate reef","Macroalgae/coral reef")),
             aes(x, y, fill = dom_tag)) +
   hab_cols +
-  geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.5) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
-          fill = NA, aes(color = waname), size = 0.5, show.legend = F) +
-  wampa_cols+
   labs(x = NULL, y = NULL, fill = NULL) +
+  new_scale_fill() +
+  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+               breaks = c(-30, -70, -200), size = 0.2) +
+  geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.33) +
+  geom_sf(data = mb_mpa %>% dplyr::filter(waname %in% "Sanctuary Zone"),
+          fill = NA, aes(color = waname), size = 0.33, show.legend = F) +
+  wampa_cols +
   guides(colour = "none") +
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
+  annotate("text", x = c(327004.392,313992.301, 334469.085,351794.461), 
+           y = c(7721238.518, 7767602.728,7757846.68,7771841.162), label = c("30m","70m", "30m","70m"), size = 2)+
+  coord_sf(xlim = c(313000, 363000), ylim = c(7715000, 7771000)) +
   theme_minimal()
+png(filename = "plots/site_dominant_habitat.png", width = 9, height = 6,
+    res = 160, units = "in")
 p1
-
-ggsave("plots/site_dominant_habitat.pdf", width = 9, height = 6, dpi = 160)
+dev.off()
 
 # fig 2: habitat multiplot
 # melt classes for faceting
@@ -121,22 +142,28 @@ widehabit$variable <- dplyr::recode(widehabit$variable,                         
 # plot(mb_mpa["ZoneName"])
 # plot(smb_mpa["ZoneName"])
 
+dep_ann <- data.frame(x = c(327004.392,313992.301, 334469.085,351794.461), 
+                      y = c(7721238.518,7767602.728,7757846.68, 7771841.162), label = c("30m","70m", "30m","70m"))
+
 p2 <- ggplot() +
   geom_tile(data = widehabit, aes(x, y, fill = value)) +
   scale_fill_viridis(direction = -1, limits = c(0, max(widehabit$value))) +
+  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+               breaks = c(-30, -70, -200), size = 0.2) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.5) +
   geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
           fill = NA, aes(color = waname), size = 0.5, show.legend = F) +
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
   labs(x = NULL, y = NULL, fill = "Occurrence (p)") +
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7770000)) +
+  geom_text(data = dep_ann, aes(x , y, label = label), inherit.aes = F, size = 1.8, colour = "black")+
+  coord_sf(xlim = c(313000, 363000), ylim = c(7715000, 7771000)) +
   theme_minimal() +
-  wampa_cols+
+  wampa_cols +
   facet_wrap(~variable)
-
+png(filename = "plots/site_habitat_predicted.png", width = 9, height = 8,
+    units = "in", res = 160)
 p2
-
-ggsave("plots/site_habitat_predicted.pdf", width = 9, height = 8, dpi = 160)
+dev.off()
 
 # # fig 3: biogenic reef
 # p3 <- ggplot(spreddf[widehabit$sitens == 1, ], aes(x, y)) +
@@ -295,55 +322,55 @@ ggsave("plots/site_spatial_layers.pdf", width = 12, height = 15, dpi = 160)
 
 # jac's map, eh
 # sort out the classes
-jlevs <- ratify(jacmap)
-jclass <- levels(jlevs)[[1]]
-jclass[["class"]] <- c("shelf.unvegetated.soft.sediments",
-                       "Upper.slope.unvegetated.soft.sediments", 
-                       "Mid.slope.sediments",
-                       "Lower.slope.reef.and.sediments",
-                       "Abyssal.reef.and.sediments", 
-                       "Seamount.soft.sediments", 
-                       "Shelf.vegetated.sediments", 
-                       "Shallow.coral.reefs.less.than.30.m.depth", 
-                       "Mesophotic.coral.reefs", 
-                       "Rariophotic.shelf.reefs", 
-                       "Upper.slope.rocky.reefs.shelf.break.to.700.m.depth", 
-                       "Mid.slope.reef", 
-                       "Artificial.reefs.pipelines.and.cables") # the class names
-levels(jacmap) <- jclass
-jmap_df <- as.data.frame(jacmap, xy = TRUE)
-colnames(jmap_df)[3] <- "class"
-
-# set up dfs
-jmap_nth <- jmap_df[(jmap_df$y > 6985000 & jmap_df$y < 7000000) & 
-                      (jmap_df$x > 100000 & jmap_df$x < 140000), ]
-
-jmap_sth <- jmap_df[(jmap_df$y > 6880000 & jmap_df$y < 6900000) & 
-                      (jmap_df$x > 125000 & jmap_df$x < 170000), ]
-
-# plot
-
-jcls_cols <- scale_fill_manual(values = c("Upper.slope.unvegetated.soft.sediments" = "wheat4", 
-                                          "shelf.unvegetated.soft.sediments" = "wheat2",
-                                          "Shallow.coral.reefs.less.than.30.m.depth" = "coral2", 
-                                          "Mesophotic.coral.reefs" = "darkorange3",
-                                          "Rariophotic.shelf.reefs" = "steelblue2"))
-
-p6 <- ggplot() + 
-  geom_tile(data = jmap_nth, aes(x, y, fill = class)) +
-  jcls_cols +
-  geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
-  labs(x= NULL, y = NULL, fill = NULL) +
-  guides(fill = "none") +
-  theme_minimal()
-
-p62 <- ggplot() + 
-  geom_tile(data = jmap_sth, aes(x, y, fill = class)) +
-  jcls_cols +
-  geom_sf(data = ab_npz[ab_npz$parkid == 2, ], fill = NA, colour = "#7bbc63") +
-  labs(x= NULL, y = NULL, fill = NULL) +
-  theme_minimal()
-
-p6 + p62 + plot_layout(widths = c(0.5, 0.44))
-ggsave("plots/site_jmonk_natmap.png", 
-       width = 10, height = 6, dpi = 160)
+# jlevs <- ratify(jacmap)
+# jclass <- levels(jlevs)[[1]]
+# jclass[["class"]] <- c("shelf.unvegetated.soft.sediments",
+#                        "Upper.slope.unvegetated.soft.sediments", 
+#                        "Mid.slope.sediments",
+#                        "Lower.slope.reef.and.sediments",
+#                        "Abyssal.reef.and.sediments", 
+#                        "Seamount.soft.sediments", 
+#                        "Shelf.vegetated.sediments", 
+#                        "Shallow.coral.reefs.less.than.30.m.depth", 
+#                        "Mesophotic.coral.reefs", 
+#                        "Rariophotic.shelf.reefs", 
+#                        "Upper.slope.rocky.reefs.shelf.break.to.700.m.depth", 
+#                        "Mid.slope.reef", 
+#                        "Artificial.reefs.pipelines.and.cables") # the class names
+# levels(jacmap) <- jclass
+# jmap_df <- as.data.frame(jacmap, xy = TRUE)
+# colnames(jmap_df)[3] <- "class"
+# 
+# # set up dfs
+# jmap_nth <- jmap_df[(jmap_df$y > 6985000 & jmap_df$y < 7000000) & 
+#                       (jmap_df$x > 100000 & jmap_df$x < 140000), ]
+# 
+# jmap_sth <- jmap_df[(jmap_df$y > 6880000 & jmap_df$y < 6900000) & 
+#                       (jmap_df$x > 125000 & jmap_df$x < 170000), ]
+# 
+# # plot
+# 
+# jcls_cols <- scale_fill_manual(values = c("Upper.slope.unvegetated.soft.sediments" = "wheat4", 
+#                                           "shelf.unvegetated.soft.sediments" = "wheat2",
+#                                           "Shallow.coral.reefs.less.than.30.m.depth" = "coral2", 
+#                                           "Mesophotic.coral.reefs" = "darkorange3",
+#                                           "Rariophotic.shelf.reefs" = "steelblue2"))
+# 
+# p6 <- ggplot() + 
+#   geom_tile(data = jmap_nth, aes(x, y, fill = class)) +
+#   jcls_cols +
+#   geom_sf(data = ab_npz[ab_npz$parkid == 3, ], fill = NA, colour = "#7bbc63") +
+#   labs(x= NULL, y = NULL, fill = NULL) +
+#   guides(fill = "none") +
+#   theme_minimal()
+# 
+# p62 <- ggplot() + 
+#   geom_tile(data = jmap_sth, aes(x, y, fill = class)) +
+#   jcls_cols +
+#   geom_sf(data = ab_npz[ab_npz$parkid == 2, ], fill = NA, colour = "#7bbc63") +
+#   labs(x= NULL, y = NULL, fill = NULL) +
+#   theme_minimal()
+# 
+# p6 + p62 + plot_layout(widths = c(0.5, 0.44))
+# ggsave("plots/site_jmonk_natmap.png", 
+#        width = 10, height = 6, dpi = 160)

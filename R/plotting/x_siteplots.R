@@ -31,7 +31,6 @@ aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")         
 wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")                         # all wa mpas
 mb_mp <- wampa[wampa$NAME %in% c("Montebello Islands","Barrow Island"),]        # just wa parks nearby
 rg_nmp <- aumpa[aumpa$NetName %in% c("South-west", "North-west"), ]             # regional nat parks networks
-# nb_nmp <- rg_nmp[rg_nmp$ResName %in% c("South-west Corner", "Geographe"), ]   # just nat parks nearby
 nb_npz <- rg_nmp[rg_nmp$ZoneName == "National Park Zone", ]
 terrnp <- st_read(
   "data/spatial/shape/Legislated_Lands_and_Waters_DBCA_011.shp")                # terrestrial reserves
@@ -106,17 +105,18 @@ p1 <- ggplot() +
   # scale_fill_gradient(low = "black", high = "grey70") +
   geom_contour_filled(data = bathdf, aes(x = x, y = y, z = Depth,
                                          fill = after_stat(level)),
-                      breaks = c(0, -40, -70, -120, -7000)) +
-  # geom_contour(data = bathdf, aes(x = x, y = y, z = Depth),
-  # binwidth = 250, colour = "white", alpha = 3/5, size = 0.1) +
+                      breaks = c(0, -30, -70, -200, -700, -2000)) +
   scale_fill_grey(start = 1, end = 0.5, guide = "none") +
+  geom_contour(data = bathdf, aes(x, y, z = Depth),
+               breaks = c(0, -30, -70, -200, -700, -2000), colour = "white",
+               alpha = 1, size = 0.1) +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   new_scale_fill() +
-  geom_sf(data = mb_mp, aes(fill = waname), alpha = 1, colour = NA) +
+  geom_sf(data = mb_mp, aes(fill = waname), alpha = 3/5, colour = NA) +
   wampa_cols +
   labs(fill = "State Marine Parks") +
   new_scale_fill() +
-  geom_sf(data = terrnp%>%dplyr::filter(leg_catego%in%c("National Park","Nature Reserve")), 
+  geom_sf(data = terrnp %>% dplyr::filter(leg_catego%in%c("National Park","Nature Reserve")), 
           aes(fill = leg_catego), alpha = 4/5, colour = NA) +
   labs(fill = "Terrestrial Managed Areas") +
   waterr_cols +
@@ -124,14 +124,11 @@ p1 <- ggplot() +
   geom_sf(data = aumpa, aes(fill = ZoneName), alpha = 4/5, colour = NA) +
   nmpa_cols +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
-  geom_contour(data = bathdf, aes(x, y, z = Depth),
-               breaks = c(0, -40, -70, -120), colour = "white",
-               alpha = 1, size = 0.1) +
   labs(x = 'Longitude', y = 'Latitude', fill = "Australian Marine Parks") +
   guides(fill = guide_legend(order = 1)) +
   annotate("rect", xmin = min(metadata$longitude), xmax = max(metadata$longitude),
            ymin = min(metadata$latitude), ymax = max(metadata$latitude),
-           colour = "grey15", fill = "white", alpha = 0.2, size = 0.1) +
+           colour = "goldenrod1", fill = "white", alpha = 0.2, size = 0.4) +
   coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20))+
   theme_minimal()+
   theme(panel.grid.major = element_blank(), 
@@ -156,7 +153,7 @@ p2
 # plot both 
 p2 + p1 + plot_layout(widths = c(0.8, 2.2))
 
-ggsave("plots/overview_map.png", dpi = 200, width = 10, height = 6)
+ggsave("plots/overview_map.png", dpi = 200, width = 10, height = 5)
 
 
 # site zoom plots
@@ -247,6 +244,12 @@ waterr_cols <- scale_fill_manual(values = c("National Park" = "#c4cea6",
                                             "Nature Reserve" = "#e4d0bb"),
                                  guide = "none")
 
+# state colours
+wampa_outs <- scale_colour_manual(values = c("Sanctuary Zone" = "#bfd054",
+                                           "General Use Zone" = "#bddde1",
+                                           "Recreation Zone" = "#f4e952",
+                                           "Special Purpose Zone" = "#7f66a7"))
+
 jmap_df$classname <- dplyr::recode(jmap_df$classname, "shelf unvegetated soft sediments" =
                               "Shelf unvegetated soft sediments")
 
@@ -263,7 +266,7 @@ jcls_fills <- scale_fill_manual(values = c(
   # "Shelf incising and other canyons" = "peru",
   "Mesophotic coral reefs" = "orange",
   # "Mid slope reef" = "sienna",
-  "Artificial reefs pipelines and cables" = "darkgoldenrod1"))
+  "Artificial reefs pipelines and cables" = "saddlebrown"))
 
 jcls_cols <- scale_color_manual(values = c(
   "Shallow coral reefs less than 30 m depth" = "coral2",
@@ -278,28 +281,35 @@ jcls_cols <- scale_color_manual(values = c(
   # "Shelf incising and other canyons" = "peru",
   "Mesophotic coral reefs" = "orange",
   # "Mid slope reef" = "sienna",
-  "Artificial reefs pipelines and cables" = "darkgoldenrod1"))
+  "Artificial reefs pipelines and cables" = "saddlebrown"))
 
 p6 <- ggplot() +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   geom_sf(data = terrnp, aes(fill = leg_catego), alpha = 4/5, colour = NA) +
   waterr_cols +
   new_scale_fill() + 
-  geom_tile(data = jmap_df, aes(x, y, fill = classname, color = classname)) +
+  geom_tile(data = jmap_df, aes(x, y, fill = classname, color = classname), ) +
   jcls_cols+
   jcls_fills+
-  geom_sf(data = wa_mp, colour = "#7bbc63", alpha = 3/5, fill = NA) +
-  # geom_sf(data = nb_npz, colour = "#7bbc63", alpha = 3/5, fill = NA) +
-  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
   labs(x = NULL, y = NULL, fill = "Habitat classification", color = "Habitat classification") +
+  new_scale_color() +
+  new_scale_fill() +
+  geom_contour(data = bathdf, aes(x, y, z = Depth),
+               breaks = c(-30, -70, -200, -700, -2000), colour = "black",
+               alpha = 1, size = 0.1) +
+  geom_sf(data = mb_mp, aes(color = waname), alpha = 3/5, fill = NA, show.legend = F) +
+  wampa_outs +
+  new_scale_color() +
+  geom_sf(data = aumpa, colour = "#b9e6fb", alpha = 3/5, fill = NA) +
+  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
   theme_minimal() +
   coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20))+
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())
+png(filename = "plots/overall_jmonk_natmap.png",
+       width = 10, height = 6, res = 160, units = "in")
 p6
-
-ggsave("plots/overall_jmonk_natmap.png",
-       width = 10, height = 6, dpi = 160)
+dev.off()
 
 
 # # saving for later
