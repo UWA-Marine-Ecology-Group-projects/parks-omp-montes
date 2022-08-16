@@ -164,6 +164,7 @@ p41 <- ggplot() +
   annotate("text", x = c(327004.392,313992.301, 334705), 
            y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
   coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
+  # coord_sf(xlim = c(313000, 363000), ylim = c(7715000, 7771000)) +
   labs(x = NULL, y = NULL, fill = "Sublegal")
 
 p41
