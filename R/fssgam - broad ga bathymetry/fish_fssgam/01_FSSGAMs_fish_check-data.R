@@ -10,10 +10,10 @@
 rm(list=ls())
 
 ## librarys----
-detach("package:plyr", unload=TRUE)#will error - don't worry
+# detach("package:plyr", unload=TRUE)#will error - don't worry
 library(tidyr)
 library(dplyr)
-options(dplyr.width = Inf) #enables head() to display all coloums
+# options(dplyr.width = Inf) #enables head() to display all coloums
 library(mgcv)
 library(MuMIn)
 library(car)
@@ -28,18 +28,17 @@ library(GlobalArchive)
 library(ggplot2)
 library(devtools)
 library(FSSgam)
+library(sf)
+library(purrr)
 
 ## set study name
 study <- "montebello.synthesis" 
 name <- study
 
-## Set your working directory ----
-working.dir <- getwd()
-setwd(working.dir)
-
 maxn <- read.csv("data/tidy/montebello.synthesis.complete.maxn.csv")%>%
-  mutate(scientific=paste(genus,species,sep=" "))%>%
-  dplyr::select(campaignid, sample, family, species, genus, scientific, maxn)
+  mutate(scientific=paste(genus, species, sep= " "))%>%
+  dplyr::select(campaignid, sample, family, species, genus, scientific, maxn) %>%
+  glimpse()
 
 length(unique(maxn$sample))
 
@@ -57,7 +56,7 @@ check <- metadata.maxn %>%
   glimpse()
 
 # look at top species ----
-  maxn.sum<-maxn%>%
+maxn.sum <- maxn%>%
     group_by(scientific)%>%
     dplyr::summarise(maxn=sum(maxn))%>%
     ungroup()%>%
@@ -135,19 +134,42 @@ ta.sr <- maxn %>%
 #   dplyr::mutate(response = scientific)%>%
 #   distinct()
 
-dat.maxn <- bind_rows(ta.sr)%>% # fished.maxn, species.maxn, 
-  dplyr::left_join(metadata.maxn)%>%
-  dplyr::left_join(habitat)%>%
-  # dplyr::select(-scientific)%>%
-  drop_na(fieldofview.open)%>%                                                  #get rid of drops with no habitat
+dat.maxn <- bind_rows(ta.sr) %>% # fished.maxn, species.maxn, 
+  dplyr::left_join(metadata.maxn) %>%
+  dplyr::left_join(habitat) %>%
+  drop_na(fieldofview.open) %>%                                                  #get rid of drops with no habitat
   glimpse()
+
+
+wgscrs <- "+proj=longlat +datum=WGS84"
+cwatr <- st_read("data/spatial/shape/coastal-waters_polygon.shp")
+cwatr <- st_transform(cwatr, wgscrs)
+
+maxn.sf <- dat.maxn %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = wgscrs)
+maxn.sf <- maxn.sf %>%
+  dplyr::mutate(longitude = unlist(map(maxn.sf$geometry, 1)),
+                latitude = unlist(map(maxn.sf$geometry, 2)),
+                state = lengths(st_intersects(maxn.sf, cwatr)) > 0) %>%
+  glimpse()
+
+dat.maxn <- as.data.frame(maxn.sf) %>%
+  dplyr::select(-geometry) %>%
+  dplyr::filter(state %in% "FALSE") %>%
+  glimpse()
+
+ggplot() +
+  geom_sf(data = maxn.sf) +
+  geom_sf(data = cwatr) +
+  coord_sf(xlim = c(min(maxn.sf$longitude), max(maxn.sf$longitude)), 
+           ylim = c(min(maxn.sf$latitude), max(maxn.sf$latitude)))
 
 #Export the data to .rds for use in next script
 saveRDS(dat.maxn, "data/tidy/dat.maxn.rds")
 
 #Import data for lengths
 length <- read.csv("data/tidy/montebello.synthesis.complete.length.csv")%>%
-  mutate(scientific=paste(family,genus,species))%>%
+  mutate(scientific = paste(family,genus,species))%>%
   glimpse()
 
 length(unique(length$sample)) #205 samples
@@ -302,6 +324,19 @@ check <- metadata.length %>%
   dplyr::anti_join(dat.length)%>%
   glimpse()
 #there are two samples that are yeeted but they have no habitat
+
+length.sf <- dat.length %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = wgscrs)
+length.sf <- length.sf %>%
+  dplyr::mutate(longitude = unlist(map(length.sf$geometry, 1)),
+                latitude = unlist(map(length.sf$geometry, 2)),
+                state = lengths(st_intersects(length.sf, cwatr)) > 0) %>%
+  glimpse()
+
+dat.length <- as.data.frame(length.sf) %>%
+  dplyr::select(-geometry) %>%
+  dplyr::filter(state %in% "FALSE") %>%
+  glimpse()
 
 saveRDS(dat.length, "data/tidy/dat.length.rds")
 

@@ -18,40 +18,30 @@ library(ggnewscale)
 
 # spatial setup and bring in layers
 wgscrs <- CRS("+proj=longlat +datum=WGS84")
-sppcrs <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")       # crs for sp objects
 
 #National marine parks
 aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
 nw_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                             # just Abrolhos Aus MP
-nw_mpa <- st_transform(nw_mpa, sppcrs)
+extent(nw_mpa)
+cwatr <- st_read("data/spatial/shape/amb_coastal_waters_limit.shp")
 
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                            # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
-st_crs(aus) <- wgscrs
-# aus    <- aus[aus$FEAT_CODE == c("mainland","island"), ]
+st_crs(aus) <- st_crs(aumpa)
+aus    <- aus[!aus$FEAT_CODE == c("sea"), ]
 montes <- st_crop(aus, xmin = 115.4, ymin = -20.3, xmax = 115.7, ymax = -20.6)
 montes    <- montes[montes$FEAT_CODE == c("island"), ]
-montes <- st_transform(montes, sppcrs)
 
-# Old version just randomly deleted an island ???
-# aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                            # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
-# aus    <- aus[aus$FEAT_CODE == c("mainland","island"), ]
-# montes <- aus[aus$GROUP_NAME %in% c("MONTEBELLO ISLANDS"), ]                      # just montes
-# st_crs(montes) <- wgscrs
-# montes <- st_transform(montes, sppcrs)
-
-aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
+# aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
 mb_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]                             # just Montes Aus MP
 wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")
 mb_mpa <- wampa[wampa$NAME %in% "Montebello Islands" ,]
 
-mb_mpa <- st_transform(mb_mpa, sppcrs)
 
 #bring in bathy for contour lines
 bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
 proj4string(bathy) <- wgscrs
-bathy <- projectRaster(bathy, crs = sppcrs)
 bathdf <- as.data.frame(bathy, xy = T)%>%
-  dplyr::rename("longitude.1" = x, "latitude.1" = y)
+  dplyr::rename("longitude" = x, "latitude" = y)
 colnames(bathdf)[3] <- "Depth"
 
 #wa MPA colours
@@ -67,13 +57,11 @@ mb_mpa$waname <- dplyr::recode(mb_mpa$waname,
                                  "Special Purpose Zone\n(Shore Based Activities)")
 
 # read in outputs from 'R/4_habitat_model.R'
-rlist  <- list.files("output/spatial_predictions_broad/", "*.tif", full.names = T)
+rlist  <- list.files("output/spatial_predictions_broad/", "broad-layer*", full.names = T)
 prasts <- stack(rlist)
+prasts <- crop(prasts, extent(nw_mpa))
 spreddf <- as.data.frame(prasts, xy = TRUE, na.rm = TRUE)
-
-# preddf <- readRDS("output/broad_habitat_predictions.rds")
-# spreddf <- readRDS("output/site_habitat_predictions.rds")                       # site predictions only
-spreddf$dom_tag <- as.factor(spreddf$layer_dom_tag)
+spreddf$dom_tag <- as.factor(spreddf$broad.layer_dom_tag)
 spreddf$dom_tag <- dplyr::recode(spreddf$dom_tag,
                           "1" = "Invertebrate reef",
                           "2" = "Macroalgae/coral reef",
@@ -111,17 +99,16 @@ p1 <- ggplot() +
   hab_cols +
   labs(x = NULL, y = NULL, fill = NULL) +
   new_scale_fill() +
-  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+  geom_contour(data = bathdf, aes(longitude, latitude, z = Depth), color = "black",
                breaks = c(-30, -70, -200), size = 0.2) +
-  geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.33) +
+  geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.5) +
+  geom_sf(data = cwatr, colour = "red", size = 0.7) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.8) +
   geom_sf(data = mb_mpa %>% dplyr::filter(waname %in% "Sanctuary Zone"),
-          fill = NA, aes(color = waname), size = 0.33, show.legend = F) +
+          fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
   wampa_cols +
   guides(colour = "none") +
-  annotate("text", x = c(327004.392,313992.301, 334469.085,351794.461), 
-           y = c(7721238.518, 7767602.728,7757846.68,7771841.162), label = c("30m","70m", "30m","70m"), size = 2)+
-  coord_sf(xlim = c(313000, 363000), ylim = c(7715000, 7771000)) +
+  coord_sf(xlim = c(115.2517, 116), ylim = c(-20.83627, -20)) +
   theme_minimal()
 png(filename = "plots/site_dominant_habitat.png", width = 9, height = 6,
     res = 160, units = "in")

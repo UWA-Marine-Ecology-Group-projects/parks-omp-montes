@@ -10,10 +10,8 @@
 rm(list=ls())
 
 ## librarys----
-detach("package:plyr", unload=TRUE)#will error - don't worry
 library(tidyr)
 library(dplyr)
-options(dplyr.width = Inf) #enables head() to display all coloums
 library(mgcv)
 library(MuMIn)
 library(car)
@@ -33,21 +31,16 @@ library(FSSgam)
 study <- "montebello.synthesis" 
 name <- study
 
-## Set your working directory ----
-working.dir <- getwd()
-setwd(working.dir)
-
 #read in data
 dat <- readRDS("data/tidy/dat.maxn.rds")%>%
   dplyr::filter(response%in%c("total.abundance","species.richness"))%>%
   glimpse()
 
-unique(dat$response)
-
 # Set predictor variables---
 names(dat)
 
-pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef", "tpi", "roughness","detrended") 
+pred.vars = c("depth","mean.relief","biota.consolidated","mesophotic.reef",
+            "photic.reef", "roughness","detrended") 
 
 # Check to make sure Response vector has not more than 90% zeros----
 unique.vars=unique(as.character(dat$response))
@@ -64,19 +57,13 @@ unique.vars.use
 #check for outliers
 plot(dat$number)
 
-dat <- dat %>%
-  dplyr::filter(number < 400)%>%
-  glimpse()
-
-plot(dat$number)
-
 # Run the full subset model selection----
 savedir <- "output/fssgam - fish_broad"
-resp.vars=unique.vars.use
-use.dat=as.data.frame(dat)
+resp.vars <- unique.vars.use
+use.dat <- as.data.frame(dat)
 str(use.dat)
 
-factor.vars=c("status")# Status as a Factor with two levels
+# factor.vars=c("status")# Status as a Factor with two levels
 out.all=list()
 var.imp=list()
 
@@ -94,7 +81,7 @@ for(i in 1:length(resp.vars)){
                                factor.smooth.interactions = FALSE,
                                # smooth.smooth.interactions = c("depth"),
                                pred.vars.cont=pred.vars,
-                               pred.vars.fact=factor.vars,
+                               # pred.vars.fact=factor.vars,
                                #linear.vars="depth",
                                k=3#,
                               # null.terms="s(campaignid ,bs='re')+s(location,bs='re')"

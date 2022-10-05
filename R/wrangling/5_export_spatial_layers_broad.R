@@ -27,7 +27,7 @@ cbathy <- cbathy[cbathy$Z <= 0, ]
 bath_r <- rasterFromXYZ(cbathy)
 plot(bath_r)
 
-cropex <- extent(114.5, 116.5, -22, -19.5)
+cropex <- extent(114, 116.8, -22, -18.5)
 bath_crop <- crop(bath_r,cropex)
 plot(bath_crop)
 # cropbath_df <- as.data.frame(bath_crop, xy = T)
@@ -56,7 +56,7 @@ plot(habsp, add = T)
 # saveRDS(cwatr, 'output/coastal_waters_limit_trimmed.rds')
 
 # retain finer bathy near survey area - mainly useful for speedy plotting
-habuff   <- buffer(habsp, 10000)
+# habuff   <- buffer(habsp, 10000)
 fbath    <- crop(bath_r, extent(habuff))
 fbath_df <- as.data.frame(fbath, xy = TRUE)
 saveRDS(fbath_df, 'output/spatial_covariates/ga_bathy_fine.rds')
@@ -78,19 +78,19 @@ saveRDS(fbath_df, 'output/spatial_covariates/ga_bathy_fine.rds')
 
 # # transform bathy to projected coords for modelling
 proj4string(bath_r) <- wgscrs
-bath_utm <- projectRaster(bath_r, crs = sppcrs)
-plot(bath_utm)
+# bath_utm <- projectRaster(bath_r, crs = sppcrs)
+# plot(bath_utm)
 # 
 # # reduce bathy area further to keep lightweight
 # fbath_t <- crop(fbath_t, extent(c(105000, 165000, 6880000, 7000000)))
 
 # calculate terrain on fine bathy
-preds <- terrain(bath_utm, neighbors = 8,
-                 opt = c("slope",  "TPI", "roughness"))
-preds <- stack(bath_utm, preds)
+preds <- terrain(bath_r, neighbors = 8,
+                 opt = c("slope",  "TPI", "roughness"), unit = "degrees")
+preds <- stack(bath_r, preds)
 plot(preds)
 # detrend bathy to highlight local topo
-zstar <- st_as_stars(bath_utm)
+zstar <- st_as_stars(bath_r)
 detre <- detrend(zstar, parallel = 8)
 detre <- as(object = detre, Class = "Raster")
 names(detre) <- c("detrended", "lineartrend")

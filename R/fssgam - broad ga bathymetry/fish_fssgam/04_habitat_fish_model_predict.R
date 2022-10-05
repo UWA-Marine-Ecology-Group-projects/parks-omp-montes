@@ -21,8 +21,7 @@ library(sp)
 dat1 <- readRDS("data/tidy/dat.maxn.rds")%>%
   glimpse()
 dat2 <- readRDS("data/tidy/dat.length.rds")
-fabund <- bind_rows(dat1,dat2)  %>%                      # merged fish data used for fssgam script
-        dplyr::filter(number<400)
+fabund <- bind_rows(dat1,dat2)                                                  # merged fish data used for fssgam script
 prel   <- readRDS("output/spatial_predictions_broad/predicted_relief_raster_ga.rds")           # predicted relief from 'R/habitat/5_krige_relief.R'
 str(prel)
 
@@ -69,8 +68,7 @@ m_legal <- gam(number ~ s(mean.relief, k = 3, bs = "cr"),
 summary(m_legal)
 
 #smaller than legal size
-m_sublegal <- gam(number ~ s(detrended, k = 3, bs = "cr")+s(mean.relief, k = 3, bs = "cr")+
-                    s(tpi, k = 3, bs = "cr"),
+m_sublegal <- gam(number ~ s(depth, k = 3, bs = "cr"),
                data = fabund%>%dplyr::filter(response%in%"smaller than legal size"), 
                method = "REML", family = tw())
 summary(m_sublegal)
@@ -83,7 +81,7 @@ preddf <- cbind(preddf,
                 "p_legal" = predict(m_legal, preddf, type = "response"),
                 "p_sublegal" = predict(m_sublegal, preddf, type = "response"))
 
-prasts <- rasterFromXYZ(preddf[, c(1, 2, 9:12)],res = c(261, 277)) 
+prasts <- rasterFromXYZ(preddf[, c(1, 2, 9:12)]) 
 plot(prasts)
 
 # subset to 10km from sites only

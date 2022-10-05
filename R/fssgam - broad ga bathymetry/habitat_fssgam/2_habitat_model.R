@@ -28,8 +28,8 @@ preddf <- as.data.frame(preds, xy = TRUE, na.rm = TRUE)%>%
 # reduce predictor space to fit survey area
 # preddf <- preddf[preddf$Depth > min(habi$Depth), ]
 # preddf <- preddf[preddf$Depth < 200, ]
-habisp <- SpatialPointsDataFrame(coords = cbind(habi$longitude.1, 
-                                                habi$latitude.1), data = habi)
+habisp <- SpatialPointsDataFrame(coords = cbind(habi$longitude, 
+                                                habi$latitude), data = habi)
 sbuff  <- buffer(habisp, 10000)
 
 # # visualise patterns
@@ -120,8 +120,7 @@ preddf <- cbind(preddf,
                 "prock" = predict(m_rock, preddf, type = "response"),
                 "psand" = predict(m_sand, preddf, type = "response"))
 
-prasts <- rasterFromXYZ(preddf, res = c(261, 277))
-head(prasts)
+prasts <- rasterFromXYZ(preddf)
 prasts$dom_tag <- which.max(prasts[[8:11]])
 plot(prasts[[6:12]])
 
@@ -137,6 +136,9 @@ plot(sprast)
 # head(sprast)
 
 # write to tifs to reduce file sizes for git
+
+writeRaster(prasts[[6:12]], "output/spatial_predictions_broad/broad-layer.tif", 
+            bylayer = TRUE, suffix = names(prasts[[6:12]]), overwrite = TRUE)
 
 writeRaster(sprast, "output/spatial_predictions_broad/layer.tif", 
             bylayer = TRUE, suffix = names(sprast), overwrite = TRUE)

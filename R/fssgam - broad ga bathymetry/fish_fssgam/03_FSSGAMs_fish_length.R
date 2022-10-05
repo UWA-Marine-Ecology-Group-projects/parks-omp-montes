@@ -10,10 +10,8 @@
 rm(list=ls())
 
 ## librarys----
-detach("package:plyr", unload=TRUE)#will error - don't worry
 library(tidyr)
 library(dplyr)
-options(dplyr.width = Inf) #enables head() to display all coloums
 library(mgcv)
 library(MuMIn)
 library(car)
@@ -32,18 +30,13 @@ library(ggplot2)
 study <- "montebello.synthesis" 
 name<- paste(study,"length",sep="_")
 
-## Set your working directory ----
-working.dir <- getwd()
-setwd(working.dir)
-
 dat <- readRDS("data/tidy/dat.length.rds")%>%
   dplyr::filter(response%in%c("greater than legal size","smaller than legal size"))%>%
   glimpse()
 
-unique(dat$response)
-
 # Set predictor variables---
-pred.vars=c("depth","mean.relief","sd.relief","mesophotic.reef","photic.reef", "tpi", "roughness","detrended") 
+pred.vars = c("depth","mean.relief","biota.consolidated","mesophotic.reef",
+              "photic.reef", "roughness","detrended")
 
 # Check to make sure Response vector has not more than 90% zeros----
 unique.vars=unique(as.character(dat$response))
@@ -63,7 +56,7 @@ resp.vars=unique.vars.use
 use.dat=as.data.frame(dat)
 str(use.dat)
 
-factor.vars=c("status")# Status as a Factor with two levels
+# factor.vars=c("status")# Status as a Factor with two levels
 out.all=list()
 var.imp=list()
 
@@ -81,7 +74,7 @@ for(i in 1:length(resp.vars)){
                                factor.smooth.interactions = FALSE,
                                # smooth.smooth.interactions = c("depth"),
                                pred.vars.cont=pred.vars,
-                               pred.vars.fact=factor.vars,
+                               # pred.vars.fact=factor.vars,
                                #linear.vars="depth",
                                k=3#,
                                # null.terms="s(campaignid ,bs='re')+s(location,bs='re')"
