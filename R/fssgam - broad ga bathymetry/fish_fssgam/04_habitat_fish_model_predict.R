@@ -17,13 +17,18 @@ library(dplyr)
 library(stringr)
 library(sp)
 
+wgscrs  <- CRS("+proj=longlat +datum=WGS84")
+sppcrs  <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")     # crs for sp objects
+
 # read in
 dat1 <- readRDS("data/tidy/dat.maxn.rds")%>%
   glimpse()
 dat2 <- readRDS("data/tidy/dat.length.rds")
 fabund <- bind_rows(dat1,dat2)                                                  # merged fish data used for fssgam script
 prel   <- readRDS("output/spatial_predictions_broad/predicted_relief_raster_ga.rds")           # predicted relief from 'R/habitat/5_krige_relief.R'
-str(prel)
+proj4string(prel) <- sppcrs                                                     # Kingsley did the relief preds in utm
+prel <- projectRaster(prel, crs = wgscrs)                                       # Back to lat long wgs84
+plot(prel)
 
 tifs  <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)
 preds <- stack(tifs)
@@ -33,7 +38,7 @@ preddf <- as.data.frame(preds, xy = TRUE, na.rm = TRUE)
 # join habitat and relief predictions, fix column names
 predsp             <- SpatialPointsDataFrame(coords = cbind(preddf$x, preddf$y), data = preddf)
 preddf$mean.relief      <- extract(prel, predsp)
-preddf             <- na.omit(preddf)                                           #maybe wrong, filtering out all rows with na relief
+preddf             <- na.omit(preddf)                                           # Removes all rows with NA relief
 preddf <- preddf %>%
   dplyr::rename(depth = layer_ga_Z, detrended = layer_ga_detrended, roughness = layer_ga_roughness,
                 slope = layer_ga_slope, tpi = layer_ga_tpi)%>%
@@ -43,8 +48,8 @@ fabund <- fabund %>%
   glimpse()
 
 # reduce predictor space to fit survey area (needed later)
-fishsp <- SpatialPointsDataFrame(coords = cbind(fabund$longitude.1, 
-                                                fabund$latitude.1), 
+fishsp <- SpatialPointsDataFrame(coords = cbind(fabund$longitude, 
+                                                fabund$latitude), 
                                  data = fabund)
 sbuff  <- buffer(fishsp, 10000)
 
@@ -85,7 +90,7 @@ prasts <- rasterFromXYZ(preddf[, c(1, 2, 9:12)])
 plot(prasts)
 
 # subset to 10km from sites only
-sprast <- mask(prasts, sbuff)
+sprast <- mask(prasts, sbuff)                                                   # 10km from sample sites
 plot(sprast)
 
 # tidy and output data

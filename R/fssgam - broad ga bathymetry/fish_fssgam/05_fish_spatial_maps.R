@@ -14,9 +14,15 @@ library(viridis)
 library(raster)
 library(patchwork)
 library(sf)
+library(terra)
 
 #read in fish prediction data
 spreddf <- readRDS("output/spatial_predictions_broad/site_fish_predictions.rds")   
+spreddf <- rast(spreddf)
+cwatrp <- vect("data/spatial/shape/coastal-waters_polygon.shp")
+spreddf <- mask(spreddf, cwatrp, inverse = T)
+plot(spreddf)
+spreddf <- as.data.frame(spreddf, xy = T, na.rm = T)
 
 # bring in spatial layers
 #National marine parks
@@ -30,20 +36,21 @@ wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")
 mb_mpa <- wampa[wampa$NAME %in% "Montebello Islands" ,]
 
 wgscrs <- CRS("+proj=longlat +datum=WGS84")
-sppcrs <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")     # crs for sp objects
-nw_mpa <- st_transform(nw_mpa, sppcrs)
+sppcrs <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")       # crs for sp objects
+# nw_mpa <- st_transform(nw_mpa, sppcrs)
+
+cwatr <- st_read("data/spatial/shape/amb_coastal_waters_limit.shp")
 
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")                            # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
 montes <- aus[aus$GROUP_NAME %in% c("MONTEBELLO ISLANDS"), ]                      # just montes
-st_crs(montes) <- wgscrs
-montes <- st_transform(montes, sppcrs)
+st_crs(montes) <- st_crs(aumpa)
+# montes <- st_transform(montes, sppcrs)
 
 #bring in bathy for contour lines
 bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
 proj4string(bathy) <- wgscrs
-bathy <- projectRaster(bathy, crs = sppcrs)
-bathdf <- as.data.frame(bathy, xy = T)%>%
-  dplyr::rename("longitude.1" = x, "latitude.1" = y)
+# bathy <- projectRaster(bathy, crs = sppcrs)
+bathdf <- as.data.frame(bathy, xy = T)
 colnames(bathdf)[3] <- "Depth"
 
 #wa MPA colours
@@ -90,21 +97,23 @@ wampa_fills <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
 
 # plotting broad maps
 #total abundance
-
+sf_use_s2(T)
 p11 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_totabund)) +
   scale_fill_viridis(direction = -1) +
-  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+  geom_contour(data = bathdf, aes(x, y, z = Depth), color = "black",
                breaks = c(-30, -70, -200), size = 0.2) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.4) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
-          aes(color = waname), size = 0.4, show.legend = F) +
+  # geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
+  #         aes(color = waname), size = 0.4, show.legend = F) +
   theme_minimal() +
   wampa_cols+
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  annotate("text", x = c(327004.392,313992.301, 334705), 
-           y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
+  geom_sf(data = cwatr, colour = "red") +
+  # annotate("text", x = c(327004.392,313992.301, 334705), 
+  #          y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
+  # coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
+  coord_sf(xlim = c(min(spreddf$x), max(spreddf$x)), ylim = c(min(spreddf$y), max(spreddf$y))) +
   labs(x = NULL, y = NULL, fill = "Total Abundance", title = "Whole assemblage")
 p11
 
@@ -113,17 +122,19 @@ p11
 p21 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_richness)) +
   scale_fill_viridis(direction = -1) +
-  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+  geom_contour(data = bathdf, aes(x, y, z = Depth), color = "black",
                breaks = c(-30, -70, -200), size = 0.2) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.4) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
-          aes(color = waname), size = 0.4, show.legend = F) +
+  # geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
+  #         aes(color = waname), size = 0.4, show.legend = F) +
   theme_minimal() +
   wampa_cols+
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  annotate("text", x = c(327004.392,313992.301, 334705), 
-           y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
+  geom_sf(data = cwatr, colour = "red") +
+  # geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
+  # annotate("text", x = c(327004.392,313992.301, 334705), 
+  #          y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
+  coord_sf(xlim = c(min(spreddf$x), max(spreddf$x)), ylim = c(min(spreddf$y), max(spreddf$y))) +
   labs(x = NULL, y = NULL, fill = "Species Richness")
 
 p21
@@ -133,17 +144,19 @@ p21
 p31 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_legal)) +
   scale_fill_viridis(direction = -1) +
-  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+  geom_contour(data = bathdf, aes(x, y, z = Depth), color = "black",
                breaks = c(-30, -70, -200), size = 0.2) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.4) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
-          aes(color = waname), size = 0.4, show.legend = F) +
+  # geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
+  #         aes(color = waname), size = 0.4, show.legend = F) +
   theme_minimal() +
   wampa_cols+
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  annotate("text", x = c(327004.392,313992.301, 334705), 
-           y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
+  geom_sf(data = cwatr, colour = "red") +
+  # annotate("text", x = c(327004.392,313992.301, 334705), 
+  #          y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
+  # coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
+  coord_sf(xlim = c(min(spreddf$x), max(spreddf$x)), ylim = c(min(spreddf$y), max(spreddf$y))) +
   labs(x = NULL, y = NULL, fill = "Legal", title = "Targeted assemblage")
 
 p31
@@ -153,18 +166,18 @@ p31
 p41 <- ggplot() +
   geom_tile(data = spreddf, aes(x, y, fill = p_sublegal)) +
   scale_fill_viridis(direction = -1) +
-  geom_contour(data = bathdf, aes(longitude.1, latitude.1, z = Depth), color = "black",
+  geom_contour(data = bathdf, aes(x, y, z = Depth), color = "black",
                breaks = c(-30, -70, -200), size = 0.2) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.4) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
-          aes(color = waname), size = 0.4, show.legend = F) +
+  # geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
+  #         aes(color = waname), size = 0.4, show.legend = F) +
   theme_minimal() +
   wampa_cols+
   geom_sf(data = montes, fill = "seashell2", colour = "grey80", size = 0.1) +
-  annotate("text", x = c(327004.392,313992.301, 334705), 
-           y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
-  coord_sf(xlim = c(315000, 360000), ylim = c(7720000, 7768000)) +
-  # coord_sf(xlim = c(313000, 363000), ylim = c(7715000, 7771000)) +
+  geom_sf(data = cwatr, colour = "red") +
+  # annotate("text", x = c(327004.392,313992.301, 334705), 
+  #          y = c(7721238.518, 7767602.728,7757846.68), label = c("30m","70m", "30m"), size = 2)+
+  coord_sf(xlim = c(min(spreddf$x), max(spreddf$x)), ylim = c(min(spreddf$y), max(spreddf$y))) +
   labs(x = NULL, y = NULL, fill = "Sublegal")
 
 p41
