@@ -179,7 +179,7 @@ depth_cols <- scale_fill_manual(values = c("#a3bbff","#98c4f7","#9acbec", "#a7cf
 p3 <- ggplot() +
   # # geom_raster(data = bathdf, aes(x, y, fill = Depth), alpha = 0.9) +
   geom_contour_filled(data = sitebathy, aes(x = x, y = y, z = Depth, fill = after_stat(level)),
-               breaks = c(-50,-100,-150,-200), colour = "white", alpha = 1, size = 0.3) +
+               breaks = c(-30,-70,-200), colour = "white", alpha = 1, size = 0.3) +
   scale_fill_grey(start = 0.6, end = 0.5, guide = "none") +
   # depth_cols+
   new_scale_fill()+
@@ -189,31 +189,22 @@ p3 <- ggplot() +
   wampa_cols +
   labs(fill = "State Marine Parks") +
   new_scale_fill() +
-  # geom_sf(data = terrnp, aes(fill = leg_catego), alpha = 3/5, colour = NA) +
-  # waterr_cols +
-  # labs(fill = "Terrestrial Managed Areas") +
-  # new_scale_fill() +
   geom_sf(data = aumpa, aes(fill = ZoneName), alpha = 3/5, colour = NA) +
   nmpa_cols +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
-  # geom_contour(data = bathdf, aes(x = x, y = y, z = Depth),
-  #              binwidth = 50, colour = "white", alpha = 4/5, size = 0.1) +
-  # geom_text_contour(data = sitebathy, aes(x = x, y = y, z = Depth),
-  #                   breaks = c(-30,-70.-200), size = 2.5, label.placer = label_placer_n(1)) +
-  annotate("text", x = c(115.24,115.283,115.52,115.21), y = c(-20.425,-20.55,-20.2453, -20.27), label = c("50m","50m","50m","50m"), size = 2)+
+  annotate("text", x = c(115.24,115.283,115.52,115.21), 
+           y = c(-20.425,-20.55,-20.2453, -20.27), label = c("50m","50m","50m","50m"), size = 2)+
   geom_point(data = metadata, aes(longitude, latitude), colour = "indianred4",
              alpha = 3/5, shape = 10) +
   labs(x = NULL, y = NULL, fill = "Australian Marine Parks") +
   guides(fill = guide_legend(order = 1)) +
-  # annotate("rect", xmin = 114.7, xmax = 114.95, ymin = -34.14, ymax = -34.01,
-  #          colour = "grey15", fill = "white", alpha = 0.1, size = 0.1) +
   coord_sf(xlim = c(min(metadata$longitude),max(metadata$longitude)), 
            ylim = c(min(metadata$latitude), max(metadata$latitude)))+
   theme_minimal()+
   theme(panel.background = element_rect(fill = "#CCCCCC"),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())
-# p3
+p3
 
 ggsave("plots/site_overview_map.png", dpi = 200, width = 10, height = 6)
 
