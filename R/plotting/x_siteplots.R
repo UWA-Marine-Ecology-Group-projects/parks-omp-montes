@@ -171,42 +171,56 @@ s_wampa_cols <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
 # trim down bathy for nicer contour labels
 sitebathy <- bathdf[bathdf$Depth > -201, ]                               # trim to reduce legend
 sitebathy <- sitebathy[sitebathy$x > 114.75 & sitebathy$x < 116.25, ]
-sitebathy <- sitebathy[sitebathy$y > -21.2 & sitebathy$y < -20, ]
+sitebathy <- sitebathy[sitebathy$y > -21.2 & sitebathy$y < -19.8, ]
 # coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20))+
 
 depth_cols <- scale_fill_manual(values = c("#a3bbff","#98c4f7","#9acbec", "#a7cfe0"),guide = "none")
+
+dep_ann <- data.frame(x = c(115.340000003, 115.219999997, 115.415000005, 115.582000000), 
+                      y = c(-20.599999997, -20.179999997, -20.270000003, -20.144999998), label = c("30m","70m", "30m","70m")) # updated BG
+
+
 #"#a7cfe0","#9acbec","#98c4f7", "#a3bbff"
 p3 <- ggplot() +
   # # geom_raster(data = bathdf, aes(x, y, fill = Depth), alpha = 0.9) +
-  geom_contour_filled(data = sitebathy, aes(x = x, y = y, z = Depth, fill = after_stat(level)),
-               breaks = c(-30,-70,-200), colour = "white", alpha = 1, size = 0.3) +
-  scale_fill_grey(start = 0.6, end = 0.5, guide = "none") +
+  geom_contour_filled(data = bathdf, aes(x, y, z = Depth,
+                                         fill = after_stat(level)),
+                      breaks = c(0, -30, -70, -200, -700)) +
+  scale_fill_grey(start = 1, end = 0.5, guide = "none") +
+  geom_contour(data = bathdf, aes(x, y, z = Depth),
+               breaks = c(0, -30, -70, -200, -700), colour = "white",
+               alpha = 1, size = 0.1) +
+  # geom_contour_filled(data = sitebathy, aes(x = x, y = y, z = Depth, fill = after_stat(level)),
+  #                     breaks = c(-30,-70,-200), colour = "white", alpha = 1, size = 0.3) +
+  # scale_fill_grey(start = 0.6, end = 0.5, guide = "none") +
   # depth_cols+
   new_scale_fill()+
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   new_scale_fill() +
-  geom_sf(data = mb_mp, aes(fill = waname), alpha = 3/5, colour = NA) +
+  geom_sf(data = mb_mp, aes(fill = waname), alpha = 3/5,  size = 0.5) +
   wampa_cols +
   labs(fill = "State Marine Parks") +
   new_scale_fill() +
-  geom_sf(data = aumpa, aes(fill = ZoneName), alpha = 3/5, colour = NA) +
+  geom_sf(data = aumpa, aes(fill = ZoneName), alpha = 3/5, size = 0.5) +
   nmpa_cols +
-  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
-  annotate("text", x = c(115.24,115.283,115.52,115.21), 
-           y = c(-20.425,-20.55,-20.2453, -20.27), label = c("50m","50m","50m","50m"), size = 2)+
+  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.8) +
+  # annotate("text", x = c(115.24,115.283,115.52,115.21), 
+           # y = c(-20.425,-20.55,-20.2453, -20.27), label = c("50m","50m","50m","50m"), size = 2)+
   geom_point(data = metadata, aes(longitude, latitude), colour = "indianred4",
-             alpha = 3/5, shape = 10) +
+             alpha = 4/5, shape = 10) +
   labs(x = NULL, y = NULL, fill = "Australian Marine Parks") +
   guides(fill = guide_legend(order = 1)) +
-  coord_sf(xlim = c(min(metadata$longitude),max(metadata$longitude)), 
-           ylim = c(min(metadata$latitude), max(metadata$latitude)))+
+  geom_text(data = dep_ann, aes(x , y, label = label), inherit.aes = F, size = 2.8, colour = "black")+
+  # coord_sf(xlim = c(min(metadata$longitude),max(metadata$longitude)), 
+  #          ylim = c(min(metadata$latitude), max(metadata$latitude)))+
+  coord_sf(xlim = c(115.24, 116), ylim = c(-20.83627, -20)) + # Updated BG
   theme_minimal()+
   theme(panel.background = element_rect(fill = "#CCCCCC"),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())
 p3
 
-ggsave("plots/site_overview_map.png", dpi = 200, width = 10, height = 6)
+ggsave("plots/site_overview_map1.png", dpi = 200, width = 10, height = 6)
 
 # jac's map, eh
 # sort out the classes
