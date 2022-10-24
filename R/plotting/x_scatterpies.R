@@ -74,15 +74,15 @@ dat <- readRDS("data/tidy/broad_merged_habitat.rds")%>%
                 "Sand" = biota.unconsolidated)%>%
   glimpse()
 
-datsp <- SpatialPointsDataFrame(coords = cbind(dat$longitude.1, 
-                                               dat$latitude.1), data = dat)
-crs(datsp) <- sppcrs
-datsp_t <- spTransform(datsp,wgscrs)
-
-dat <- as.data.frame(datsp_t, xy = T)%>%
-  dplyr::select(-longitude.1, - latitude.1)%>%
-  dplyr::rename(longitude.1 = coords.x1, latitude.1 = coords.x2, "Macroalgae/coral reef" = Macroalgae.coral.reef,
-                "Invertebrate reef" = Invertebrate.reef)
+# datsp <- SpatialPointsDataFrame(coords = cbind(dat$longitude.1, 
+#                                                dat$latitude.1), data = dat)
+# crs(datsp) <- sppcrs
+# datsp_t <- spTransform(datsp,wgscrs)
+# 
+# dat <- as.data.frame(datsp_t, xy = T)%>%
+#   dplyr::select(-longitude.1, - latitude.1)%>%
+#   dplyr::rename(longitude.1 = coords.x1, latitude.1 = coords.x2, "Macroalgae/coral reef" = Macroalgae.coral.reef,
+#                 "Invertebrate reef" = Invertebrate.reef)
 
 #bring in bathy for contour lines
 bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
