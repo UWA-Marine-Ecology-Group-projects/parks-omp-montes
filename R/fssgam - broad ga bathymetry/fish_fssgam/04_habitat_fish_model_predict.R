@@ -20,6 +20,9 @@ library(sp)
 wgscrs  <- CRS("+proj=longlat +datum=WGS84")
 sppcrs  <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")     # crs for sp objects
 
+aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")           # all aus mpas
+nw_mpa <- aumpa[aumpa$ResName %in% c("Montebello"), ]           
+
 # read in
 dat1 <- readRDS("data/tidy/dat.maxn.rds")%>%
   glimpse()
@@ -92,6 +95,11 @@ plot(prasts)
 # subset to 10km from sites only
 sprast <- mask(prasts, sbuff)                                                   # 10km from sample sites
 plot(sprast)
+
+# # to make square
+# sprast <- mask(prasts, extent(nw_mpa), inverse = TRUE)                                                   # 10km from sample sites
+# plot(sprast)
+
 
 # tidy and output data
 spreddf <- as.data.frame(sprast, xy = TRUE, na.rm = TRUE)
