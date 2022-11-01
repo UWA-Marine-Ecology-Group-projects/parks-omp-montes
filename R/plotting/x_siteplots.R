@@ -259,7 +259,7 @@ jmap_df$classname <- dplyr::recode(jmap_df$classname, "shelf unvegetated soft se
                               "Shelf unvegetated soft sediments")
 
 jcls_fills <- scale_fill_manual(values = c(
-  "Shallow coral reefs less than 30 m depth" = "coral2",
+  "Shallow coral reefs less than 30 m depth" = "coral2", #
   # "Shallow rocky reefs less than 30 m depth" = "darkgoldenrod1", 
   # "Mesophotic rocky reefs" = "khaki4",
   "Shelf vegetated sediments" = "seagreen3",
@@ -274,7 +274,7 @@ jcls_fills <- scale_fill_manual(values = c(
   "Artificial reefs pipelines and cables" = "saddlebrown"))
 
 jcls_cols <- scale_color_manual(values = c(
-  "Shallow coral reefs less than 30 m depth" = "coral2",
+  "Shallow coral reefs less than 30 m depth" = "coral2", #"coral2",
   # "Shallow rocky reefs less than 30 m depth" = "darkgoldenrod1", 
   # "Mesophotic rocky reefs" = "khaki4",
   "Shelf vegetated sediments" = "seagreen3",
@@ -305,8 +305,8 @@ p6 <- ggplot() +
   geom_sf(data = mb_mp, aes(color = waname), alpha = 3/5, fill = NA, show.legend = F) +
   wampa_outs +
   new_scale_color() +
-  geom_sf(data = aumpa, colour = "#b9e6fb", alpha = 3/5, fill = NA) +
-  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
+  geom_sf(data = aumpa, colour = "#b9e6fb", alpha = 3/5, fill = NA, size = 1) +
+  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 1) +
   theme_minimal() +
   coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20))+
   theme(panel.grid.major = element_blank(), 
