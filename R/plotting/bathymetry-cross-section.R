@@ -10,6 +10,7 @@
 library(dplyr)
 library(sf)
 # library(rgeos)
+library(rgdal)
 library(rnaturalearth)
 library(ggplot2)
 # library(metR)
@@ -27,8 +28,14 @@ cbaths <- list.files("data/spatial/rasters/large", "*tile", full.names = TRUE)  
 cbath <- lapply(cbaths, function(x){read.table(file = x, header = TRUE, sep = ",")})
 cbath <- do.call("rbind", lapply(cbath, as.data.frame))
 
+# onslow -21.631844, 115.109194
+# transect through montebellos -20.02574419161966, 115.65782118508181
+
 # Eastern Recherche / Daw Island
 # Make sf point
+# points <- data.frame(x = c(123.95, 124.4),                                      # Set your start and end lat and longs
+#                      y = c(-33.5, -34.4), id = 1)
+
 points <- data.frame(x = c(123.95, 124.4),                                      # Set your start and end lat and longs
                      y = c(-33.5, -34.4), id = 1)
 
@@ -36,6 +43,8 @@ tran <- sfheaders::sf_linestring(obj = points,                                  
                                  x = "x", 
                                  y = "y",
                                  linestring_id = "id")
+
+wgscrs <- CRS("+proj=longlat +datum=WGS84 +south")
 st_crs(tran) <- wgscrs
 
 tranv <- vect(tran)                                                             # Ito terra package vector
