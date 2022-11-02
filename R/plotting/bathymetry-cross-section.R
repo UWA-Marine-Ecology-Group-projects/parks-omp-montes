@@ -10,7 +10,6 @@
 library(dplyr)
 library(sf)
 # library(rgeos)
-library(rgdal)
 library(rnaturalearth)
 library(ggplot2)
 # library(metR)
@@ -24,37 +23,40 @@ library(viridis)
 
 
 # Bathymetry cross section
-cbaths <- list.files("data/spatial/rasters/large", "*tile", full.names = TRUE)  # XYZ ascii files gitnored
+cbaths <- list.files("data/spatial/rasters/large", "*tile", full.names = TRUE)  # XYZ ascii files in gitignore
 cbath <- lapply(cbaths, function(x){read.table(file = x, header = TRUE, sep = ",")})
 cbath <- do.call("rbind", lapply(cbath, as.data.frame))
 
 # onslow -21.631844, 115.109194
-# transect through montebellos -20.02574419161966, 115.65782118508181
+# Tyral rocks -20.269470915212963/115.3909506041739
 
-# Eastern Recherche / Daw Island
-# Make sf point
-# points <- data.frame(x = c(123.95, 124.4),                                      # Set your start and end lat and longs
-#                      y = c(-33.5, -34.4), id = 1)
-
-points <- data.frame(x = c(123.95, 124.4),                                      # Set your start and end lat and longs
-                     y = c(-33.5, -34.4), id = 1)
+points <- data.frame(x = c(115.109194, 115.3909506041739),                                      # Set your start and end lat and longs
+                     y = c(-21.631844, -20.269470915212963), id = 1)
 
 tran <- sfheaders::sf_linestring(obj = points,                                  # Cast to sf line
-                                 x = "x", 
+                                 x = "x",
                                  y = "y",
                                  linestring_id = "id")
+plot(tran)
 
-wgscrs <- CRS("+proj=longlat +datum=WGS84 +south")
+wgscrs <- "+proj=longlat +datum=WGS84"
 st_crs(tran) <- wgscrs
 
 tranv <- vect(tran)                                                             # Ito terra package vector
-dep <- rast(cbath)                                                              # Terra spatraster
+dep <- terra::rast(cbath)                                                              # Terra spatraster
+plot(dep)
 
 cbathy <- terra::extract(dep, tranv, xy = T, ID = F)
 
-bath_cross <- st_as_sf(x = cbathy, coords = c("x", "y"), crs = wgscrs)          # Cast to sf object
+# BG trying to get a straight line
+# bath_cross <- cbath %>%
+#   dplyr::filter(abs(Y - -20.269) == min(abs(Y - -20.269))) %>%
+#                 # Z > -220) %>% 
+#   st_as_sf(coords = c("X", "Y"), crs = wgscrs)
 
-aus <- st_read("data/spatial/shapefiles/cstauscd_r.mif")
+bath_cross <- st_as_sf(x = cbathy, coords = c("x", "y"), crs = wgscrs)          # Cast to sf object
+plot(bath_cross)
+aus <- st_read("data/spatial/shape/cstauscd_r.mif")
 st_crs(aus) <- st_crs(aumpa)
 aus <- st_transform(aus, wgscrs)
 aus <- aus[aus$FEAT_CODE %in% "mainland", ]

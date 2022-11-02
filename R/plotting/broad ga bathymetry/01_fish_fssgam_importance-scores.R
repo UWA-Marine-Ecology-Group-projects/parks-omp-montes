@@ -22,24 +22,25 @@ setwd(working.dir)
 
 datmaxn <- read.csv("output/fssgam - fish_broad/montebello.synthesis_all.var.imp.csv")%>%
   glimpse()
+
 datlength <- read.csv("output/fssgam - fish_broad/montebello.synthesis_length_all.var.imp.csv")%>%
   glimpse()
 
 #read in data - negative values manually added
 #manually add in Xs for terms included in most parsimonious models
 dat.taxa <-bind_rows(datmaxn,datlength)%>% #from local copy
-  dplyr::select(-sd.relief)%>%
+  # dplyr::select(-sd.relief)%>% # BG turned this off
   rename(resp.var=X)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   mutate(label=NA)%>%
   mutate(resp.var=factor(resp.var, levels = c("smaller than legal size","greater than legal size","species.richness","total.abundance")))%>%
-  mutate(predictor=factor(predictor, levels = c("depth","mean.relief","detrended","roughness","tpi","mesophotic.reef","photic.reef","status")))%>%
+  mutate(predictor=factor(predictor, levels = c("depth", "mean.relief", "detrended", "roughness","biota.consolidated", "mesophotic.reef","photic.reef"
+    # "depth","mean.relief","detrended","roughness","tpi","mesophotic.reef","photic.reef","status"
+    )))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="total.abundance","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="species.richness","X",label))%>%
   mutate(label=ifelse(predictor=="mean.relief"&resp.var=="greater than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="detrended"&resp.var=="smaller than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="mean.relief"&resp.var=="smaller than legal size","X",label))%>%
-  mutate(label=ifelse(predictor=="tpi"&resp.var=="smaller than legal size","X",label))%>%
+  mutate(label=ifelse(predictor=="depth"&resp.var=="smaller than legal size","X",label))%>%
   glimpse()
 
 # Theme-
@@ -108,8 +109,12 @@ gg.importance.tar <- ggplot(dat.taxa%>%dplyr::filter(resp.var%in%c("greater than
   scale_fill_gradientn(legend_title,colours=c("white", re), na.value = "grey98",
                        limits = c(-1.01, 1))+
   scale_y_discrete(labels=c("Smaller than legal size","Greater than legal size"))+         #Tidy Taxa names
-  scale_x_discrete(labels = c("Depth","Mean relief","Detrended","Roughness","TPI",
-                              "Invertebrate reef","Macroalgae/coral reef","Status"))+   #Tidy predictor names
+  # scale_x_discrete(labels = c("Depth","Mean relief","Detrended","Roughness","TPI",
+  #                             "Invertebrate reef","Macroalgae/coral reef","Status"))+   #Tidy predictor names
+  
+  scale_x_discrete(labels = c("Depth","Mean relief","Detrended","Roughness", "Consolidated (rock)",
+                              "Invertebrate reef","Macroalgae/coral reef"))+   #Tidy predictor names
+  
   labs(x = NULL, y = NULL, title = "Targeted assemblage") +
   theme_classic()+
   Theme1+
