@@ -27,6 +27,8 @@ cbaths <- list.files("data/spatial/rasters/large", "*tile", full.names = TRUE)  
 cbath <- lapply(cbaths, function(x){read.table(file = x, header = TRUE, sep = ",")})
 cbath <- do.call("rbind", lapply(cbath, as.data.frame))
 
+summary(cbath)
+
 # onslow -21.631844, 115.109194
 # Tyral rocks -20.269470915212963/115.3909506041739
 
@@ -48,16 +50,32 @@ plot(dep)
 
 cbathy <- terra::extract(dep, tranv, xy = T, ID = F)
 
-# BG trying to get a straight line
-# bath_cross <- cbath %>%
-#   dplyr::filter(abs(Y - -20.269) == min(abs(Y - -20.269))) %>%
-#                 # Z > -220) %>% 
-#   st_as_sf(coords = c("X", "Y"), crs = wgscrs)
+summary(cbath)
 
-bath_cross <- st_as_sf(x = cbathy, coords = c("x", "y"), crs = wgscrs)          # Cast to sf object
+filtered.dat <- cbath %>%
+  filter(X > 114) %>%
+  filter(X < 120) %>%
+  filter(Y > -23) %>%
+  filter(Y < -20)
+
+summary(filtered.dat)
+  
+# BG trying to get a straight line
+bath_cross <- filtered.dat %>%
+  dplyr::filter(abs(X - 115.3909) == min(abs(X - 115.3909)),
+                Z > -800) %>%
+  st_as_sf(coords = c("X", "Y"), crs = wgscrs)
+
+
+# bath_cross <- cbath %>%
+#   dplyr::filter(abs(Y - -20.269) == min(abs(Y - -20.269)),
+#                 Z > -500) %>%
+#   st_as_sf(coords = c("X", "Y"), crs = wgscrs) 
+
+# bath_cross <- st_as_sf(x = cbathy, coords = c("x", "y"), crs = wgscrs)          # Cast to sf object
 plot(bath_cross)
 aus <- st_read("data/spatial/shape/cstauscd_r.mif")
-st_crs(aus) <- st_crs(aumpa)
+st_crs(aus) <- st_crs(bath_cross)
 aus <- st_transform(aus, wgscrs)
 aus <- aus[aus$FEAT_CODE %in% "mainland", ]
 aus <- st_union(aus)                                                            # Joins the states together
@@ -79,7 +97,8 @@ bath_df1 <- as.data.frame(bath_sf) %>%
   dplyr::mutate(distance.from.coast = ifelse(land %in% "FALSE", 
                                              distance.from.coast*-1,            # Make distance from coast negative if its ocean
                                              distance.from.coast)) %>%          
-  dplyr::filter(depth > -250) %>%                                               # Out to the shelf break
+  # dplyr::filter(depth > -250) %>%                                               # Out to the shelf break
+  dplyr::filter(distance.from.coast < 10) %>%
   glimpse()
 
 paleo <- data.frame(depth = c(-118, -94, -63, -41),                             # Manually set detpsh for old coastlines
@@ -107,12 +126,14 @@ p3 <- ggplot() +
   theme_classic() +
   scale_x_continuous(expand = c(0,0)) +
   labs(x = "Distance from coast (km)", y = "Elevation (m)") +
-  # geom_segment(data = paleo, aes(x = distance.from.coast, xend = distance.from.coast + 20, # Old coastline lines
+  # ge0om_segment(data = paleo, aes(x = distance.from.coast, xend = distance.from.coast + 20, # Old coastline lines
   #                                y = depth, yend = depth), linetype = 2, alpha = 0.5) +
   # geom_text(data = paleo, aes(x = distance.from.coast + 26, y = depth, label = label), size = 3) +  # And annotation text
-  annotate(geom = "text", x = c(-20, - 35), y = 10, label = c("Whaleback Island", "Daw Island"), size = 2.5) # Exciting labels for features
+  annotate(geom = "text", x = c(-105, -60), y = c(-10, 65), label = c("Tryal Rocks", "Barrow Island"), size = 2.5) # Exciting labels for features
 
-png(filename = "plots/eastern-recherche-cross-section.png", width = 8, height = 4,
+p3
+
+png(filename = "plots/tryalrocks_cross_section_north-south.png", width = 8, height = 4,
     units = "in", res = 200)
 p3
 dev.off()

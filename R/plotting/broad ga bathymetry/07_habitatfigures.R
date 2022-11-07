@@ -94,23 +94,37 @@ hab_cols <- scale_fill_manual(values = c(#"Macroalgae" = "darkgoldenrod4",
 ))
 
 p1 <- ggplot() +
+  
+  geom_contour_filled(data = bathdf, aes(x = longitude, y = latitude, z = Depth,
+                                         fill = after_stat(level)),
+                      breaks = c(0, -30, -70, -200, -700)) +
+  scale_fill_grey(start = 1, end = 0.5, guide = "none") +
+  
+  geom_contour(data = bathdf, aes(longitude, latitude, z = Depth),
+               breaks = c(0, -30, -70, -200, -700), colour = "white",
+               alpha = 1, size = 0.1) +
+  
+  new_scale_fill()+
+  
   geom_tile(data = spreddf %>% dplyr::filter(dom_tag %in% c("Rock","Sand","Invertebrate reef","Macroalgae/coral reef")),
             aes(x, y, fill = dom_tag)) +
   hab_cols +
   labs(x = NULL, y = NULL, fill = NULL) +
   new_scale_fill() +
+  
   geom_contour(data = bathdf, aes(longitude, latitude, z = Depth), color = "black",
                breaks = c(-30, -70, -200), size = 0.2) +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.5) +
   # geom_sf(data = cwatr, colour = "red", size = 0.7) +
-  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 0.8) +
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 1.5) +
   geom_sf(data = mb_mpa %>% dplyr::filter(waname %in% "Sanctuary Zone"),
-          fill = NA, aes(color = waname), size = 0.8, show.legend = F) +
-  geom_sf(data = cwatr, colour = "red", size = 0.7) +
+          fill = NA, aes(color = waname), size = 1.2, show.legend = F) +
+  geom_sf(data = cwatr, colour = "red", size = 0.9) +
   wampa_cols +
   guides(colour = "none") +
   coord_sf(xlim = c(115.2517, 116), ylim = c(-20.83627, -20)) +
-  theme_minimal()
+  theme_minimal() +
+  annotate(geom = "text", x = c(115.390), y = c(-20.269), label = c("Tryal Rocks"), size = 2.5)
 png(filename = "plots/site_dominant_habitat.png", width = 9, height = 6,
     res = 160, units = "in")
 p1
@@ -134,28 +148,41 @@ dep_ann <- data.frame(x = c(327004.392,313992.301, 334469.085,351794.461),
                       y = c(7721238.518,7767602.728,7757846.68, 7771841.162), label = c("30m","70m", "30m","70m"))
 
 dep_ann <- data.frame(x = c(115.340000003, 115.219999997, 115.415000005, 115.582000000), 
-                      y = c(-20.599999997, -20.179999997, -20.270000003, -20.144999998), label = c("30m","70m", "30m","70m")) # updated BG
+                      y = c(-20.599999997, -20.179999997, -20.270000003, -20.144999998), label = c("30m","70m", "Tryal rocks","70m")) # updated BG
 
 
 p2 <- ggplot() +
+  
+  
+  geom_contour_filled(data = bathdf, aes(x = longitude, y = latitude, z = Depth,
+                                         fill = after_stat(level)),
+                      breaks = c(0, -30, -70, -200, -700)) +
+  scale_fill_grey(start = 1, end = 0.5, guide = "none") +
+  
+  geom_contour(data = bathdf, aes(longitude, latitude, z = Depth),
+               breaks = c(0, -30, -70, -200, -700), colour = "white",
+               alpha = 1, size = 0.1) +
+  
+  new_scale_fill()+
+  
   geom_tile(data = widehabit, aes(x, y, fill = value)) +
   scale_fill_viridis(direction = -1, limits = c(0, max(widehabit$value))) +
   geom_contour(data = bathdf, aes(longitude, latitude, z = Depth), color = "black",
                breaks = c(-30, -70, -200), size = 0.2) +
-  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 1) + # BG changed size to 1
+  geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 1.5) + # BG changed size to 1.5
   geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
-          fill = NA, aes(color = waname), size = 1, show.legend = F) + # BG changed size to 1
+          fill = NA, aes(color = waname), size = 1.2, show.legend = F) + # BG changed size to 1.2
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   labs(x = NULL, y = NULL, fill = "Occurrence (p)") +
   geom_text(data = dep_ann, aes(x , y, label = label), inherit.aes = F, size = 1.8, colour = "black")+
-  coord_sf(xlim = c(313000, 363000), ylim = c(7715000, 7771000)) +
+  # coord_sf(xlim = c(313000, 363000), ylim = c(7715000, 7771000)) +
   geom_sf(data = cwatr, colour = "red", size = 0.7) +
   coord_sf(xlim = c(115.2517, 116), ylim = c(-20.83627, -20)) + # Updated BG
   scale_x_continuous(breaks = seq(115.3, 116, by = 0.2)) + # Added BG
   theme_minimal() +
   wampa_cols +
   facet_wrap(~variable)
-png(filename = "plots/site_habitat_predicted1.png", width = 9, height = 8,
+png(filename = "plots/site_habitat_predicted.png", width = 9, height = 8,
     units = "in", res = 160)
 p2
 dev.off()

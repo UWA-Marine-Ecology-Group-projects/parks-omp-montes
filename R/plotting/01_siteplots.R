@@ -50,7 +50,7 @@ aus    <- st_read("data/spatial/shape/cstauscd_r.mif") %>%                 # Geo
   dplyr::filter(FEAT_CODE %in% c("mainland", "island"))
 
 st_crs(aus) <- gdacrs
-ausc <- st_crop(aus, e)
+ausc <- sf::st_crop(aus, e)
 
 # Commonwealth parks
 aumpa  <- st_read("data/spatial/shape/AustraliaNetworkMarineParks.shp")    # All aus mpas
@@ -59,10 +59,10 @@ mpa <- st_crop(aumpa, e)                                                        
 aumpa$ZoneName <- factor(aumpa$ZoneName, levels = c("Multiple Use Zone", 
                                                     "Special Purpose Zone",
                                                     "National Park Zone"))
-npz <- mpa[mpa$ZoneName %in% "National Park Zone", ]                            # Just National Park Zones
+npz <- aumpa[aumpa$ZoneName %in% "National Park Zone", ]                            # Just National Park Zones
 
 # State parks
-wampa <- st_read("data/spatial/shapefiles/WA_MPA_2020.shp")
+wampa <- st_read("data/spatial/shape/WA_MPA_2020.shp")
 st_crs(wampa) <- gdacrs
 # Simplify names for plot legend
 wampa$waname <- gsub("( \\().+(\\))", "", wampa$ZONE_TYPE)
@@ -76,41 +76,37 @@ wampa$waname <- dplyr::recode(wampa$waname,
                               "Special Purpose Zone (Seagrass Protection) (IUCN IV)" = 
                                 "Special Purpose Zone")
 
-wampa <- st_crop(wampa, e)                                                      # Crop to the study area
+wampa <- st_crop(wampa, xmin = 115, xmax = 116.17, ymin = -21, ymax = -19)                                                      # Crop to the study area
 wasanc <- wampa[wampa$ZONE_TYPE %in% "Sanctuary Zone (IUCN IA)", ]
 
 # Terrestrial parks
-terrnp <- st_read("data/spatial/shapefiles/Legislated_Lands_and_Waters_DBCA_011.shp") %>%  # Terrestrial reserves
+terrnp <- st_read("data/spatial/shape/Legislated_Lands_and_Waters_DBCA_011.shp") %>%  # Terrestrial reserves
   dplyr::filter(leg_catego %in% c("Nature Reserve", "National Park"))
-terrnp <- st_crop(terrnp, xmin = 113, ymin = -30, xmax = 116, ymax = -26)       # Crop to the study area - using a different extent as this is on land
+terrnp <- st_crop(terrnp, xmin = 115, xmax = 116.17, ymin = -21, ymax = -19)       # Crop to the study area - using a different extent as this is on land
 
 # Key Ecological Features
-kef <- st_read("data/spatial/shapefiles/AU_DOEE_KEF_2015.shp")
-kef <- st_crop(kef, e)                                                          # Crop
+kef <- st_read("data/spatial/shape/AU_DOEE_KEF_2015.shp")
+kef <- st_crop(kef, xmin = 115, xmax = 116.17, ymin = -21, ymax = -19)                                                          # Crop
 unique(kef$NAME)
 # Simplify names for plot legend
-kef$NAME <- dplyr::recode(kef$NAME,"Perth Canyon and adjacent shelf break, and other west coast canyons" = "West coast canyons",                 
-                          "Commonwealth marine environment within and adjacent to the west coast inshore lagoons" = "West coast lagoons",                
-                          "Ancient coastline at 90-120m depth" = "Ancient coastline",                                                   
-                          "Western demersal slope and associated fish communities" = "Western demersal fish",                               
-                          "Western rock lobster" = "Western rock lobster",
-                          "Commonwealth marine environment surrounding the Houtman Abrolhos Islands" = "Abrolhos Islands")
+kef$NAME <- dplyr::recode(kef$NAME, "Ancient coastline at 125 m depth contour" = "Ancient coastline")
 # Reorder levels so everything plots nicely
-kef$NAME <- factor(kef$NAME, levels = c("Western rock lobster", "Western demersal fish", "Wallaby Saddle", 
-                                        "Abrolhos Islands", "Ancient coastline", 
-                                        "West coast canyons", "West coast lagoons"))
+kef$NAME <- factor(kef$NAME, levels = c("Ancient coastline"))
 
 # Coastal waters limit
-cwatr <- st_read("data/spatial/shapefiles/amb_coastal_waters_limit.shp")       # Coastal waters limit
-cwatr <- st_crop(cwatr, e)
+cwatr <- st_read("data/spatial/shape/amb_coastal_waters_limit.shp")       # Coastal waters limit
+cwatr <- st_crop(cwatr, xmin = 115, xmax = 116.17, ymin = -21, ymax = -19)
 
 # Bathymetry data
-cbaths <- list.files("data/spatial/rasters/raw bathymetry", "*tile", full.names = TRUE)
+cbaths <- list.files("data/spatial/rasters/large", "*tile", full.names = TRUE)
 cbathy <- lapply(cbaths, function(x){read.table(file = x, header = TRUE, sep = ",")})
 cbathy <- do.call("rbind", lapply(cbathy, as.data.frame))                       # All bathy in tiles as a dataframe
 bath_r <- rast(cbathy)
+
+plot(bath_r)
+
 crs(bath_r) <- wgscrs
-bath_r <- crop(bath_r, e)
+bath_r <- crop(bath_r, xmin = 115, xmax = 116.17, ymin = -21, ymax = -19)
 bath_df <- as.data.frame(bath_r, xy = T, na.rm = T)                             # Dataframe - cropped and above 0 use for bath cross section
 bath_r <- clamp(bath_r, upper = 0, value = FALSE)                               # Only data below 0
 bathy <- as.data.frame(bath_r, xy = T, na.rm = T)
@@ -131,15 +127,18 @@ p1 <- ggplot() +
   geom_contour(data = bathy, aes(x = x, y = y, z = Z), 
                breaks = c(-30, -70, -200, -700),                                # Add here as needed
                colour = "white", size = 0.1) +
-  geom_sf(data = ausc, fill = "seashell2", colour = "black", size = 0.1) +
+  # geom_sf(data = ausc, fill = "seashell2", colour = "black", size = 0.1) +
   geom_sf(data = npz, aes(color = ZoneName), fill = NA, size = 0.4) +
   scale_color_manual(values = c("Habitat Protection Zone" = "#fff8a3",
                                 "National Park Zone" = "#7bbc63",
                                 "Multiple Use Zone" = "#b9e6fb")) +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 1, size = 0.4) +
-  coord_sf(xlim = c(112, 116), ylim = c(-30, -26)) +                            # Change here
+  # coord_sf(xlim = c(112, 116), ylim = c(-30, -26)) +                            # Change here
   labs(y = "Latitude", x = "Longitude")+
   theme_minimal()
+
+p1
+
 png(filename = paste(paste0('plots/spatial/', name) , 'exploratory-site-plot.png', 
                      sep = "-"), height = 4, width = 10,
     res = 300, units = "in")
@@ -315,21 +314,23 @@ kef_fills <- scale_fill_manual(values = c("Ancient coastline" = "#ff6db6",
                                           "Wallaby Saddle" = "#940000"))
 
 p5 <- ggplot() +
-  geom_sf(data = ausc, fill = "seashell2", colour = "grey80", size = 0.1) +
+  # geom_sf(data = ausc, fill = "seashell2", colour = "grey80", size = 0.1) +
   geom_sf(data = terrnp, aes(fill = leg_catego), alpha = 4/5, colour = NA, show.legend = F) +
   labs(fill = "Terrestrial Managed Areas") +
   terr_fills +
   new_scale_fill() +
   geom_sf(data = kef, aes(fill = NAME), alpha = 0.7, color = NA) +
   kef_fills +
-  geom_sf(data = mpa, fill = NA, alpha = 1, aes(color = ZoneName), show.legend = F, size = 0.4) +
+  geom_sf(data = aumpa, fill = NA, alpha = 1, aes(color = ZoneName), show.legend = F, size = 0.4) +
   nmpa_cols +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
   labs(x = NULL, y = NULL,  fill = "Key Ecological Features") +
   guides(fill = guide_legend(order = 1)) +
-  coord_sf(xlim = c(112, 116), ylim = c(-30, -26)) +                            # Change here
+  coord_sf(xlim = c(114.7, 116.3), ylim = c(-21.3, -19.9)) +                            # Change here
   theme_minimal()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+p5
 
 png(filename = paste(paste0('plots/spatial/', name) , 'key-ecological-features.png', 
                      sep = "-"), units = "in", res = 200, width = 8, height = 6)

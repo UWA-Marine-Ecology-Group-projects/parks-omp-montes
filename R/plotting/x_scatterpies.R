@@ -140,7 +140,7 @@ gg.scatterpie <- ggplot() +
                   pie_scale = 0.45, color = NA) +
   labs(fill = "Habitat",x = 'Longitude', y = 'Latitude')+
   hab_cols+
-  annotate("text", x = c(115.34,115.22, 115.415,115.582), y = c(-20.6,-20.18,-20.27,-20.145), label = c("30m","70m", "30m","70m"), size = 2.5)+
+  annotate("text", x = c(115.34, 115.22, 115.582), y = c(-20.6, -20.18, -20.145), label = c("30m","70m", "70m"), size = 2.5)+
   # coord_sf(xlim = c(min(dat$longitude.1),max(dat$longitude.1)),
   # ylim = c(min(dat$latitude.1), max(dat$latitude.1)))+
   geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.8) +
@@ -149,9 +149,11 @@ gg.scatterpie <- ggplot() +
   theme_minimal()+
   theme(panel.background = element_rect(fill = "#e0e0e0"),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank()) +
+  annotate(geom = "text", x = c(115.390), y = c(-20.269), label = c("Tryal Rocks"), size = 2.5) +
+  theme(legend.position = "bottom")
 png(filename = "plots/scatterpies.png", 
-    height = 6,width = 7, units = "in", res = 300)
+    height = 6, width = 7, units = "in", res = 300)
 gg.scatterpie
 dev.off()
 

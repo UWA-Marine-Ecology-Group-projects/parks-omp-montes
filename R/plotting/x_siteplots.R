@@ -132,7 +132,10 @@ p1 <- ggplot() +
   coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20))+
   theme_minimal()+
   theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank()) +
+  annotate(geom = "text", x = c(115.390), y = c(-20.269), label = c("Tryal Rocks"), size = 2)
+# Tyral rocks -20.269470915212963/115.3909506041739
+
 p1
 
 # inset map
