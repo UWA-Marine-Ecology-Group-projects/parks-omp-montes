@@ -9,7 +9,7 @@
 # Load libraries
 library(dplyr)
 library(sf)
-# library(rgeos)
+library(geosphere)
 library(rnaturalearth)
 library(ggplot2)
 # library(metR)
@@ -39,10 +39,10 @@ tran <- sfheaders::sf_linestring(obj = points,                                  
                                  x = "x",
                                  y = "y",
                                  linestring_id = "id")
-plot(tran)
 
 wgscrs <- "+proj=longlat +datum=WGS84"
 st_crs(tran) <- wgscrs
+plot(tran)
 
 tranv <- vect(tran)                                                             # Ito terra package vector
 dep <- terra::rast(cbath)                                                              # Terra spatraster
@@ -64,18 +64,17 @@ summary(filtered.dat)
 bath_cross <- filtered.dat %>%
   dplyr::filter(abs(X - 115.3909) == min(abs(X - 115.3909)),
                 Z > -800) %>%
+  dplyr::mutate("distance.from.coast" = distHaversine(cbind(X, Y), 
+                                                      c(115.3909, -21.51375))) %>% # Coastline at -21.51375
   st_as_sf(coords = c("X", "Y"), crs = wgscrs)
 
 
-# bath_cross <- cbath %>%
-#   dplyr::filter(abs(Y - -20.269) == min(abs(Y - -20.269)),
-#                 Z > -500) %>%
-#   st_as_sf(coords = c("X", "Y"), crs = wgscrs) 
 
-# bath_cross <- st_as_sf(x = cbathy, coords = c("x", "y"), crs = wgscrs)          # Cast to sf object
+gdacrs <- "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs"
+
 plot(bath_cross)
 aus <- st_read("data/spatial/shape/cstauscd_r.mif")
-st_crs(aus) <- st_crs(bath_cross)
+st_crs(aus) <- gdacrs                                                           # Should be GDA?
 aus <- st_transform(aus, wgscrs)
 aus <- aus[aus$FEAT_CODE %in% "mainland", ]
 aus <- st_union(aus)                                                            # Joins the states together
@@ -84,8 +83,7 @@ ausout <- st_cast(aus, "MULTILINESTRING")                                       
 plot(ausout)
 
 bath_sf <- bath_cross %>%
-  dplyr::mutate("distance.from.coast" = st_distance(bath_cross, ausout),        # Distance from coast in m
-                x = unlist(map(bath_cross$geometry, 1)),                        # Get the lats and longs from geometry list
+  dplyr::mutate(x = unlist(map(bath_cross$geometry, 1)),                        # Get the lats and longs from geometry list
                 y = unlist(map(bath_cross$geometry, 2)),
                 land = lengths(st_intersects(bath_cross, aus)) > 0) %>%         # If it is on the land on or not
   glimpse()
@@ -101,7 +99,7 @@ bath_df1 <- as.data.frame(bath_sf) %>%
   dplyr::filter(distance.from.coast < 10) %>%
   glimpse()
 
-paleo <- data.frame(depth = c(-118, -94, -63, -41),                             # Manually set detpsh for old coastlines
+paleo <- data.frame(depth = c(-118, -94, -63, -41),                             # Manually set depths for old coastlines
                     label = c("20-30 Ka", "15-17 Ka", "12-13 Ka", "9-10 Ka"))
 
 for (i in 1:nrow(paleo)) {                                                      # Loop to get closest depth to the old coastline depth
@@ -126,10 +124,7 @@ p3 <- ggplot() +
   theme_classic() +
   scale_x_continuous(expand = c(0,0)) +
   labs(x = "Distance from coast (km)", y = "Elevation (m)") +
-  # ge0om_segment(data = paleo, aes(x = distance.from.coast, xend = distance.from.coast + 20, # Old coastline lines
-  #                                y = depth, yend = depth), linetype = 2, alpha = 0.5) +
-  # geom_text(data = paleo, aes(x = distance.from.coast + 26, y = depth, label = label), size = 3) +  # And annotation text
-  annotate(geom = "text", x = c(-105, -60), y = c(-10, 65), label = c("Tryal Rocks", "Barrow Island"), size = 2.5) # Exciting labels for features
+  annotate(geom = "text", x = c(-137, -80), y = c(-10, 65), label = c("Tryal Rocks", "Barrow Island"), size = 2.5) # Exciting labels for features
 
 p3
 
