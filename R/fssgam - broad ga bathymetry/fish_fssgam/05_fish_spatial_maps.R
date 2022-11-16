@@ -53,7 +53,7 @@ st_crs(montes) <- st_crs(aumpa)
 # montes <- st_transform(montes, sppcrs)
 
 #bring in bathy for contour lines
-bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
+bathy <- raster("data/spatial/rasters/large/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
 proj4string(bathy) <- wgscrs
 # bathy <- projectRaster(bathy, crs = sppcrs)
 bathdf <- as.data.frame(bathy, xy = T)
@@ -105,7 +105,7 @@ wampa_fills <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
 #total abundance
 sf_use_s2(T)
 
-dep_ann <- data.frame(x = c(115.340000003, 115.219999997, 115.415000005, 115.582000000), 
+dep_ann <- data.frame(x = c(115.340000003, 115.219999997, (115.415000005 + 0.065), 115.582000000), 
                       y = c(-20.599999997, -20.179999997, -20.270000003, -20.144999998), label = c("30m","70m", "Tryal Rocks","70m")) # updated BG
 
 p11 <- ggplot() +

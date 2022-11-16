@@ -113,7 +113,7 @@ gg.importance.tar <- ggplot(dat.taxa%>%dplyr::filter(resp.var%in%c("greater than
   #                             "Invertebrate reef","Macroalgae/coral reef","Status"))+   #Tidy predictor names
   
   scale_x_discrete(labels = c("Depth","Mean relief","Detrended","Roughness", "Consolidated (rock)",
-                              "Invertebrate reef","Macroalgae/coral reef"))+   #Tidy predictor names
+                              "Invertebrate reef","Macroalgae"))+   #Tidy predictor names
   
   labs(x = NULL, y = NULL, title = "Targeted assemblage") +
   theme_classic()+
