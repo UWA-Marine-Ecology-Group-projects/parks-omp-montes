@@ -45,18 +45,24 @@ sbuff  <- buffer(habisp, 10000)
 #   facet_grid(habitat ~ covariate, scales = "free")
 
 # use formula from top model from '2_modelselect.R'
-#photic reef
-m_photic <- gam(cbind(photic.reef, Total.Sum - photic.reef) ~ 
-                  s(depth_ga,     k = 5, bs = "cr")  + 
+# Macroalgae
+m_macro <- gam(cbind(biota.macroalgae, Total.Sum - biota.macroalgae) ~ 
                   s(detrended, k = 5, bs = "cr") + 
-                  s(roughness, k = 5, bs = "cr") +
-                  s(tpi, k = 5, bs = "cr"), 
+                  s(roughness, k = 5, bs = "cr"), 
                 data = habi, method = "REML", family = binomial("logit"))
-summary(m_photic)
-gam.check(m_photic)
-vis.gam(m_photic)
+summary(m_macro)
+gam.check(m_macro)
+vis.gam(m_macro)
 
-#mesophotic reef
+# Coral
+m_coral <- gam(cbind(biota.stony.corals, Total.Sum - biota.stony.corals) ~ 
+                 s(detrended, k = 5, bs = "cr"), 
+               data = habi, method = "REML", family = binomial("logit"))
+summary(m_coral)
+gam.check(m_coral)
+# vis.gam(m_coral)
+
+# Soft coral/sponge reef
 m_meso <- gam(cbind(mesophotic.reef, Total.Sum - mesophotic.reef) ~ 
                 s(depth_ga,     k = 5, bs = "cr")  + 
                 s(detrended, k = 5, bs = "cr") +
@@ -79,15 +85,15 @@ gam.check(m_macro)
 vis.gam(m_macro)
 
 #stony corals
-m_stony <- gam(cbind(biota.stony.corals, Total.Sum - biota.stony.corals) ~ 
-                s(depth_ga,     k = 5, bs = "cr")  + 
-                s(detrended, k = 5, bs = "cr") + 
-                # s(roughness, k = 5, bs = "cr"),
-                s(tpi, k = 5, bs = "cr"),
-              data = habi, method = "REML", family = binomial("logit"))
-summary(m_stony)
-gam.check(m_stony)
-vis.gam(m_stony)
+# m_stony <- gam(cbind(biota.stony.corals, Total.Sum - biota.stony.corals) ~ 
+#                 s(depth_ga,     k = 5, bs = "cr")  + 
+#                 s(detrended, k = 5, bs = "cr") + 
+#                 # s(roughness, k = 5, bs = "cr"),
+#                 s(tpi, k = 5, bs = "cr"),
+#               data = habi, method = "REML", family = binomial("logit"))
+# summary(m_stony)
+# gam.check(m_stony)
+# vis.gam(m_stony)
 
 #rock
 m_rock <- gam(cbind(biota.consolidated, Total.Sum - biota.consolidated) ~ 
@@ -113,20 +119,19 @@ vis.gam(m_sand)
 
 # predict, rasterise and plot
 preddf <- cbind(preddf, 
-                "pcoral" = predict(m_stony, preddf, type = "response"),
+                "pcoral" = predict(m_coral, preddf, type = "response"),
                 "pmacro" = predict(m_macro, preddf, type = "response"),
                 "pmeso" = predict(m_meso, preddf, type = "response"),
-                "pphotic" = predict(m_photic, preddf, type = "response"),
                 "prock" = predict(m_rock, preddf, type = "response"),
                 "psand" = predict(m_sand, preddf, type = "response"))
 
 prasts <- rasterFromXYZ(preddf)
-prasts$dom_tag <- which.max(prasts[[8:11]])
-plot(prasts[[6:12]])
+prasts$dom_tag <- which.max(prasts[[6:10]])
+plot(prasts[[6:11]])
 
 # subset to 10km from sites only
 sprast <- mask(prasts, sbuff)
-sprast <- sprast[[6:12]]
+sprast <- sprast[[6:11]]
 plot(sprast)
 
 # # categorise by dominant tag
@@ -137,8 +142,8 @@ plot(sprast)
 
 # write to tifs to reduce file sizes for git
 
-writeRaster(prasts[[6:12]], "output/spatial_predictions_broad/broad-layer.tif", 
-            bylayer = TRUE, suffix = names(prasts[[6:12]]), overwrite = TRUE)
+writeRaster(prasts[[6:11]], "output/spatial_predictions_broad/broad-layer.tif", 
+            bylayer = TRUE, suffix = names(prasts[[6:11]]), overwrite = TRUE)
 
 writeRaster(sprast, "output/spatial_predictions_broad/layer.tif", 
             bylayer = TRUE, suffix = names(sprast), overwrite = TRUE)

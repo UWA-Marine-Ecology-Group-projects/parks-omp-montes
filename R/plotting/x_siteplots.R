@@ -41,9 +41,15 @@ plot(jacmap)
 # jacmap <- projectRaster(jacmap, crs = sppcrs, method = "ngb")
 cwatr  <- st_read("data/spatial/shape/amb_coastal_waters_limit.shp")            # coastal waters line
 cwatr <- st_crop(cwatr, c(xmin = 113, xmax = 118, ymin = -23, ymax = -20))      # crop down coastal waters line to general project area
-bathy <- raster("data/spatial/raster/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
+bathy <- raster("data/spatial/rasters/large/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
 bathdf <- as.data.frame(bathy, xy = T)
 colnames(bathdf)[3] <- "Depth"
+
+testmp <- aumpa %>%
+  dplyr::filter(ResName %in% "Montebello")
+test <- mask(bathy, testmp)
+plot(test)
+summary(test)
 
 st_crs(aus)         <- st_crs(aumpa)
 
@@ -180,7 +186,7 @@ sitebathy <- sitebathy[sitebathy$y > -21.2 & sitebathy$y < -19.8, ]
 depth_cols <- scale_fill_manual(values = c("#a3bbff","#98c4f7","#9acbec", "#a7cfe0"),guide = "none")
 
 dep_ann <- data.frame(x = c(115.340000003, 115.219999997, 115.415000005, 115.582000000), 
-                      y = c(-20.599999997, -20.179999997, -20.270000003, -20.144999998), label = c("30m","70m", "30m","70m")) # updated BG
+                      y = c(-20.599999997, -20.179999997, -20.270000003, -20.144999998), label = c("30m","70m", "Tryal Rocks","70m")) # updated BG
 
 
 #"#a7cfe0","#9acbec","#98c4f7", "#a3bbff"
@@ -218,12 +224,15 @@ p3 <- ggplot() +
   #          ylim = c(min(metadata$latitude), max(metadata$latitude)))+
   coord_sf(xlim = c(115.24, 116), ylim = c(-20.83627, -20)) + # Updated BG
   theme_minimal()+
-  theme(panel.background = element_rect(fill = "#CCCCCC"),
+  theme(panel.background = element_rect(fill = "#CCCCCC", colour = NA),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())
+png(filename = "plots/site_overview_map1.png", res = 200, units = "in",
+    width = 10, height = 6)
 p3
+dev.off()
 
-ggsave("plots/site_overview_map1.png", dpi = 200, width = 10, height = 6)
+# ggsave("plots/site_overview_map1.png", dpi = 200, width = 10, height = 6)
 
 # jac's map, eh
 # sort out the classes

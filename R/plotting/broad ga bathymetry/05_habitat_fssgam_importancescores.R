@@ -12,17 +12,12 @@ rm(list=ls())
 library(ggplot2)
 library(dplyr)
 
-## Set working directory----
-working.dir <- getwd()
-setwd(working.dir)
-#OR Set manually once
-
 dat.taxa <-read.csv("output/fssgam-habitat_broad/_montebello.synthesis_all.var.imp.csv")%>% #from local copy
   rename(resp.var=X)%>%
   gather(key=predictor,value=importance,2:ncol(.))%>%
   mutate(label=NA)%>%
-  dplyr::filter(!resp.var%in%c("biota.macroalgae","biota.stony.corals"))%>%
-  mutate(label=ifelse(resp.var=="biota.consolidated"&predictor=="detrended","X",label))%>%
+  dplyr::filter(!resp.var%in%c("photic.reef"))%>%
+  mutate(label=ifelse(resp.var=="biota.consolidated"&predictor=="depth_ga","X",label))%>%
   mutate(label=ifelse(resp.var=="biota.consolidated"&predictor=="roughness","X",label))%>%
   mutate(label=ifelse(resp.var=="biota.consolidated"&predictor=="tpi","X",label))%>%
   mutate(label=ifelse(resp.var=="biota.unconsolidated"&predictor=="depth_ga","X",label))%>%
@@ -30,9 +25,15 @@ dat.taxa <-read.csv("output/fssgam-habitat_broad/_montebello.synthesis_all.var.i
   mutate(label=ifelse(resp.var=="mesophotic.reef"&predictor=="depth_ga","X",label))%>%
   mutate(label=ifelse(resp.var=="mesophotic.reef"&predictor=="roughness","X",label))%>%
   mutate(label=ifelse(resp.var=="mesophotic.reef"&predictor=="tpi","X",label))%>%
-  mutate(label=ifelse(resp.var=="photic.reef"&predictor=="depth_ga","X",label))%>%
-  mutate(label=ifelse(resp.var=="photic.reef"&predictor=="roughness","X",label))%>%
-  mutate(label=ifelse(resp.var=="photic.reef"&predictor=="tpi","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.stony.corals"&predictor=="detrended","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.macroalgae"&predictor=="detrended","X",label))%>%
+  mutate(label=ifelse(resp.var=="biota.macroalgae"&predictor=="roughness","X",label))%>%
+  dplyr::mutate(importance = ifelse(resp.var == "biota.consolidated" & 
+                                      predictor == "tpi", importance * -1, importance)) %>%
+  dplyr::mutate(importance = ifelse(resp.var == "biota.consolidated" & 
+                                      predictor == "depth_ga", importance * -1, importance)) %>%
+  dplyr::mutate(importance = ifelse(resp.var == "biota.macroalgae" & 
+                                      predictor == "roughness", importance * -1, importance)) %>%
   glimpse()
 
 # Theme-
@@ -67,7 +68,7 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
    geom_tile(show.legend=T) +
    scale_fill_gradientn(legend_title, colours=c(re), na.value = "grey98",
                          limits = c(-1, 1))+
-   scale_y_discrete( labels=c("Rock","Sand", "Invertebrate reef", "Macroalgae/coral reef"))+
+   scale_y_discrete( labels=c("Rock","Macroalgae", "Hard coral", "Sand", "Soft coral/sponges"))+
    scale_x_discrete(labels = c("Depth","Detrended","Roughness", "TPI"))+
    xlab(NULL)+
    ylab(NULL)+
@@ -77,4 +78,4 @@ gg.importance.scores <- ggplot(dat.taxa, aes(x=predictor,y=resp.var,fill=importa
 gg.importance.scores
 
 #save plots
-save_plot("plots/montes.habitat.importance.scores.png", gg.importance.scores,base_height = 3,base_width = 4.25)
+save_plot("plots/montes.habitat.importance.scores.png", gg.importance.scores,base_height = 6,base_width = 8)
