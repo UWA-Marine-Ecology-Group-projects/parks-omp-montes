@@ -141,8 +141,29 @@ plot(sprast)
 # head(sprast)
 
 # write to tifs to reduce file sizes for git
+crs(sprast) <- "+proj=longlat +datum=WGS84"
 
 saveRDS(sprast, file = "output/fssgam-habitat_broad/montes-habitat-spatial_WGS84.rds")
+
+spreddf <- as.data.frame(sprast, xy = T, na.rm = T)
+spreddf$dom_tag <- dplyr::recode(spreddf$dom_tag,
+                                 "1" = "Hard coral",
+                                 "2" = "Macroalgae",
+                                 "3" = "Soft coral/sponges",
+                                 "4" = "Rock",
+                                 "5" = "Sand")
+test <- spreddf[,c(1:2,8)]
+test$dom_tag <- as.factor(test$dom_tag)
+test$ndom_tag <- as.numeric(test$dom_tag)
+head(test)
+testraster <- rasterFromXYZ(test[,c("x", "y", "ndom_tag")], 
+                            crs = "+proj=longlat +datum=WGS84")
+plot(testraster)
+testraster[] = factor(levels(test$dom_tag)[testraster[]])
+plot(testraster)
+
+saveRDS(testraster, file = "output/fssgam-habitat_broad/montes-dominant-habitat_WGS84.rds")
+
 
 writeRaster(prasts[[6:11]], "output/spatial_predictions_broad/broad-layer.tif", 
             bylayer = TRUE, suffix = names(prasts[[6:11]]), overwrite = TRUE)
