@@ -128,7 +128,8 @@ dat.cp <- dat %>%
   left_join(spr.l)%>%
   left_join(spr.cti)%>%
   left_join(sst)%>%
-  dplyr::filter(!year=="2022")%>%
+  dplyr::filter(!year=="2022",
+                status %in% "Fished")%>%
   glimpse()
 
 # plot year by species richness - plus a line for MPA gazetting time ---
@@ -142,14 +143,14 @@ gg.sr <- ggplot(data = dat.cp, aes(x = year, y = species.richness, fill = status
   ylab("Species richness")+
   xlab("Year")+
   labs(title = "a)")+
-  scale_fill_manual(labels = c("General Use/Multiple Use Zone", "Sanctuary Zone"),values=c("#6daff4", "#7bbc63"))+
+  scale_fill_manual(labels = c("Multiple Use Zone", "Sanctuary Zone"),values=c("#6daff4", "#7bbc63"))+
   guides(fill=guide_legend(title = "Marine Park Zone"))+
   Theme1
 gg.sr
 
 #greater than legal
 gg.l <- ggplot(data = dat.cp, aes(x = year, y = legal, fill = status))+
-  scale_fill_manual(labels = c("General Use/Multiple Use Zone", "Sanctuary Zone"),values=c("#6daff4", "#7bbc63"))+
+  scale_fill_manual(labels = c("Multiple Use Zone", "Sanctuary Zone"),values=c("#6daff4", "#7bbc63"))+
   # geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = 1.5),fill = "#ffeec7")+
   # geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 1.5, ymax = 2),fill = "#c7d6ff")+
   # geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 2, ymax = Inf),fill = "#caffc7")+
@@ -185,7 +186,7 @@ gg.cti <- ggplot()+
   ylab(expression(paste("Temperature (",degree~C,")")))+
   xlab("Year")+
   labs(title = "c)")+
-  scale_fill_manual(labels = c("General Use/Multiple Use Zone", "Sanctuary Zone"),
+  scale_fill_manual(labels = c("Multiple Use Zone", "Sanctuary Zone"),
                     values=c("#6daff4", "#7bbc63"))+
   guides(fill=guide_legend(title = "Marine Park Zone"))+
   Theme1
