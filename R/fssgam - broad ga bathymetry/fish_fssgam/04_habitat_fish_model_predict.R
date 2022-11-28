@@ -16,6 +16,7 @@ library(raster)
 library(dplyr)
 library(stringr)
 library(sp)
+library(sf)
 
 wgscrs  <- CRS("+proj=longlat +datum=WGS84")
 sppcrs  <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")     # crs for sp objects
@@ -95,6 +96,8 @@ plot(prasts)
 # subset to 10km from sites only
 sprast <- mask(prasts, sbuff)                                                   # 10km from sample sites
 plot(sprast)
+crs(sprast) <- wgscrs
+saveRDS(sprast, file = "output/fssgam - fish_broad/montes-fish-spatial_WGS84.rds")
 
 # # to make square
 # sprast <- mask(prasts, extent(nw_mpa), inverse = TRUE)                                                   # 10km from sample sites

@@ -142,6 +142,8 @@ plot(sprast)
 
 # write to tifs to reduce file sizes for git
 
+saveRDS(sprast, file = "output/fssgam-habitat_broad/montes-habitat-spatial_WGS84.rds")
+
 writeRaster(prasts[[6:11]], "output/spatial_predictions_broad/broad-layer.tif", 
             bylayer = TRUE, suffix = names(prasts[[6:11]]), overwrite = TRUE)
 
