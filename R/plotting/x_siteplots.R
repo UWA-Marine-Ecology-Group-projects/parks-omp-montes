@@ -129,7 +129,7 @@ p1 <- ggplot() +
   new_scale_fill() +
   geom_sf(data = aumpa, aes(fill = ZoneName), alpha = 4/5, colour = NA) +
   nmpa_cols +
-  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.2) +
+  geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.7) +
   labs(x = 'Longitude', y = 'Latitude', fill = "Australian Marine Parks") +
   guides(fill = guide_legend(order = 1)) +
   annotate("rect", xmin = min(metadata$longitude), xmax = max(metadata$longitude),
@@ -142,7 +142,7 @@ p1 <- ggplot() +
   annotate(geom = "text", x = c(115.390), y = c(-20.269), label = c("Tryal Rocks"), size = 2)
 # Tyral rocks -20.269470915212963/115.3909506041739
 
-p1
+# p1
 
 # inset map
 p2 <- ggplot(data = aus) +
@@ -157,7 +157,7 @@ p2 <- ggplot(data = aus) +
         axis.ticks = element_blank(),
         panel.grid.major = element_blank(),
         panel.border = element_rect(colour = "grey70"))
-p2
+# p2
 
 # plot both 
 p2 + p1 + plot_layout(widths = c(0.8, 2.2))

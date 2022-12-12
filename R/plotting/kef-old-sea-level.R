@@ -54,22 +54,29 @@ mpa <- st_crop(aumpa, e)                                                        
 unique(mpa$ZoneName)
 
 # State parks
-wampa <- st_read("data/spatial/shape/WA_MPA_2020.shp")
-st_crs(wampa) <- gdacrs
-# Simplify names for plot legend
-wampa$waname <- gsub("( \\().+(\\))", "", wampa$ZONE_TYPE)
-wampa$waname <- gsub(" [1-4]", "", wampa$waname)
-wampa$waname[wampa$NAME == "Hamelin Pool"]     <- "Marine Nature Reserve"
-wampa$waname[wampa$NAME == "Abrolhos Islands"] <- "Fish Habitat Protection Area"
-wampa$waname <- dplyr::recode(wampa$waname, 
-                              "General Use" = "General Use Zone",
-                              "Special Purpose Zone (Shore Based Activities)" = 
-                                "Special Purpose Zone\n(Shore Based Activities)",
-                              "Special Purpose Zone (Seagrass Protection) (IUCN IV)" = 
-                                "Special Purpose Zone")
+# simplify zone names
+wampa  <- st_read("data/spatial/shape/WA_MPA_2018.shp")                         # all wa mpas
+mb_mp <- wampa[wampa$NAME %in% c("Montebello Islands","Barrow Island"),]        # just wa parks nearby
 
-wampa <- st_crop(wampa, xmin = 115, xmax = 116.17, ymin = -21, ymax = -19)                                                      # Crop to the study area
-wasanc <- wampa[wampa$ZONE_TYPE %in% "Sanctuary Zone (IUCN IA)", ]
+mb_mp$ZoneName <- dplyr::recode(mb_mp$ZoneName,
+                                "Special Purpose Zone (Mining Exclusion)" =
+                                  "Special Purpose Zone\n(Mining Exclusion)")
+
+mb_mp$waname <- gsub("( \\().+(\\))", "", mb_mp$ZONE_TYPE)
+mb_mp$waname <- gsub(" [1-4]", "", mb_mp$waname)
+# ab_mpa$waname[ab_mpa$ZONE_TYPE == unique(ab_mpa$ZONE_TYPE)[14]] <-
+#   c("Special Purpose Zone\n(Habitat Protection)")
+mb_mp$waname <- dplyr::recode(mb_mp$waname,
+                              "General Use" = "General Use Zone",
+                              # "MMA" = "Marine Management Area",
+                              # "Recreation Area" = "Recreation Zone",
+                              # "Conservation Area" = "Sanctuary Zone",
+                              "Special Purpose Zone (Shore Based Activities)" =
+                                "Special Purpose Zone\n(Shore Based Activities)")
+mb_mp <- mb_mp %>%
+  dplyr::mutate(waname=ifelse(NAME%in%"Barrow Island"&
+                                TYPE%in%"Marine Park","Sanctuary Zone",waname))%>%
+  dplyr::filter(!waname%in%"Unassigned")
 
 # Terrestrial parks
 terrnp <- st_read("data/spatial/shape/Legislated_Lands_and_Waters_DBCA_011.shp") %>%  # Terrestrial reserves
@@ -104,6 +111,11 @@ terr_fills <- scale_fill_manual(values = c("National Park" = "#c4cea6",         
 
 nmpa_cols <- scale_color_manual(values = c("Multiple Use Zone" = "#b9e6fb"))
 
+wampa_cols <- scale_colour_manual(values = c("Sanctuary Zone" = "#bfd054",
+                                           "General Use Zone" = "#bddde1",
+                                           "Recreation Zone" = "#f4e952",
+                                           "Special Purpose Zone" = "#7f66a7"))
+
 p5 <- ggplot() +
   geom_sf(data = ausc, fill = "seashell2", colour = "grey80", size = 0.1) +
   geom_sf(data = terrnp, aes(fill = leg_catego), alpha = 4/5, colour = NA, show.legend = F) +
@@ -114,14 +126,20 @@ p5 <- ggplot() +
   kef_fills +
   geom_sf(data = aumpa, fill = NA, alpha = 1, aes(color = ZoneName), show.legend = F, size = 0.4) +
   nmpa_cols +
+  new_scale_colour() +
+  geom_sf(data = mb_mp, 
+          fill = NA, alpha = 1, aes(color = waname), show.legend = F, size = 0.4) +
+  wampa_cols + 
+  new_scale_color() +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 4/5, size = 0.5) +
   labs(x = NULL, y = NULL,  fill = "Key Ecological Features") +
   guides(fill = guide_legend(order = 1)) +
   annotate(geom = "text", label = "Barrow Island", 
            x = (115.4023 + 0.15), y = -20.7804, size = 3) +
   annotate(geom = "point", x = 115.4023, y = -20.7804) +
+  annotate(geom = "text", x = c(115.390), y = c(-20.269), label = c("Tryal Rocks"), size = 2) +
   coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20)) +                      # Change here
-  theme_minimal()+
+  theme_minimal() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
 p5
@@ -166,6 +184,8 @@ p7 <- ggplot() +
   # geom_sf(data = npz,
   #         colour = "#7bbc63", size = 0.55, fill = NA) +
   geom_sf(data = cwatr, colour = "firebrick", alpha = 0.7, size = 0.5) +
+  annotate(geom = "segment", x = 115.3909, xend = 115.3909, y = -22, yend = -20,
+           linetype = 2, alpha = 0.4) +
   coord_sf(xlim = c(114.75,116.25), ylim = c(-21.2,-20)) +                            # Change here
   labs(x = "Longitude", y = "Latitude") +
   theme_minimal() +

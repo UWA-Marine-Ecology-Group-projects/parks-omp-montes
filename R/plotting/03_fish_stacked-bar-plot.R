@@ -105,7 +105,7 @@ metadata <- read.csv('data/tidy/montebello.synthesis.checked.metadata.csv')%>%
   glimpse()
 
 # workout total maxn for each species ---
-maxn.10<-maxn%>%
+maxn.10 <- maxn%>%
   mutate(scientific=paste(genus,species,sep=" "))%>%
   group_by(scientific)%>%
   dplyr::summarise(maxn=sum(maxn))%>%
@@ -379,20 +379,21 @@ fished.species <- state.maxn %>%
   dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Plectropomus spp"), "450", minlegal.wa))%>%
   dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Scomberomorus spp"), "900", minlegal.wa))%>%
   dplyr::mutate(minlegal.wa = ifelse(scientific %in% c("Lethrinus spp"), "280", minlegal.wa))%>%
-  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R"))%>% 
-  dplyr::filter(!species %in% c('Loxodon macrorhinus'))%>%          #removed Loxodon macrorhinus - maybe remove herklotsichthys if it cooks everything
+  dplyr::filter(fishing.type %in% c("B/R","B/C/R","R","C/R")) %>% 
+  dplyr::filter(!species %in% c('macrorhinus')) %>%          #removed Loxodon macrorhinus - maybe remove herklotsichthys if it cooks everything
   glimpse()
 
 # workout total maxn for each species ---
-maxn.fished.10<-fished.species %>%
-  group_by(scientific)%>%
+maxn.fished.10 <- fished.species %>%
+  dplyr::mutate(scientific = paste(genus, species, sep = " ")) %>%
+  group_by(scientific) %>%
   dplyr::summarise(maxn=sum(maxn))%>%
   ungroup()%>%
   top_n(10)%>%
   glimpse()
 
 #have a look
-bar<-ggplot(maxn.fished.10, aes(x=reorder(scientific,maxn), y=maxn)) +   
+bar <- ggplot(maxn.fished.10, aes(x=reorder(scientific,maxn), y=maxn)) +   
   geom_bar(stat="identity",position=position_dodge())+
   coord_flip()+
   xlab("Species")+
@@ -405,37 +406,37 @@ bar
 #1 - Lethrinus atkinsoni
 # already loaded
 
-#2 - Herklotsichthys spp
-# already loaded
-
-#3 - Plectropomus spp
-p.s <- as.raster(readPNG("data/images/Plectropomus leopardus 3cm.png"))
-
-#4 - Lethrinus nebulosus
-l.n <- as.raster(readPNG("data/images/lethrinus nebulosus 3cm.png"))
-
-#5 - Lethrinus punctulatus
+#2 - Lethrinus punctulatus
 l.p <- as.raster(readPNG("data/images/Lethrinus punctulatus-3cmL.png"))
 
-#6 - Lutjanus lemniscatus
-l.l <- as.raster(readPNG("data/images/Lutjanus lemniscatus 5cmL.png"))
+#3 - Lethrinus olivaceous
+l.o <- as.raster(readPNG("data/images/Lethrinidae-Dark.png"))
 
-#7 - Symphorus nematophorus
+#4 - Gymnocranius grandoculis
+g.g <- as.raster(readPNG("data/images/Gymnocranius_grandoculis_nb_TAYLOR.png"))
+
+#5 - Symphorus nematophorus
 s.n <- as.raster(readPNG("data/images/Lutjanidae-Dark.png"))
 
-#8 - Choerodon cyanodus
-c.c <- as.raster(readPNG("data/images/Choerodon cyanodus-5cmL.png"))
+#6 - Epinephelus multinotatus
+e.m <- as.raster(readPNG("data/images/Epinephelus multinotatus 3cm.png"))
 
-#9 - Scomberomorus spp
-s.spp <- as.raster(readPNG("data/images/Scombridae-Dark.png"))
-
-#10 - Choerodon cauteroma
+#7 - Choerodon cauteroma
 c.ca <- as.raster(readPNG("data/images/Choerodon cauteroma-5cmL.png"))
 
+#8 - Lutjanus sebae
+l.s <- as.raster(readPNG("data/images/Lutjanus sebae 300dpi.png"))
+
+#9 - Epinephelus rivulatus
+e.r <- as.raster(readPNG("data/images/Serranidae-Dark.png"))
+
+#10 - Aprion virescens
+a.v <- as.raster(readPNG("data/images/Pristipomoides multidens 300dpi.png"))
+
 #plot final bar plot
-bar.fished.10<-ggplot(maxn.fished.10, aes(x=reorder(scientific,maxn), y=maxn)) +   
+bar.fished.10 <- ggplot(maxn.fished.10, aes(x=reorder(scientific,maxn), y=maxn)) +   
   geom_bar(stat="identity",colour="black",fill="lightgrey",position=position_dodge())+
-  ylim (0, 775)+
+  ylim (0, 200)+
   coord_flip()+
   xlab("Species")+
   ylab(expression(Overall~abundance~(Sigma~MaxN)))+
@@ -443,25 +444,20 @@ bar.fished.10<-ggplot(maxn.fished.10, aes(x=reorder(scientific,maxn), y=maxn)) +
   theme(axis.text.y = element_text(face="italic"))+
   theme_collapse+
   theme.larger.text+
-  annotation_raster(l.a, xmin=9.7,xmax=10.3,ymin=640, ymax=780)+          #1
-  annotation_raster(h.spp, xmin=8.8,xmax=9.2,ymin=290, ymax=350)+               #2
-  annotation_raster(p.s, xmin=7.6, xmax=8.4, ymin=190, ymax=360)+         #3
-  annotation_raster(l.n, xmin=6.55,xmax=7.45,ymin=150, ymax=310)+               #4
-  annotation_raster(l.p, xmin=5.6,xmax=6.3,ymin=140, ymax=270)+                #5
-  annotation_raster(l.l, xmin=4.7,xmax=5.3,ymin=130, ymax=260)+                 #6
-  annotation_raster(s.n, xmin=3.55,xmax=4.45,ymin=120, ymax=280)+                 #7
-  annotation_raster(c.c, xmin=2.65,xmax=3.35,ymin=110, ymax=250)+              #8
-  annotation_raster(s.spp, xmin=1.55,xmax=2.45,ymin=100, ymax=350)+                #9
-  annotation_raster(c.ca, xmin=0.65,xmax=1.35,ymin=90, ymax=230)                 #10
-
-
-
-
-
+  annotation_raster(l.a, xmin = 9.7,xmax = 10.3,ymin = 153 + 1, ymax = 153 + 40)+          
+  annotation_raster(l.p, xmin = 8.7,xmax = 9.3,ymin = 119 + 1, ymax = 119 + 50)+               
+  annotation_raster(l.o, xmin = 7.6, xmax = 8.4, ymin = 47 + 1, ymax = 47 + 50)+        
+  annotation_raster(g.g, xmin = 6.55,xmax = 7.45,ymin = 42 + 1, ymax = 42 + 50)+               
+  annotation_raster(s.n, xmin = 5.6,xmax = 6.3,ymin = 38 + 1, ymax = 38 + 50)+               
+  annotation_raster(e.m, xmin = 4.7,xmax = 5.3,ymin = 36 + 1, ymax = 36 + 50)+                
+  annotation_raster(c.ca, xmin = 3.55,xmax = 4.45,ymin = 25 + 1, ymax = 25 + 50)+                 
+  annotation_raster(l.s, xmin = 2.65,xmax = 3.35,ymin = 24 + 1, ymax = 24 + 50)+              
+  annotation_raster(e.r, xmin = 1.55,xmax = 2.45,ymin = 16 + 1, ymax = 16 + 50)+                
+  annotation_raster(a.v, xmin = 0.65,xmax = 1.35,ymin = 14 + 1, ymax = 14 + 50)                 
 
 # ggtitle("10 most abundant species") +
 # theme(plot.title = element_text(hjust = 0))
-# bar.fished.10
+bar.fished.10
 
 #save out plot
 ggsave("plots/abundant.targets.bar.png",bar.fished.10,dpi=600,width=6.0, height = 6.0)

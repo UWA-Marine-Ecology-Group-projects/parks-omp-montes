@@ -119,6 +119,8 @@ paleo$distance.from.coast <- dat$distance.from.coast                            
 
 p3 <- ggplot() +
   geom_rect(aes(xmin = min(bath_df1$distance.from.coast), xmax = max(bath_df1$distance.from.coast), ymin =-Inf, ymax = 0), fill = "#12a5db", alpha = 0.5) +
+  annotate(geom = "segment", x = -102, xend = -102, y = -26, yend = 0, 
+           colour = "red", size = 0.7) +
   geom_line(data = bath_df1, aes(y = depth, x = distance.from.coast)) +
   geom_ribbon(data = bath_df1, aes(ymin = -Inf, ymax = depth, x = distance.from.coast), fill = "tan") +
   theme_classic() +
