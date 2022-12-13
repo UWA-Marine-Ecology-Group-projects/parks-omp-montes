@@ -18,6 +18,8 @@ library(ggplot2)
 library(stringr)
 library(googlesheets4)
 library(tidyverse)
+library(sf)
+library(purrr)
 
 ## Set your working directory ----
 working.dir <- getwd()
@@ -27,12 +29,32 @@ maxn <- read_csv("data/tidy/montebello.synthesis.checked.maxn.csv")%>%
   mutate(scientific=paste(genus,species,sep=" "))%>%
   glimpse()
 
-mass <- read.csv("data/tidy/montebello.synthesis.complete.mass.csv")%>%
-  glimpse()
-
 # Read in metadata ----
 metadata<-read_csv("data/tidy/montebello.synthesis.checked.metadata.csv")%>%
   dplyr::select(sample,latitude,longitude,date,time,depth)
+
+maxn <- maxn %>%
+  left_join(metadata)
+
+wgscrs <- "+proj=longlat +datum=WGS84"
+cwatr <- st_read("data/spatial/shape/coastal-waters_polygon.shp")
+cwatr <- st_transform(cwatr, wgscrs)
+
+maxn.sf <- maxn %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = wgscrs)
+maxn.sf <- maxn.sf %>%
+  dplyr::mutate(longitude = unlist(map(maxn.sf$geometry, 1)),
+                latitude = unlist(map(maxn.sf$geometry, 2)),
+                state = lengths(st_intersects(maxn.sf, cwatr)) > 0) %>%
+  glimpse()
+
+maxn <- as.data.frame(maxn.sf) %>%
+  dplyr::select(-geometry) %>%
+  dplyr::filter(state %in% "FALSE") %>%
+  glimpse()
+
+# mass <- read.csv("data/tidy/montebello.synthesis.complete.mass.csv")%>%
+#   glimpse()
 
 # Read in life history
 url <- "https://docs.google.com/spreadsheets/d/1SMLvR9t8_F-gXapR2EemQMEPSw_bUbPLcXd3lJ5g5Bo/edit?ts=5e6f36e2#gid=825736197"
@@ -51,7 +73,7 @@ names(master)
 
 length(unique(metadata$sample))
 
-total.number.fish <- sum(maxn$maxn) # 13901
+total.number.fish <- sum(maxn$maxn) # 6277
 
 #species list
 species.list <- as.data.frame(unique(maxn$scientific))
@@ -69,10 +91,16 @@ unique(fished.species$scientific)
 
 write.csv(fished.species, file = "output/fssgam - fish/montes.fished.species.csv", row.names = F)
 
-spp.species <- maxn %>%
-  dplyr::filter(species%in%c("spp","sp"))%>%
+iucn.species <- species.list %>%
+  left_join(master) %>%
+  dplyr::filter(iucn.ranking %in% c("Vulnerable", "Endangered", 
+                                    "Near Threatened", "Critically Endangered")) %>%
+  distinct() %>%
+  dplyr::select(scientific, australian.common.name, iucn.ranking) %>%
   glimpse()
-unique(spp.species$scientific)
+
+write.csv(iucn.species, file = paste0("data/tidy/", study, "_endangered.species.table.csv"),
+          row.names = F)
 
 # total.number.measured <- length%>%
 #   filter(length>0)

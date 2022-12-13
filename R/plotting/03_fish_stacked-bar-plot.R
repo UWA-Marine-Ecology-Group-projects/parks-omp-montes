@@ -23,6 +23,8 @@ library(rgdal)
 library(raster)
 library(png)
 library(cowplot)
+library(sf)
+library(purrr)
 
 ## Set your working directory ----
 working.dir <- getwd()
@@ -383,6 +385,14 @@ fished.species <- state.maxn %>%
   dplyr::filter(!species %in% c('macrorhinus')) %>%          #removed Loxodon macrorhinus - maybe remove herklotsichthys if it cooks everything
   glimpse()
 
+fished.table <- fished.species %>%
+  dplyr::mutate(scientific = paste(genus, species, sep = " ")) %>%
+  dplyr::select(scientific, australian.common.name, fishing.type) %>%
+  distinct()
+
+write.csv(fished.table, file = paste0("data/tidy/", study, "_fished.species.table.csv"),
+          row.names = F)
+
 # workout total maxn for each species ---
 maxn.fished.10 <- fished.species %>%
   dplyr::mutate(scientific = paste(genus, species, sep = " ")) %>%
@@ -445,19 +455,19 @@ bar.fished.10 <- ggplot(maxn.fished.10, aes(x=reorder(scientific,maxn), y=maxn))
   theme_collapse+
   theme.larger.text+
   annotation_raster(l.a, xmin = 9.7,xmax = 10.3,ymin = 153 + 1, ymax = 153 + 40)+          
-  annotation_raster(l.p, xmin = 8.7,xmax = 9.3,ymin = 119 + 1, ymax = 119 + 50)+               
+  annotation_raster(l.p, xmin = 8.7,xmax = 9.3,ymin = 119 + 1, ymax = 119 + 35)+               
   annotation_raster(l.o, xmin = 7.6, xmax = 8.4, ymin = 47 + 1, ymax = 47 + 50)+        
-  annotation_raster(g.g, xmin = 6.55,xmax = 7.45,ymin = 42 + 1, ymax = 42 + 50)+               
-  annotation_raster(s.n, xmin = 5.6,xmax = 6.3,ymin = 38 + 1, ymax = 38 + 50)+               
-  annotation_raster(e.m, xmin = 4.7,xmax = 5.3,ymin = 36 + 1, ymax = 36 + 50)+                
-  annotation_raster(c.ca, xmin = 3.55,xmax = 4.45,ymin = 25 + 1, ymax = 25 + 50)+                 
-  annotation_raster(l.s, xmin = 2.65,xmax = 3.35,ymin = 24 + 1, ymax = 24 + 50)+              
-  annotation_raster(e.r, xmin = 1.55,xmax = 2.45,ymin = 16 + 1, ymax = 16 + 50)+                
-  annotation_raster(a.v, xmin = 0.65,xmax = 1.35,ymin = 14 + 1, ymax = 14 + 50)                 
+  annotation_raster(g.g, xmin = 6.6,xmax = 7.4,ymin = 42 + 1, ymax = 42 + 45)+               
+  annotation_raster(s.n, xmin = 5.55,xmax = 6.45,ymin = 38 + 1, ymax = 38 + 50)+               
+  annotation_raster(e.m, xmin = 4.5,xmax = 5.5,ymin = 36 + 1, ymax = 36 + 60)+                
+  annotation_raster(c.ca, xmin = 3.65,xmax = 4.35,ymin = 25 + 1, ymax = 25 + 40)+                 
+  annotation_raster(l.s, xmin = 2.55,xmax = 3.45,ymin = 24 + 1, ymax = 24 + 50)+              
+  annotation_raster(e.r, xmin = 1.65,xmax = 2.35,ymin = 16 + 1, ymax = 16 + 35)+                
+  annotation_raster(a.v, xmin = 0.5,xmax = 1.5,ymin = 14 + 1, ymax = 14 + 65)                 
 
 # ggtitle("10 most abundant species") +
 # theme(plot.title = element_text(hjust = 0))
-bar.fished.10
+# bar.fished.10
 
 #save out plot
 ggsave("plots/abundant.targets.bar.png",bar.fished.10,dpi=600,width=6.0, height = 6.0)
