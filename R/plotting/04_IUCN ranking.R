@@ -53,6 +53,20 @@ maxn <- as.data.frame(maxn.sf) %>%
   dplyr::filter(state %in% "FALSE") %>%
   glimpse()
 
+length(unique(maxn$sample)) # 88
+total.number.fish <- sum(maxn$maxn) # 6277
+length(unique(maxn$family)) # 51
+length(unique(maxn$genus)) # 122 
+length(unique(maxn$species)) # 233
+
+species.abu <- maxn %>%
+  dplyr::group_by(scientific) %>%
+  dplyr::summarise(maxn = sum(maxn)) %>%
+  glimpse()
+
+habitat <- read.csv("data/tidy/montebello.synthesis.complete.habitat.csv") %>%
+  glimpse()
+
 # mass <- read.csv("data/tidy/montebello.synthesis.complete.mass.csv")%>%
 #   glimpse()
 
@@ -72,8 +86,6 @@ unique(master$fishing.type)
 names(master)
 
 length(unique(metadata$sample))
-
-total.number.fish <- sum(maxn$maxn) # 6277
 
 #species list
 species.list <- as.data.frame(unique(maxn$scientific))
