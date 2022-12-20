@@ -15,6 +15,7 @@ library(raster)
 library(patchwork)
 library(sf)
 library(terra)
+library(ggnewscale)
 
 #read in fish prediction data
 spreddf <- readRDS("output/spatial_predictions_broad/site_fish_predictions.rds")   
@@ -117,9 +118,7 @@ p11 <- ggplot() +
   # geom_contour(data = bathdf, aes(x, y, z = Depth),
   #              breaks = c(0, -30, -70, -200, -700), colour = "white",
   #              alpha = 1, size = 0.1) +
-  
   new_scale_fill()+
-  
   geom_tile(data = spreddf, aes(x, y, fill = p_totabund)) +
   scale_fill_viridis(direction = -1) +
   geom_contour(data = bathdf, aes(x, y, z = Depth), color = "black",
@@ -144,21 +143,15 @@ p11
 
 #species richness
 p21 <- ggplot() +
-  
   geom_contour_filled(data = bathdf, aes(x = x, y = y, z = Depth,
                                          fill = after_stat(level)),
                       breaks = c(0, -30, -70, -200, -700)) +
   scale_fill_grey(start = 1, end = 0.5, guide = "none") +
-  geom_contour(data = bathdf, aes(x, y, z = Depth),
-               breaks = c(0, -30, -70, -200, -700), colour = "white",
-               alpha = 1, size = 0.1) +
-  
   new_scale_fill()+
-  
-  geom_tile(data = spreddf, aes(x, y, fill = p_richness)) +
+  geom_tile(data = spreddf, aes(x, y, fill = p_totabund)) +
   scale_fill_viridis(direction = -1) +
-  # geom_contour(data = bathdf, aes(x, y, z = Depth), color = "black",
-  #              breaks = c(-30, -70, -200), size = 0.2) +
+  geom_contour(data = bathdf, aes(x, y, z = Depth), color = "black",
+               breaks = c(-30, -70, -200), size = 0.2) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 1) +
   # geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"), fill = NA, 
   #         aes(color = waname), size = 0.4, show.legend = F) +
