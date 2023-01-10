@@ -6,6 +6,8 @@
 # date:    Oct 2021
 ##
 
+rm(list = ls())
+
 library(INLA)
 library(sp)
 library(ggnewscale)
@@ -16,7 +18,7 @@ library(raster)
 habi  <- readRDS("data/tidy/merged_habitat.rds")                                # merged data from 'R/1_mergedata.R'
 p_files <- list.files("output/spatial_covariates/", "*.tif", full.names = TRUE)
 preds   <- stack(p_files)
-
+# plot(preds)
 # preds <- readRDS("output/spatial/spatial_covariates.rds")                         # spatial covs from 'R/1_mergedata.R'
 colnames(habi)
 habi      <- habi[ , c(1, 2, 3, 35:42)]

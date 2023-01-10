@@ -205,6 +205,7 @@ dev.off()
 pcelldf <- readRDS('output/spatial_predictions_broad/predicted_relief_site_ga.rds')
 pcelldf$prelief[pcelldf$prelief < 0] <- 0
 
+plot(pcelldf)
 # p4 <- ggplot() +
 #   geom_tile(data = pcelldf, aes(x, y, fill = prelief)) +
 #   labs(fill = "Relief score", color = "Relief score")+
@@ -246,7 +247,9 @@ pcelldf$prelief[pcelldf$prelief < 0] <- 0
 #load in bathymetry derivatives and relief
 tifs  <- list.files("output/spatial_covariates/", "layer_ga*", full.names = TRUE)
 preds <- stack(tifs)
+preds <- crop(preds, extent(115.2117, 116.04, -20.87627, -19.96))
 plot(preds)
+predf <- as.data.frame(preds, xy = T, na.rm = T)
 # preds <- projectRaster(preds, crs = wgscrs)
 
 sppcrs  <- CRS("+proj=utm +zone=50 +south +datum=WGS84 +units=m +no_defs")     # crs for sp objects
@@ -256,30 +259,29 @@ crs(pcell) <- sppcrs
 pcell <- projectRaster(pcell, crs = wgscrs)
 pcelldf <- as.data.frame(pcell, xy = T, na.rm = T)
 coordinates(pcelldf) <- ~x+y
-predsx <- raster::extract(preds, pcelldf, sp = T)
+predsx <- raster::extract(pcelldf, preds, sp = T)
 
 predsdf <- as.data.frame(predsx, xy = T, na.rm = T)
 predsdf$layer_ga_Z <- abs(predsdf$layer_ga_Z)
 
 # depth
 pd <- ggplot() +
-  geom_tile(data = predsdf, aes(x, y, fill = layer_ga_Z)) +
+  geom_tile(data = predf, aes(x, y, fill = layer_ga_Z)) +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "A", direction = -1) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 1) + 
   geom_sf(data = cwatr, colour = "red", size = 0.7) +
-  geom_sf(data = mb_mpa%>%dplyr::filter(waname%in%"Sanctuary Zone"),
+  geom_sf(data = mb_mpa %>% dplyr::filter(waname%in%"Sanctuary Zone"),
           fill = NA, aes(color = waname), size = 0.7, show.legend = F) + # BG changed size to 1.2
   wampa_cols +
   labs(x= NULL, y = NULL, fill = "Depth (m)") +
-  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
-           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
+  coord_sf(xlim = c(115.2517, 116), ylim = c(-20.83627, -20))+
   theme_minimal() 
 pd
 
 # tpi
 pt <- ggplot() +
-  geom_tile(data = predsdf, aes(x, y, fill = layer_ga_tpi)) +
+  geom_tile(data = predf, aes(x, y, fill = layer_ga_tpi)) +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "D", direction = 1) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 1) + 
@@ -288,14 +290,13 @@ pt <- ggplot() +
           fill = NA, aes(color = waname), size = 0.7, show.legend = F) + # BG changed size to 1.2
   wampa_cols +
   labs(x= NULL, y = NULL, fill = "TPI") +
-  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
-           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
+  coord_sf(xlim = c(115.2517, 116), ylim = c(-20.83627, -20))+
   theme_minimal()
 pt
 
 # roughness
 pr <- ggplot() +
-  geom_tile(data = predsdf, aes(x, y, fill = layer_ga_roughness)) +
+  geom_tile(data = predf, aes(x, y, fill = layer_ga_roughness)) +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "D", direction = 1) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 1) + 
@@ -304,14 +305,13 @@ pr <- ggplot() +
           fill = NA, aes(color = waname), size = 0.7, show.legend = F) + # BG changed size to 1.2
   wampa_cols +
   labs(x= NULL, y = NULL, fill = "Roughness") +
-  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
-           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
+  coord_sf(xlim = c(115.2517, 116), ylim = c(-20.83627, -20))+
   theme_minimal() 
 pr
 
 # detrended
 pdt <- ggplot() +
-  geom_tile(data = predsdf, aes(x, y, fill = layer_ga_detrended)) +
+  geom_tile(data = predf, aes(x, y, fill = layer_ga_detrended)) +
   geom_sf(data = aus, fill = "seashell2", colour = "grey80", size = 0.1) +
   scale_fill_viridis(option = "D", direction = 1) +
   geom_sf(data = nw_mpa, fill = NA, colour = "#b9e6fb", size = 1) + 
@@ -320,8 +320,7 @@ pdt <- ggplot() +
           fill = NA, aes(color = waname), size = 0.7, show.legend = F) + # BG changed size to 1.2
   wampa_cols +
   labs(x= NULL, y = NULL, fill = "Detrended (m)") +
-  coord_sf(xlim = c(min(pcelldf$x),max(pcelldf$x)),
-           ylim = c(min(pcelldf$y), max(pcelldf$y)))+
+  coord_sf(xlim = c(115.2517, 116), ylim = c(-20.83627, -20))+
   theme_minimal()
 pdt
 
