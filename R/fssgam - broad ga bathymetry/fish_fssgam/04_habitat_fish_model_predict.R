@@ -97,6 +97,7 @@ plot(prasts)
 sprast <- mask(prasts, sbuff)                                                   # 10km from sample sites
 plot(sprast)
 crs(sprast) <- wgscrs
+writeRaster(sprast[[3]], "output/fssgam - fish_broad/parks-montes-legal.tif", overw)
 saveRDS(sprast, file = "output/fssgam - fish_broad/montes-fish-spatial_WGS84.rds")
 
 # # to make square
