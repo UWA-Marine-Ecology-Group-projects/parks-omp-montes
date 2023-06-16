@@ -145,35 +145,76 @@ crs(sprast) <- "+proj=longlat +datum=WGS84"
 
 saveRDS(sprast, file = "output/fssgam-habitat_broad/montes-habitat-spatial_WGS84.rds")
 
-spreddf <- as.data.frame(sprast, xy = T, na.rm = T)
-spreddf$dom_tag <- dplyr::recode(spreddf$dom_tag,
-                                 "1" = "Hard coral",
-                                 "2" = "Macroalgae",
-                                 "3" = "Soft coral/sponges",
-                                 "4" = "Rock",
-                                 "5" = "Sand")
-test <- spreddf[,c(1:2,8)]
-test$dom_tag <- as.factor(test$dom_tag)
-test$ndom_tag <- as.numeric(test$dom_tag)
-head(test)
-testraster <- rasterFromXYZ(test[,c("x", "y", "ndom_tag")], 
-                            crs = "+proj=longlat +datum=WGS84")
-plot(testraster)
-testraster[] = factor(levels(test$dom_tag)[testraster[]])
-plot(testraster)
-
-saveRDS(testraster, file = "output/fssgam-habitat_broad/montes-dominant-habitat_WGS84.rds")
-
-
-writeRaster(prasts[[6:11]], "output/spatial_predictions_broad/broad-layer.tif", 
-            bylayer = TRUE, suffix = names(prasts[[6:11]]), overwrite = TRUE)
-
-writeRaster(sprast, "output/spatial_predictions_broad/layer.tif", 
+writeRaster(sprast, "output/spatial_predictions_broad/parks-montes.tif", 
             bylayer = TRUE, suffix = names(sprast), overwrite = TRUE)
 
-# # tidy and output data - not keeping this, too big for git
-# spreddf         <- as.data.frame(sprast, xy = TRUE, na.rm = TRUE)
-# spreddf$dom_tag <- (names(spreddf)[8:13])[spreddf$dom_tag]
+
+# Convert it to a shapefile
+dom_rast <- sprast %>%
+  as.data.frame(xy = T, na.rm = T) %>%
+  dplyr::select(x, y, dom_tag) %>%
+  rast(type = "xyz", crs = "epsg:4326")
+plot(dom_rast)
+# Don't think I need this step?
+pred_stars <- st_as_stars(dom_rast)
+
+dom.habs <- st_as_sf(pred_stars, as_points = FALSE, merge = TRUE) %>%
+  dplyr::mutate(dom_tag = dplyr::recode(dom_tag,
+                "1" = "coral",
+                "2" = "macroalgae",
+                "3" = "inverts",
+                "4" = "rock",
+                "5" = "sand"))
+plot(dom.habs)
+
+name <- "parks-montes"
+
+st_write(dom.habs, paste0("output/spatial_predictions_broad/", name, "_predicted-dominant-habitat.shp"),
+         append = F)
+
+# Write national habitat map to a shapefile for Tim
+natmap <- rast("data/spatial/rasters/ecosystem-types-19class-naland.tif") %>%
+  st_as_stars()
+
+natmap.classes <- read.csv("data/spatial/rasters/Ecosystem_categories-final-2021.csv") %>%
+  dplyr::mutate(habitat.type = as.character(category.number)) %>%
+  dplyr::select(habitat.type, Ecosystems) %>%
+  glimpse()
+
+natmap.sf <- st_as_sf(natmap, as_points = FALSE, merge = TRUE) %>%
+  dplyr::rename(habitat.type = `ecosystem-types-19class-naland.tif`) %>%
+  dplyr::mutate(habitat.type = as.character(habitat.type)) %>%
+  left_join(natmap.classes) %>%
+  dplyr::rename(code = habitat.type,
+                class = Ecosystems)
+
+st_write(natmap.sf, "data/spatial/shape/national-ecosystem-types.shp",
+         append = F,layer_options = "ENCODING=UTF-8")
+
+# Not sure whats going on with this bit
+# spreddf <- as.data.frame(sprast, xy = T, na.rm = T)
+# spreddf$dom_tag <- dplyr::recode(spreddf$dom_tag,
+#                                  "1" = "Hard coral",
+#                                  "2" = "Macroalgae",
+#                                  "3" = "Soft coral/sponges",
+#                                  "4" = "Rock",
+#                                  "5" = "Sand")
+# test <- spreddf[,c(1:2,8)]
+# test$dom_tag <- as.factor(test$dom_tag)
+# test$ndom_tag <- as.numeric(test$dom_tag)
+# head(test)
+# testraster <- rasterFromXYZ(test[,c("x", "y", "ndom_tag")], 
+#                             crs = "+proj=longlat +datum=WGS84")
+# plot(testraster)
+# testraster[] = factor(levels(test$dom_tag)[testraster[]])
+# plot(testraster)
 # 
-# # saveRDS(preddf, "output/broad_habitat_predictions.rds")  
-# saveRDS(spreddf, "output/site_habitat_predictions.rds")
+# saveRDS(testraster, file = "output/fssgam-habitat_broad/montes-dominant-habitat_WGS84.rds")
+# 
+# 
+# writeRaster(prasts[[6:11]], "output/spatial_predictions_broad/broad-layer.tif", 
+#             bylayer = TRUE, suffix = names(prasts[[6:11]]), overwrite = TRUE)
+# 
+# writeRaster(sprast, "output/spatial_predictions_broad/layer.tif", 
+#             bylayer = TRUE, suffix = names(sprast), overwrite = TRUE)
+
