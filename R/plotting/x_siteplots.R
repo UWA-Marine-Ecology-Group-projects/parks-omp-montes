@@ -1,9 +1,8 @@
-
 ###
-# Project: MAC HUB South-west Corner
+# Project: Parks Montes synthesis
 # Data:    BRUVS, BOSS
 # Task:    Overview maps
-# author:  Kingsley Griffin
+# author:  Claude Spencer
 # date:    Mar 2022
 ##
 
@@ -73,8 +72,10 @@ mb_mp$waname <- dplyr::recode(mb_mp$waname,
                                "Special Purpose Zone (Shore Based Activities)" =
                                 "Special Purpose Zone\n(Shore Based Activities)")
 mb_mp <- mb_mp %>%
-  dplyr::mutate(waname=ifelse(NAME%in%"Barrow Island"&
-                              TYPE%in%"Marine Park","Sanctuary Zone",waname))%>%
+  dplyr::mutate(waname = ifelse(NAME %in% "Barrow Island" &
+                              TYPE %in% "Marine Park","Sanctuary Zone", 
+                              ifelse(NAME %in% "Barrow Island" & 
+                                       TYPE %in% "Marine Management Area", "Marine Management Area", waname))) %>%
   dplyr::filter(!waname%in%"Unassigned")
 
 wa_mp <- mb_mp %>%
@@ -97,7 +98,8 @@ nmpa_cols <- scale_fill_manual(values = c(#"National Park Zone" = "#7bbc63",
 wampa_cols <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
                                            "General Use Zone" = "#bddde1",
                                             "Recreation Zone" = "#f4e952",
-                                           "Special Purpose Zone" = "#7f66a7"))
+                                           "Special Purpose Zone" = "#7f66a7",
+                                           "Marine Management Area" = "#ffb36b"))
 
 # state terrestrial parks colours
 waterr_cols <- scale_fill_manual(values = c(#"National Park" = "#c4cea6",
