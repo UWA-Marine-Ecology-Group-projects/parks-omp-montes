@@ -10,7 +10,7 @@ rm(list = ls())
 
 library(dplyr)
 library(sf)
-library(rgeos)
+# library(rgeos)
 library(rnaturalearth)
 library(ggplot2)
 library(metR)
@@ -18,10 +18,8 @@ library(metR)
 library(stringr)
 library(patchwork)
 library(raster)
+library(terra)
 library(ggnewscale)
-
-working.dir <- getwd()
-setwd(working.dir)
 
 # get data and sort spatial boundaries
 aus    <- st_read("data/spatial/shape/cstauscd_r.mif")%>%                       # geodata 100k coastline available: https://data.gov.au/dataset/ds-ga-a05f7892-eae3-7506-e044-00144fdd4fa6/
@@ -40,13 +38,19 @@ plot(jacmap)
 # jacmap <- projectRaster(jacmap, crs = sppcrs, method = "ngb")
 cwatr  <- st_read("data/spatial/shape/amb_coastal_waters_limit.shp")            # coastal waters line
 cwatr <- st_crop(cwatr, c(xmin = 113, xmax = 118, ymin = -23, ymax = -20))      # crop down coastal waters line to general project area
-bathy <- raster("data/spatial/rasters/large/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
+# bathy <- raster("data/spatial/rasters/large/ga_bathy_largerextent.tif")                # bathymetry trimmed to project area
+bathy <- rast("data/spatial/rasters/large/Australian_Bathymetry_and_Topography_2023_250m_MSL_cog.tif") %>%
+  crop(ext(114.8, 116, -22, -19.5)) %>%
+  clamp(upper = 0, values = F)
+plot(bathy)
 bathdf <- as.data.frame(bathy, xy = T)
 colnames(bathdf)[3] <- "Depth"
 
 testmp <- aumpa %>%
-  dplyr::filter(ResName %in% "Montebello")
-test <- mask(bathy, testmp)
+  dplyr::filter(ResName %in% "Montebello") %>%
+  st_transform(4326)
+test <- mask(bathy, testmp) %>%
+  trim()
 plot(test)
 summary(test)
 
@@ -99,7 +103,7 @@ wampa_cols <- scale_fill_manual(values = c("Sanctuary Zone" = "#bfd054",
                                            "General Use Zone" = "#bddde1",
                                             "Recreation Zone" = "#f4e952",
                                            "Special Purpose Zone" = "#7f66a7",
-                                           "Marine Management Area" = "#ffb36b"))
+                                           "Marine Management Area" = "#71a6d1"))
 
 # state terrestrial parks colours
 waterr_cols <- scale_fill_manual(values = c(#"National Park" = "#c4cea6",
@@ -164,8 +168,19 @@ p2 <- ggplot(data = aus) +
 # plot both 
 p2 + p1 + plot_layout(widths = c(0.8, 2.2))
 
-ggsave("plots/overview_map.png", dpi = 200, width = 10, height = 5)
+ggsave("plots/overview_map.png", dpi = 300, width = 10, height = 5)
 
+# Samples per campaign per zone
+unique(metadata$campaignid)
+
+parks <- st_read("data/spatial/shape/western-australia_marine-parks-all.shp")
+
+test <- metadata %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+  st_intersection(parks) %>%
+  group_by(campaignid, epbc, zone) %>%
+  summarise(n = n()) %>%
+  glimpse()
 
 # site zoom plots
 # reduce zone levels for these plots
