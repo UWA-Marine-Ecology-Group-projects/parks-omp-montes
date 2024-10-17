@@ -16,7 +16,7 @@ rm(list = ls())
 # Load libraries
 library(dplyr)
 library(sf)
-library(rgeos)
+# library(rgeos)
 library(rnaturalearth)
 library(ggplot2)
 library(metR)
@@ -24,7 +24,7 @@ library(stringr)
 library(patchwork)
 library(terra)
 library(ggnewscale)
-library(GlobalArchive)
+# library(GlobalArchive)
 library(tidyverse)
 library(viridis)
 
@@ -163,7 +163,7 @@ bath_r <- clamp(bath_r, upper = 0, value = FALSE)                               
 bathy <- as.data.frame(bath_r, xy = T, na.rm = T)
 
 depth_fills <- scale_fill_manual(values = c("#b8d9a9","#8dbc80", "#5d9d52"),
-                                 labels = c("9-10 Ka", "15-17 Ka", "20-30 Ka"),
+                                 labels = c("9-10 Ka (~40 m)", "15-17 Ka (~70 m)", "20-30 Ka (~125 m)"),
                                  name = "Coastline age")
 
 # Convert back to a raster and smooth it out

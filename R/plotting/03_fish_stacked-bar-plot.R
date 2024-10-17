@@ -13,13 +13,13 @@ rm(list=ls())
 study <- "montebello.synthesis" 
 
 # Libraries required
-library(GlobalArchive)
+# library(GlobalArchive)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(stringr)
 library(ggmap)
-library(rgdal)
+# library(rgdal)
 library(raster)
 library(png)
 library(cowplot)
@@ -27,8 +27,8 @@ library(sf)
 library(purrr)
 
 ## Set your working directory ----
-working.dir <- getwd()
-setwd(working.dir)
+# working.dir <- getwd()
+# setwd(working.dir)
 #OR set manually once
 
 theme_collapse<-theme(      
@@ -50,6 +50,9 @@ theme.larger.text<-theme(
 maxn <- read.csv("data/tidy/montebello.synthesis.checked.maxn.csv")%>%
   dplyr::mutate(scientific = paste(genus, species, sep = " "))%>%
   glimpse()
+
+test <- maxn %>%
+  distinct(campaignid, sample)
 
 metadata <- read.csv("data/tidy/montebello.synthesis.checked.metadata.csv")
 
@@ -77,6 +80,9 @@ test <- maxn %>%
   glimpse()
 
 species <- as.data.frame(unique(test$scientific)) 
+
+test <- state.maxn %>%
+  distinct(campaignid, sample, date, depth)
 
 # #get stats to use for the little section in report
 # sum(test$maxn) #16935 fish

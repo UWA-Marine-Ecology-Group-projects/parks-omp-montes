@@ -14,6 +14,7 @@ library(dplyr)
 library(ggtext)
 library(tidyr)
 library(cowplot)
+library(patchwork)
 
 ## Set working directory----
 working.dir <- getwd()
@@ -113,7 +114,7 @@ gg.importance.tar <- ggplot(dat.taxa%>%dplyr::filter(resp.var%in%c("greater than
   #                             "Invertebrate reef","Macroalgae/coral reef","Status"))+   #Tidy predictor names
   
   scale_x_discrete(labels = c("Depth","Mean relief","Detrended","Roughness", "Consolidated (rock)",
-                              "Invertebrate reef","Macroalgae"))+   #Tidy predictor names
+                              "Inverts","Macroalgae"))+   #Tidy predictor names
   
   labs(x = NULL, y = NULL, title = "Targeted assemblage") +
   theme_classic()+
@@ -127,7 +128,7 @@ gg.importance.scores <- gg.importance.full / gg.importance.tar
 gg.importance.scores
 
 #save output - changed dimensions for larger text in report
-save_plot("plots/montes.synthesis.fish.importance.png", gg.importance.scores,base_height = 5,base_width = 7)
+save_plot("plots/montes.synthesis.fish.importance.png", gg.importance.scores,base_height = 5,base_width = 6.9)
 
 # testing relationship direction
 # library(mgcv)

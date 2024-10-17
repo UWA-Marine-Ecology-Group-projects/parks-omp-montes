@@ -10,7 +10,7 @@ study <- "montes.synthesis"
 # Libraries required
 library(devtools)
 # install_github("UWAMEGFisheries/GlobalArchive") #to check for updates
-library(GlobalArchive)
+# library(GlobalArchive)
 library(readr)
 library(tidyr)
 library(dplyr)
@@ -30,7 +30,7 @@ maxn <- read_csv("data/tidy/montebello.synthesis.checked.maxn.csv")%>%
   glimpse()
 
 # Read in metadata ----
-metadata<-read_csv("data/tidy/montebello.synthesis.checked.metadata.csv")%>%
+metadata <- read_csv("data/tidy/montebello.synthesis.checked.metadata.csv")%>%
   dplyr::select(sample,latitude,longitude,date,time,depth)
 
 maxn <- maxn %>%
